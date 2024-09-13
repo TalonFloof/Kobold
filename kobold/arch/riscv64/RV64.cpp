@@ -17,7 +17,14 @@ namespace Kobold::Architecture {
     }
 
     void Log(const char* s, size_t l) {
-
+        if(UseLegacyConsole) {
+            size_t i;
+            for(i = 0; i < l; i++) {
+                SBICallLegacy1(1,s[i]);
+            }
+        } else {
+            SBICall3(0x4442434E,0,l,((usize)s) & 0xFFFFFFFF,((usize)s) >> 32);
+        }
     }
 
     void InterruptControl(IntAction action) {

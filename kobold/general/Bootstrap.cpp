@@ -12,5 +12,6 @@ void KernelInitialize() {
     Logging::Log("Copyright (C) 2024 TalonFloof, Licensed under GNU LGPLv3");
     Initialize();
     InterruptControl(IntAction::DISABLE_INTERRUPTS);
-    InterruptControl(IntAction::YIELD_UNTIL_INTERRUPT);
+    while(1)
+        InterruptControl(IntAction::YIELD_UNTIL_INTERRUPT);
 }
