@@ -3,14 +3,15 @@
 
 namespace Kobold {
     namespace Architecture {
-        typedef enum {
+        enum IntAction {
             DISABLE_INTERRUPTS,
             ENABLE_INTERRUPTS,
             YIELD_UNTIL_INTERRUPT,
-        } IntAction;
+        };
 
         void InterruptControl(IntAction action);
         void Log(const char* s, size_t l);
+        void EarlyInitialize();
         void Initialize();
 
         int GetHartID();
