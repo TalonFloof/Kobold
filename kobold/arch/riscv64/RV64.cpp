@@ -20,7 +20,9 @@ namespace Kobold::Architecture {
 
     }
 
-    void Interrupt() {
-        asm volatile("wfi");
+    void InterruptControl(IntAction action) {
+        if(action == YIELD_UNTIL_INTERRUPT) {
+            asm volatile("wfi");
+        }
     }
 }

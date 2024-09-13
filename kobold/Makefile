@@ -2,6 +2,8 @@ CPPFILES := $(shell find . -type f -name '*.cpp')
 
 OBJFILES := $(patsubst %.cpp,%.o,$(CPPFILES))
 
+CPPFILES := $(CPPFILES) $(shell find . -type f -name '*.s')
+
 CFLAGS := \
 	-ffreestanding \
 	-O0 \
