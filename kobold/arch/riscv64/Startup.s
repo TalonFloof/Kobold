@@ -6,7 +6,7 @@ _start:
 
   la      t0, rv64_boot_page_table
   srli    t0, t0, 12
-  li      t1, 8 << 60
+  li      t1, 9 << 60
   or      t0, t0, t1
   csrw    satp, t0
   sfence.vma
@@ -21,8 +21,7 @@ __rv64_init_stack_top:
 .section .data
 .align 12 # Make sure the entries are aligned
 rv64_boot_page_table:
-  .quad (0x000000 << 10) | 0xcf # VRWXAD
-  .quad (0x040000 << 10) | 0xcf # VRWXAD
-  .quad (0x080000 << 10) | 0xcf # VRWXAD
-  .quad (0x0c0000 << 10) | 0xcf # VRWXAD
-  .zero 8 * 508
+  .quad (0x0 << 37) | 0xcf # VRWXAD
+  .zero 8 * 255
+  .quad (0x0 << 37) | 0xcf # VRWXAD
+  .zero 8 * 255
