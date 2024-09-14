@@ -70,7 +70,7 @@ void Kobold::Logging::Write(const char* __restrict format, va_list args) {
         }
         case 'u': {
             hex = 0;
-            __attribute__((fallthrough));
+            //__attribute__((fallthrough));
         }
         case 'x': {
             format++;

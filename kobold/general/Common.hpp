@@ -13,3 +13,23 @@ typedef int16_t i16;
 typedef int32_t i32;
 typedef int64_t i64;
 typedef intptr_t isize;
+
+#include "DeviceTree/smoldtb.hpp"
+#ifdef _COMMON_INSTANCE
+#include "../arch/IArchitecture.hpp"
+#include "Logging.hpp"
+
+using namespace Kobold::Architecture;
+
+[[noreturn]] void Panic(const char* reason) {
+    Kobold::Logging::Log("panic (hart %x) %s", 0, reason);
+    InterruptControl(IntAction::DISABLE_INTERRUPTS);
+    while(1)
+        InterruptControl(IntAction::YIELD_UNTIL_INTERRUPT);
+}
+
+dtb_ops DeviceTreeOps;
+#else
+[[noreturn]] void Panic(const char* reason);
+extern "C" dtb_ops DeviceTreeOps;
+#endif

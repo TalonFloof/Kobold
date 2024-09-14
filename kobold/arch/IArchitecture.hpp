@@ -12,7 +12,7 @@ namespace Kobold {
         void InterruptControl(IntAction action);
         void Log(const char* s, size_t l);
         void EarlyInitialize();
-        void Initialize();
+        void Initialize(void* deviceTree);
 
         int GetHartID();
         

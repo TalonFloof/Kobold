@@ -3,6 +3,8 @@
 
 .option push
 _start:
+  # a0 = Hart ID
+  # a1 = Device Tree Address
   li t2, 0xffff800000000000
   la sp, __rv64_init_stack_top-0xffff800000000000
   add sp, sp, t2
@@ -17,6 +19,7 @@ _start:
   la t0, KernelInitialize-0xffff800000000000
   add t0, t0, t2
   or ra, zero, zero
+  add a1, a1, t2
   jr t0
 .option pop
 
