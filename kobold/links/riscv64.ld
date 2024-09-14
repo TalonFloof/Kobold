@@ -15,12 +15,14 @@ PHDRS
 SECTIONS
 {
     KERNEL_VMA = 0xFFFF800000000000;
+    . = 0x80200000;
 
-    .text.boot (0x80200000) : AT(0x80200000) {
+    __KERNEL_BEGIN__ = .;
+
+    .text.boot : AT(0x80200000) {
        KEEP(*(.text.boot))
     } : boot
 
-    . = 0x80200000 + SIZEOF(.text.boot);
     . = ALIGN(4096);
 
     . += KERNEL_VMA;
@@ -51,4 +53,6 @@ SECTIONS
     } : data
 
     . = ALIGN(4096);
+
+    __KERNEL_END__ = . - KERNEL_VMA;
 }

@@ -1,5 +1,7 @@
 #pragma once
-#include "Common.hpp"
+#include <stdint.h>
+#include <stdarg.h>
+#include <stddef.h>
 
 char *itoa(unsigned long long num, char *str, int base);
 void *memset(void *src, int c, size_t count);

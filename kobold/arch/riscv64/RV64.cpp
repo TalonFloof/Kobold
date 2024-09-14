@@ -2,48 +2,45 @@
 #include "../../general/Logging.hpp"
 #include "SBI.hpp"
 #include "../../general/DeviceTree/DevTree.hpp"
+#include "CSR.hpp"
+#include "Traps.hpp"
 
 using namespace Kobold;
 
-void print_node(dtb_node* node, size_t indent)
-{
-    const size_t indent_scale = 2;
-    if (node == NULL)
-        return;
-
-    char indent_buff[indent + 1];
-    for (size_t i = 0; i < indent; i++)
-        indent_buff[i] = ' ';
-    indent_buff[indent] = 0;
-    
-    dtb_node_stat stat;
-    dtb_stat_node(node, &stat);
-    Logging::Log("%s| %s: %lu siblings, %lu children, %lu properties.", 
-        indent_buff, stat.name, stat.sibling_count, stat.child_count, stat.prop_count);
-
-    for (size_t i = 0; i < stat.prop_count; i++)
-    {
-        dtb_prop* prop = dtb_get_prop(node, i);
-        if (prop == NULL)
-            break;
-        //NOTE: DO NOT DO THIS! This is a hack for testing purposes for I can make print pretty
-        //trees and check all properties are read correctly. There's a reason these structs are
-        //opaque to calling code, and their underlying definitions can change at any time.
-        const char* name = *(const char**)prop;
-        Logging::Log("%s  | %s", indent_buff, name);
-    }
-
-    //if(dtb_get_parent(node) == NULL) {
-        dtb_node* child = dtb_get_child(node);
-        while (child != NULL)
-        {
-            print_node(child, indent + indent_scale);
-            child = dtb_get_sibling(child);
-        }
-    //}
-}
-
 namespace Kobold::Architecture {
+    struct StatusRegister {
+        union {
+            u64 value;
+
+            struct {
+                u64 uie   : 1;
+                u64 sie   : 1;
+                u64 rsv1  : 1;
+                u64 mie   : 1;
+                u64 upie  : 1;
+                u64 spie  : 1;
+                u64 rsv2  : 1;
+                u64 mpie  : 1;
+                u64 spp   : 1;
+                u64 rsv3  : 2;
+                u64 mpp   : 2;
+                u64 fs    : 2;
+                u64 xs    : 2;
+                u64 mprv  : 1;
+                u64 sum   : 1;
+                u64 mxr   : 1;
+                u64 tvm   : 1;
+                u64 tw    : 1;
+                u64 tsr   : 1;
+                u64 rsv4  : 9;
+                u64 uxl   : 2;
+                u64 sxl   : 2;
+                u64 rsv5  : 27;
+                u64 sd    : 1;
+            };
+        };
+    };
+
     int UseLegacyConsole = 1;
 
     void EarlyInitialize() {
@@ -55,6 +52,8 @@ namespace Kobold::Architecture {
     }
 
     void Initialize(void* deviceTree) {
+        WriteCSR(((usize)&kernelvec),stvec);
+        WriteCSR(0xffff,medeleg);
         Kobold::DeviceTree::ScanTree(deviceTree);
     }
 
@@ -71,7 +70,17 @@ namespace Kobold::Architecture {
 
     void InterruptControl(IntAction action) {
         if(action == YIELD_UNTIL_INTERRUPT) {
-            asm volatile("wfi");
+            __asm__ __volatile__ ("wfi");
+        } else if(action == DISABLE_INTERRUPTS) {
+            StatusRegister sr;
+            ReadCSR(sr,sstatus);
+            sr.sie = 0;
+            WriteCSR(sr,sstatus);
+        } else if(action == ENABLE_INTERRUPTS) {
+            StatusRegister sr;
+            ReadCSR(sr,sstatus);
+            sr.sie = 1;
+            WriteCSR(sr,sstatus);
         }
     }
 }

@@ -3,6 +3,7 @@
 #include <stdint.h>
 #include <stddef.h>
 #include <stdbool.h>
+#include "../Memory.hpp"
 
 #ifdef __cplusplus
 extern "C" {
@@ -72,6 +73,7 @@ dtb_node* dtb_get_parent(dtb_node* node);
 dtb_prop* dtb_get_prop(dtb_node* node, size_t index);
 bool dtb_stat_node(dtb_node* node, dtb_node_stat* stat);
 
+uint32_t dtb_read_prop_size(dtb_prop* prop);
 const char* dtb_read_prop_string(dtb_prop* prop, size_t index);
 size_t dtb_read_prop_values(dtb_prop* prop, size_t cell_count, size_t* vals);
 size_t dtb_read_prop_pairs(dtb_prop* prop, dtb_pair layout, dtb_pair* vals);

@@ -14,6 +14,10 @@ typedef int32_t i32;
 typedef int64_t i64;
 typedef intptr_t isize;
 
+#define ALIGN_UP(s, a)      (((s) + ((a) - 1)) & ~((a) - 1))
+#define ALIGN_DOWN(s, a)    ((s) & ~((a) - 1))
+#define ALIGNED(s, a)       (!((s) & ((a) - 1)))
+
 #include "DeviceTree/smoldtb.hpp"
 #ifdef _COMMON_INSTANCE
 #include "../arch/IArchitecture.hpp"
@@ -31,5 +35,5 @@ using namespace Kobold::Architecture;
 dtb_ops DeviceTreeOps;
 #else
 [[noreturn]] void Panic(const char* reason);
-extern "C" dtb_ops DeviceTreeOps;
+extern dtb_ops DeviceTreeOps;
 #endif

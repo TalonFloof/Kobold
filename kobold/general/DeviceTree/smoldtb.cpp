@@ -138,7 +138,7 @@ static size_t string_len(const char* str)
     return count;
 }
 
-static void* memcpy(void* dest, const void* src, size_t count)
+/*static void* memcpy(void* dest, const void* src, size_t count)
 {
     uint8_t* d = (uint8_t*)dest;
     const uint8_t* s = (const uint8_t*)src;
@@ -147,7 +147,7 @@ static void* memcpy(void* dest, const void* src, size_t count)
         d[i] = s[i];
 
     return dest;
-}
+}*/
 
 static bool strings_eq(const char* a, const char* b, size_t len)
 {
@@ -668,6 +668,12 @@ bool dtb_stat_node(dtb_node* node, dtb_node_stat* stat)
     }
 
     return true;
+}
+
+uint32_t dtb_read_prop_size(dtb_prop* prop) {
+    if(prop == NULL)
+        return 0;
+    return prop->length;
 }
 
 const char* dtb_read_prop_string(dtb_prop* prop, size_t index)

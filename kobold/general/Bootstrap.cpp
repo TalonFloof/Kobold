@@ -14,5 +14,6 @@ void KernelInitialize(int hartID, void* deviceTree) {
     Logging::Log("KoboldKernel");
     Logging::Log("Copyright (C) 2024 TalonFloof, Licensed under GNU LGPLv3");
     Initialize(deviceTree);
+    *((u32*)0x0) = 0;
     Panic("Booted Successfully");
 }
