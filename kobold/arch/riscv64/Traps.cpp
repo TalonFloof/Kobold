@@ -6,6 +6,10 @@
 
 using namespace Kobold;
 
+namespace Kobold::Architecture {
+    extern int UseLegacyTimer;
+}
+
 extern "C" void KTrap(Architecture::Frame* frame) {
     usize reason = 0;
     ReadCSR(reason,scause);
@@ -14,7 +18,11 @@ extern "C" void KTrap(Architecture::Frame* frame) {
         if(intType == 0x5) {
             u64 base;
             ReadCSR(base,time);
-            SBICallLegacy1(0,base+(DeviceTree::CpuSpeed / 100));
+            if(Architecture::UseLegacyTimer) {
+                SBICallLegacy1(0,base+(DeviceTree::CpuSpeed / 100));
+            } else {
+                SBICall1(0x54494D45,0,base+(DeviceTree::CpuSpeed / 100));
+            }
         }
     } else {
         Logging::Log("Supervisor Trap - Cause %x", reason);

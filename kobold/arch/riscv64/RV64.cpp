@@ -41,6 +41,7 @@ namespace Kobold::Architecture {
         };
     };
 
+    int UseLegacyTimer = 1;
     int UseLegacyConsole = 1;
 
     void EarlyInitialize() {
@@ -50,14 +51,24 @@ namespace Kobold::Architecture {
         if(hasDebugCon.value) {
             UseLegacyConsole = 0;
         }
+        hasDebugCon = SBICall1(0x10,3,0x54494D45);
+        if(hasDebugCon.value) {
+            UseLegacyTimer = 0;
+        }
     }
 
     void Initialize(void* deviceTree) {
         WriteCSR(((usize)&_intHandler),stvec);
         Kobold::DeviceTree::ScanTree(deviceTree);
         // Setup the Timer
-        if(SBICallLegacy1(0,(Kobold::DeviceTree::CpuSpeed / 100)) != 0) {
-            Panic("Failed to setup timer!");
+        if(UseLegacyTimer) {
+            if(SBICallLegacy1(0,(Kobold::DeviceTree::CpuSpeed / 100)) != 0) {
+                Panic("Failed to setup timer!");
+            }
+        } else {
+            if(SBICall1(0x54494D45,0,(Kobold::DeviceTree::CpuSpeed / 100)).error != SBI_SUCCESS) {
+                Panic("Failed to setup timer!");
+            }
         }
         WriteCSR((1 << 5) | (1 << 9) | (1 << 1),sie);
     }
