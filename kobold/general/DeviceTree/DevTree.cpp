@@ -64,12 +64,46 @@ namespace Kobold::DeviceTree {
         *o2 = scSize;
     }
 
+    int FindFirstFree(dtb_pair* freeMemory, int length) {
+        for(int i=0; i < length; i++) {
+            if(freeMemory[i].a == 0 && freeMemory[i].b == 0)
+                return i;
+        }
+        return -1;
+    }
+
+    void Reserve(dtb_pair* freeMemory, int length, dtb_pair reserve) {
+        for(int i=0; i < length; i++) {
+            if(reserve.a == freeMemory[i].a && reserve.b == freeMemory[i].b) {
+                freeMemory[i].a = 0;
+                freeMemory[i].b = 0;
+                return;
+            } else if(freeMemory[i].a < reserve.a && freeMemory[i].b == reserve.b) {
+                freeMemory[i].b = reserve.a;
+                return;
+            } else if(freeMemory[i].a == reserve.a && freeMemory[i].b > reserve.b) {
+                freeMemory[i].a = reserve.b;
+                return;
+            } else if(freeMemory[i].a < reserve.a && freeMemory[i].b > reserve.b) {
+                size_t oldEnd = freeMemory[i].b;
+                freeMemory[i].b = reserve.a;
+                freeMemory[FindFirstFree(freeMemory,length)] = {reserve.b, oldEnd};
+                return;
+            }
+        }
+    }
+
     void ScanTree(void* deviceTree) {
         if(!dtb_init((usize)deviceTree,DeviceTreeOps)) {
             Panic("No Device Tree");
         }
         dtb_node* node = dtb_find("/");
         node = dtb_get_child(node);
+        dtb_pair freeMemory[64];
+        for(int i=0; i < 64; i++) {
+            freeMemory[i].a = 0;
+            freeMemory[i].b = 0;
+        }
         while (node != NULL) {
             dtb_node_stat stat;
             dtb_stat_node(node, &stat);
@@ -83,7 +117,7 @@ namespace Kobold::DeviceTree {
                 dtb_pair entries[entryCount];
                 dtb_read_prop_pairs(ranges,(dtb_pair) {acSize,scSize},(dtb_pair*)&entries);
                 for(int i=0; i < entryCount; i++) {
-                    Logging::Log("mem [%x-%x] Usable", entries[i].a, (entries[i].a+entries[i].b)-1);
+                    freeMemory[FindFirstFree((dtb_pair*)&freeMemory,64)] = {entries[i].a, (entries[i].a+entries[i].b)};
                 }
             } else if(strncmp(stat.name,"reserved-memory",15) == 0) {
                 // Reserved Memory
@@ -97,7 +131,7 @@ namespace Kobold::DeviceTree {
                         dtb_pair entries[entryCount];
                         dtb_read_prop_pairs(ranges,(dtb_pair) {acSize,scSize},(dtb_pair*)&entries);
                         for(int i=0; i < entryCount; i++) {
-                            Logging::Log("mem [%x-%x] Reserved", entries[i].a, (entries[i].a+entries[i].b)-1);
+                            Reserve((dtb_pair*)&freeMemory,64,(dtb_pair) {entries[i].a, (entries[i].a+entries[i].b)});
                         }
                     }
                     res = dtb_get_sibling(res);
@@ -107,7 +141,13 @@ namespace Kobold::DeviceTree {
         }
         usize begin = (usize)(&__KERNEL_BEGIN__);
         usize end = (usize)(&__KERNEL_END__);
-        Logging::Log("mem [%x-%x] Kernel", begin, end-1);
-        Logging::Log("mem [%x-%x] DeviceTree", (usize)deviceTree - 0xffff800000000000, (usize)deviceTree+ALIGN_UP(dtb_query_total_size((usize)deviceTree),4096)-1 - 0xffff800000000000);
+        Reserve((dtb_pair*)&freeMemory,64,(dtb_pair) {begin,end}); // kernel
+        Reserve((dtb_pair*)&freeMemory,64,(dtb_pair) {(usize)deviceTree - 0xffff800000000000, (usize)deviceTree+ALIGN_UP(dtb_query_total_size((usize)deviceTree),4096) - 0xffff800000000000}); // device tree
+        for(int i=0; i < 64; i++) {
+            if(freeMemory[i].a != 0 && freeMemory[i].b != 0) {
+                Logging::Log("mem [%x-%x] Usable", freeMemory[i].a, freeMemory[i].b-1);
+            }
+        }
+        // Now we have constructed a memory map of all of the usable areas, construct our pfn using this
     }
 }

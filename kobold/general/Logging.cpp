@@ -72,13 +72,25 @@ void Kobold::Logging::Write(const char* __restrict format, va_list args) {
             hex = 0;
             //__attribute__((fallthrough));
         }
+        case 'X': {
+            //__attribute__((fallthrough));
+        }
         case 'x': {
+            int zeroPad = 0;
+            if(*format == 'X') {
+                zeroPad = 1;
+            }
             format++;
             if (isHalf) {
             unsigned int arg = va_arg(args, unsigned int);
             (void)itoa(arg, (char*)&buf, hex ? 16 : 10);
             if (hex) {
                 Kobold::Architecture::Log("0x", 2);
+                if(zeroPad) {
+                    for(int i=0; i < 8-strlen((char*)&buf); i++) {
+                        Kobold::Architecture::Log("0",1);
+                    }
+                }
             }
             Kobold::Architecture::Log((char*)&buf, strlen((char*)&buf));
             } else {
@@ -86,6 +98,11 @@ void Kobold::Logging::Write(const char* __restrict format, va_list args) {
             (void)itoa(arg, (char*)&buf, hex ? 16 : 10);
             if (hex) {
                 Kobold::Architecture::Log("0x", 2);
+                if(zeroPad) {
+                    for(int i=0; i < 16-strlen((char*)&buf); i++) {
+                        Kobold::Architecture::Log("0",1);
+                    }
+                }
             }
             Kobold::Architecture::Log((char*)&buf, strlen((char*)&buf));
             }

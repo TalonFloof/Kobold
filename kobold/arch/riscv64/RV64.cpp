@@ -53,8 +53,9 @@ namespace Kobold::Architecture {
     }
 
     void Initialize(void* deviceTree) {
-        WriteCSR(((usize)&kernelvec),stvec);
+        WriteCSR(((usize)&_intHandler),stvec);
         Kobold::DeviceTree::ScanTree(deviceTree);
+        WriteCSR(0,mstatus);
     }
 
     void Log(const char* s, size_t l) {
@@ -72,15 +73,24 @@ namespace Kobold::Architecture {
         if(action == YIELD_UNTIL_INTERRUPT) {
             __asm__ __volatile__ ("wfi");
         } else if(action == DISABLE_INTERRUPTS) {
-            StatusRegister sr;
-            ReadCSR(sr,sstatus);
-            sr.sie = 0;
-            WriteCSR(sr,sstatus);
+            __asm__ __volatile__("csrci sstatus, 8");
         } else if(action == ENABLE_INTERRUPTS) {
-            StatusRegister sr;
-            ReadCSR(sr,sstatus);
-            sr.sie = 1;
-            WriteCSR(sr,sstatus);
+            __asm__ __volatile__("csrsi sstatus, 8");
         }
+    }
+
+    struct Frame {
+        usize ra, gp, tp, t0, t1, t2, t3, t4, t5, t6, a0, a1, a2, a3, a4, a5, a6, a7, s0, s1, s2, s3, s4, s5, s6, s7, s8, s9, s10, s11, sp, pc;
+    };
+
+    void PrintFrame(Frame* f) {
+        Logging::Log(" ra %X  gp %X  tp %X  t0 %X", f->ra, f->gp, f->tp, f->t0);
+        Logging::Log(" t1 %X  t2 %X  t3 %X  t4 %X", f->t1, f->t2, f->t3, f->t4);
+        Logging::Log(" t5 %X  t6 %X  a0 %X  a1 %X", f->t5, f->t6, f->a0, f->a1);
+        Logging::Log(" a2 %X  a3 %X  a4 %X  a5 %X", f->a2, f->a3, f->a4, f->a5);
+        Logging::Log(" a6 %X  a7 %X  s0 %X  s1 %X", f->a6, f->a7, f->s0, f->s1);
+        Logging::Log(" s2 %X  s3 %X  s4 %X  s5 %X", f->s2, f->s3, f->s4, f->s5);
+        Logging::Log(" s6 %X  s7 %X  s8 %X  s9 %X", f->s6, f->s7, f->s8, f->s9);
+        Logging::Log("s10 %X s11 %X  sp %X  pc %X", f->s10, f->s11, f->sp, f->pc);
     }
 }

@@ -15,6 +15,7 @@ namespace Kobold {
         void Initialize(void* deviceTree);
 
         int GetHartID();
-        
+        struct Frame;
+        void PrintFrame(Frame* f);
     }
 }

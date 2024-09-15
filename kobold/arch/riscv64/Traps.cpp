@@ -4,10 +4,10 @@
 
 using namespace Kobold;
 
-extern "C" void KernelTrap() {
-    usize reason, epc = 0;
+extern "C" void KTrap(Architecture::Frame* frame) {
+    usize reason = 0;
     ReadCSR(reason,scause);
-    ReadCSR(epc,sepc);
-    Logging::Log("Supervisor Trap - Cause %x | PC %x", reason, epc);
+    Logging::Log("Supervisor Trap - Cause %x", reason);
+    Architecture::PrintFrame(frame);
     Panic("RISC-V Supervisor Trap");
 }
