@@ -28,8 +28,9 @@ using namespace Kobold::Architecture;
 [[noreturn]] void Panic(const char* reason) {
     Kobold::Logging::Log("panic (hart %x) %s", 0, reason);
     InterruptControl(IntAction::DISABLE_INTERRUPTS);
-    while(1)
+    while(1) {
         InterruptControl(IntAction::YIELD_UNTIL_INTERRUPT);
+    }
 }
 
 dtb_ops DeviceTreeOps;
@@ -37,3 +38,26 @@ dtb_ops DeviceTreeOps;
 [[noreturn]] void Panic(const char* reason);
 extern dtb_ops DeviceTreeOps;
 #endif
+
+
+namespace Kobold::Sync {
+    struct Lock {
+        char atomic;
+        char permitInterrupts;
+    };
+
+
+    inline void Acquire(Lock *self) {
+        int i;
+        for (i = 0; i < 50000000; i++) {
+            if (!__atomic_test_and_set(&(self->atomic), __ATOMIC_ACQUIRE)) {
+            return;
+            }
+        }
+        Panic("Deadlock");
+    }
+
+    inline void Release(Lock *self) {
+        __atomic_clear(&(self->atomic), __ATOMIC_RELEASE);
+    }
+}

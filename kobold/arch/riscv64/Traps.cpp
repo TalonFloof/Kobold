@@ -1,13 +1,24 @@
 #include "Traps.hpp"
 #include "../../general/Logging.hpp"
 #include "CSR.hpp"
+#include "../../general/DeviceTree/DevTree.hpp"
+#include "SBI.hpp"
 
 using namespace Kobold;
 
 extern "C" void KTrap(Architecture::Frame* frame) {
     usize reason = 0;
     ReadCSR(reason,scause);
-    Logging::Log("Supervisor Trap - Cause %x", reason);
-    Architecture::PrintFrame(frame);
-    Panic("RISC-V Supervisor Trap");
+    if(reason & (1ULL << 63ULL)) {
+        usize intType = reason & ~(1ULL << 63ULL);
+        if(intType == 0x5) {
+            u64 base;
+            ReadCSR(base,time);
+            SBICallLegacy1(0,base+(DeviceTree::CpuSpeed / 100));
+        }
+    } else {
+        Logging::Log("Supervisor Trap - Cause %x", reason);
+        Architecture::PrintFrame(frame);
+        Panic("RISC-V Supervisor Trap");
+    }
 }

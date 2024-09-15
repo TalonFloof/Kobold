@@ -1,7 +1,9 @@
+#define _DEVTREE_IMPL
 #include "DevTree.hpp"
 #include "../Memory.hpp"
 #include "../Logging.hpp"
 #include "../Common.hpp"
+#include "../Memory/PFN.hpp"
 
 using namespace Kobold;
 
@@ -9,6 +11,7 @@ extern void* __KERNEL_BEGIN__;
 extern void* __KERNEL_END__;
 
 namespace Kobold::DeviceTree {
+    u64 CpuSpeed = 0;
     void print_node(dtb_node* node, size_t indent)
 {
     const size_t indent_scale = 2;
@@ -149,5 +152,14 @@ namespace Kobold::DeviceTree {
             }
         }
         // Now we have constructed a memory map of all of the usable areas, construct our pfn using this
+        Memory::Initialize((dtb_pair*)&freeMemory,64);
+        node = dtb_find("/cpus");
+        u64 freq;
+        {
+            dtb_prop* p = dtb_find_prop(node,"timebase-frequency");
+            dtb_read_prop_values(p,dtb_read_prop_size(p)/4,(size_t*)&freq);
+        }
+        Logging::Log("Machine Timer @ %i.%i MHz",freq/1000000,(freq/1000)%1000);
+        CpuSpeed = freq;
     }
 }

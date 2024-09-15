@@ -55,7 +55,11 @@ namespace Kobold::Architecture {
     void Initialize(void* deviceTree) {
         WriteCSR(((usize)&_intHandler),stvec);
         Kobold::DeviceTree::ScanTree(deviceTree);
-        WriteCSR(0,mstatus);
+        // Setup the Timer
+        if(SBICallLegacy1(0,(Kobold::DeviceTree::CpuSpeed / 100)) != 0) {
+            Panic("Failed to setup timer!");
+        }
+        WriteCSR((1 << 5) | (1 << 9) | (1 << 1),sie);
     }
 
     void Log(const char* s, size_t l) {
@@ -65,7 +69,10 @@ namespace Kobold::Architecture {
                 SBICallLegacy1(1,s[i]);
             }
         } else {
-            SBICall3(0x4442434E,0,l,((usize)s) & 0xFFFFFFFF,((usize)s) >> 32);
+            size_t i;
+            for(i = 0; i < l; i++) {
+                SBICall1(0x4442434E,2,s[i]);
+            }
         }
     }
 
@@ -73,9 +80,11 @@ namespace Kobold::Architecture {
         if(action == YIELD_UNTIL_INTERRUPT) {
             __asm__ __volatile__ ("wfi");
         } else if(action == DISABLE_INTERRUPTS) {
-            __asm__ __volatile__("csrci sstatus, 8");
+            __asm__ __volatile__("csrci sstatus, 2");
         } else if(action == ENABLE_INTERRUPTS) {
-            __asm__ __volatile__("csrsi sstatus, 8");
+            __asm__ __volatile__("csrsi sstatus, 2");
+        } else {
+            Panic("Unknown Action!");
         }
     }
 

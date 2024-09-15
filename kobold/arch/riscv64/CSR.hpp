@@ -14,3 +14,10 @@
         :                           \
         : [val] "r" (value)         \
     )
+
+#define ClearCSR(value, which)      \
+    __asm__ __volatile__ (          \
+        "csrc " #which ", %[val];"  \
+        :                           \
+        : [val] "r" (value)         \
+    )
