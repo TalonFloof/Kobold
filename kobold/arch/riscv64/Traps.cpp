@@ -5,8 +5,9 @@
 using namespace Kobold;
 
 extern "C" void KernelTrap() {
-    int reason;
+    usize reason, epc = 0;
     ReadCSR(reason,scause);
-    Logging::Log("Cause %x", reason);
+    ReadCSR(epc,sepc);
+    Logging::Log("Supervisor Trap - Cause %x | PC %x", reason, epc);
     Panic("RISC-V Supervisor Trap");
 }

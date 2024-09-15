@@ -45,6 +45,7 @@ namespace Kobold::Architecture {
 
     void EarlyInitialize() {
         // Check if the Debug Console SBI Extension is available, if its not, use the legacy console functions
+        InterruptControl(DISABLE_INTERRUPTS);
         SBIReturn hasDebugCon = SBICall1(0x10,3,0x4442434E);
         if(hasDebugCon.value) {
             UseLegacyConsole = 0;
@@ -53,7 +54,6 @@ namespace Kobold::Architecture {
 
     void Initialize(void* deviceTree) {
         WriteCSR(((usize)&kernelvec),stvec);
-        WriteCSR(0xffff,medeleg);
         Kobold::DeviceTree::ScanTree(deviceTree);
     }
 
