@@ -22,6 +22,23 @@ namespace Kobold::Memory {
         PfnLock.Release();
     }
 
+    void* AllocatePage(int type, usize pte) {
+        PfnLock.Acquire();
+        if(PfnFreeHead != NULL) {
+            int index = (((usize)PfnFreeHead) - ((usize)PfnStart))/sizeof(PFNEntry);
+            if(PfnFreeHead->next != NULL)
+                PfnFreeHead->next->prev = NULL;
+            PfnFreeHead = PfnFreeHead->next;
+            PfnStart[index]->type = type;
+            PfnStart[index]->pageFrame = pte;
+            PfnStart[index]->references = 0;
+            PfnLock.Release();
+            return NULL;
+        }
+        PfnLock.Release();
+        return NULL;
+    }
+
     void Initialize(dtb_pair* ranges, size_t len) {
         u64 highestAddr = 0;
         for(int i=0; i < len; i++) {
