@@ -10,24 +10,18 @@
 #define PFN_PAGETABLE 5
 #define PFN_TCB 6
 #define PFN_SERVICE_CATEGORY 7
-#define PFN_KERNEL 512
-#define PFN_PFN 513
-#define PFN_DEVTREE 514
+#define PFN_PFN 128
 
 namespace Kobold::Memory {
     struct PFNEntry {
         PFNEntry* next;
-        PFNEntry* prev; // Prev is reused as the reference count if not free
-        u64 type : 12;
-        u64 pageFrame : 52;
-
-        inline usize GetReferences() {
-            return (usize)(this->prev);
+        union {
+            PFNEntry* prev;
+            usize references;
         }
-
-        inline void SetReferences(usize r) {
-            this->prev = (PFNEntry*)r;
-        }
+        usize pageEntry : 48; // Used on PFN_PAGETABLE to point to the entry on the page table
+        usize reserved : 8;
+        usize type : 8;
     };
     void Initialize(dtb_pair* ranges, size_t len);
 }

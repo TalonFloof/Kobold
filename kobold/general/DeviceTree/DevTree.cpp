@@ -69,7 +69,7 @@ namespace Kobold::DeviceTree {
 
     int FindFirstFree(dtb_pair* freeMemory, int length) {
         for(int i=0; i < length; i++) {
-            if(freeMemory[i].a == 0 && freeMemory[i].b == 0)
+            if(freeMemory[i].b == 0)
                 return i;
         }
         return -1;
@@ -147,7 +147,7 @@ namespace Kobold::DeviceTree {
         Reserve((dtb_pair*)&freeMemory,64,(dtb_pair) {begin,end}); // kernel
         Reserve((dtb_pair*)&freeMemory,64,(dtb_pair) {(usize)deviceTree - 0xffff800000000000, (usize)deviceTree+ALIGN_UP(dtb_query_total_size((usize)deviceTree),4096) - 0xffff800000000000}); // device tree
         for(int i=0; i < 64; i++) {
-            if(freeMemory[i].a != 0 && freeMemory[i].b != 0) {
+            if(freeMemory[i].b != 0) {
                 Logging::Log("mem [%x-%x] Usable", freeMemory[i].a, freeMemory[i].b-1);
             }
         }

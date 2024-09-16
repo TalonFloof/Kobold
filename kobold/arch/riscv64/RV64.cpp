@@ -46,7 +46,7 @@ namespace Kobold::Architecture {
 
     void EarlyInitialize() {
         // Check if the Debug Console SBI Extension is available, if its not, use the legacy console functions
-        InterruptControl(DISABLE_INTERRUPTS);
+        IntControl(false);
         SBIReturn hasDebugCon = SBICall1(0x10,3,0x4442434E);
         if(hasDebugCon.value) {
             UseLegacyConsole = 0;
@@ -87,16 +87,19 @@ namespace Kobold::Architecture {
         }
     }
 
-    void InterruptControl(IntAction action) {
-        if(action == YIELD_UNTIL_INTERRUPT) {
-            __asm__ __volatile__ ("wfi");
-        } else if(action == DISABLE_INTERRUPTS) {
-            __asm__ __volatile__("csrci sstatus, 2");
-        } else if(action == ENABLE_INTERRUPTS) {
+    inline void WaitForInt() {
+        __asm__ __volatile__ ("wfi");
+    }
+
+    bool IntControl(bool enable) {
+        if(enable) {
             __asm__ __volatile__("csrsi sstatus, 2");
         } else {
-            Panic("Unknown Action!");
+            __asm__ __volatile__("csrci sstatus, 2");
         }
+        u64 v;
+        ReadCSR(v,sstatus);
+        return (v & 2) != 0;
     }
 
     struct Frame {

@@ -19,18 +19,17 @@ typedef intptr_t isize;
 #define ALIGNED(s, a)       (!((s) & ((a) - 1)))
 
 #include "DeviceTree/smoldtb.hpp"
-#ifdef _COMMON_INSTANCE
 #include "../arch/IArchitecture.hpp"
+#ifdef _COMMON_INSTANCE
 #include "Logging.hpp"
 
 using namespace Kobold::Architecture;
 
 [[noreturn]] void Panic(const char* reason) {
     Kobold::Logging::Log("panic (hart %x) %s", 0, reason);
-    InterruptControl(IntAction::DISABLE_INTERRUPTS);
-    while(1) {
-        InterruptControl(IntAction::YIELD_UNTIL_INTERRUPT);
-    }
+    IntControl(false);
+    while(1)
+        WaitForInt();
 }
 
 dtb_ops DeviceTreeOps;
@@ -42,22 +41,25 @@ extern dtb_ops DeviceTreeOps;
 
 namespace Kobold::Sync {
     struct Lock {
-        char atomic;
-        char permitInterrupts;
-    };
+        char atomic = 0;
+        bool permitInterrupts = true;
+        bool prevInt = false;
 
-
-    inline void Acquire(Lock *self) {
-        int i;
-        for (i = 0; i < 50000000; i++) {
-            if (!__atomic_test_and_set(&(self->atomic), __ATOMIC_ACQUIRE)) {
-            return;
+        inline void Acquire() {
+            if(!permitInterrupts)
+                this->prevInt = Kobold::Architecture::IntControl(false);
+            for (int i = 0; i < 50000000; i++) {
+                if (!__atomic_test_and_set(&(this->atomic), __ATOMIC_ACQUIRE)) {
+                    return;
+                }
             }
+            Panic("Deadlock");
         }
-        Panic("Deadlock");
-    }
 
-    inline void Release(Lock *self) {
-        __atomic_clear(&(self->atomic), __ATOMIC_RELEASE);
-    }
+        inline void Release() {
+            __atomic_clear(&(this->atomic), __ATOMIC_RELEASE);
+            if(!permitInterrupts)
+                Kobold::Architecture::IntControl(this->prevInt);
+        }
+    };
 }
