@@ -34,10 +34,16 @@ namespace Kobold::Memory {
             PfnStart[index].pageEntry = pte;
             PfnStart[index].references = 0;
             PfnLock.Release();
-            return NULL;
+            return (void*)((index << 12) + 0xffff800000000000);
         }
         PfnLock.Release();
         return NULL;
+    }
+
+    void ReferencePage(void* page) {
+        PfnLock.Acquire();
+        usize index = (((usize)page) >> 12) & 0x7fffffffffff;
+        PfnLock.Release();
     }
 
     void Initialize(dtb_pair* ranges, size_t len) {
