@@ -65,11 +65,6 @@ namespace Kobold::Memory {
         if(startAddr == 0)
             Panic("Couldn't allocate PFN Database! (Insufficient Memory Layout)");
         Logging::Log("PFN @ %X [%i entries, %i KiB]", startAddr, entries, neededSize/1024);
-        for(int i=0; i < len; i++) {
-            if(ranges[i].b != 0) {
-                Logging::Log("mem [%x-%x] Usable", ranges[i].a, ranges[i].b-1);
-            }
-        }
         PfnStart = (PFNEntry*)startAddr;
         memset(PfnStart,0,neededSize);
         u64 count = 0;
