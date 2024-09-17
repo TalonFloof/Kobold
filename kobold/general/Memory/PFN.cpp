@@ -56,19 +56,19 @@ namespace Kobold::Memory {
             if(--(PfnStart[index].references) <= 0) {
                 int oldState = PfnStart[index].type;
                 PfnStart[index].type = PFN_FREE;
+                PfnStart[index].prev = PfnFreeTail;
                 if(PfnFreeHead == NULL)
                     PfnFreeHead = &PfnStart[index];
                 if(PfnFreeTail != NULL) {
                     PfnFreeTail->next = &PfnStart[index];
-                    PfnStart[index].prev = PfnFreeTail;
                 }
                 PfnFreeTail = &PfnStart[index];
-                if(PfnStart[index].pageEntry != 0 && PfnStart[index].type == PFN_PAGE_TABLE) {
+                if(PfnStart[index].pageEntry != 0 && PfnStart[index].type == PFN_PAGETABLE) {
                     usize entry = PfnStart[index].pageEntry;
                     usize pt = (entry & (~0xfff));
                     *((usize*)(entry + 0xffff800000000000)) = 0;
                     PfnLock.Release();
-                    DereferencePage(pt);
+                    DereferencePage((void*)pt);
                     return;
                 }
             }
@@ -77,8 +77,15 @@ namespace Kobold::Memory {
     }
 
     void ForceFreePage(void* page) {
+        usize index = (((usize)page) >> 12) & 0x7ffffffff;
         PfnLock.Acquire();
-        
+        PfnStart[index].type = PFN_FREE;
+        PfnStart[index].prev = PfnFreeTail;
+        PfnStart[index].next = NULL;
+        PfnStart[index].pageEntry = 0;
+        if(PfnFreeTail != NULL)
+            PfnFreeTail->next = &PfnStart[index];
+        PfnFreeTail = &PfnStart[index];
         PfnLock.Release();
     }
 

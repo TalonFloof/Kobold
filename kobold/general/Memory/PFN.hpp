@@ -24,4 +24,8 @@ namespace Kobold::Memory {
         usize type : 8;
     };
     void Initialize(dtb_pair* ranges, size_t len);
+    void* AllocatePage(int type, usize pte);
+    void ReferencePage(void* page);
+    void DereferencePage(void* page);
+    void ForceFreePage(void* page);
 }

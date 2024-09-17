@@ -13,4 +13,11 @@ namespace Kobold::Memory {
         usize reserved : 5;
         usize pageFrame : (64-12);
     };
+
+    struct AddressSpace {
+        usize* pointer;
+
+        usize MapPage(usize vaddr, PageTableEntry entry);
+        PageTableEntry GetPage(usize vaddr);
+    };
 }
