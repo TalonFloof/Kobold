@@ -42,7 +42,37 @@ namespace Kobold::Memory {
 
     void ReferencePage(void* page) {
         PfnLock.Acquire();
-        usize index = (((usize)page) >> 12) & 0x7fffffffffff;
+        usize index = (((usize)page) >> 12) & 0x7ffffffff;
+        if(PfnStart[index].type >= PFN_ACTIVE) {
+            PfnStart[index].references += 1;
+        }
+        PfnLock.Release();
+    }
+
+    void DereferencePage(void* page) {
+        PfnLock.Acquire();
+        usize index = (((usize)page) >> 12) & 0x7ffffffff;
+        if(PfnStart[index].type >= PFN_ACTIVE) {
+            if(--(PfnStart[index].references) <= 0) {
+                int oldState = PfnStart[index].type;
+                PfnStart[index].type = PFN_FREE;
+                if(PfnFreeHead == NULL)
+                    PfnFreeHead = &PfnStart[index];
+                if(PfnFreeTail != NULL) {
+                    PfnFreeTail->next = &PfnStart[index];
+                    PfnStart[index].prev = PfnFreeTail;
+                }
+                PfnFreeTail = &PfnStart[index];
+                if(PfnStart[index].pageEntry != 0 && PfnStart[index].type == PFN_PAGE_TABLE) {
+                    usize entry = PfnStart[index].pageEntry;
+                    usize pt = (entry & (~0xfff));
+                    *((usize*)(entry + 0xffff800000000000)) = 0;
+                    PfnLock.Release();
+                    DereferencePage(pt);
+                    return;
+                }
+            }
+        }
         PfnLock.Release();
     }
 
