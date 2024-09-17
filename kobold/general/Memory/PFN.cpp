@@ -76,6 +76,12 @@ namespace Kobold::Memory {
         PfnLock.Release();
     }
 
+    void ForceFreePage(void* page) {
+        PfnLock.Acquire();
+        
+        PfnLock.Release();
+    }
+
     void Initialize(dtb_pair* ranges, size_t len) {
         u64 highestAddr = 0;
         for(int i=0; i < len; i++) {
