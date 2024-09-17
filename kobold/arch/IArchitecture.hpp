@@ -1,9 +1,11 @@
 #pragma once
-#include "../general/Common.hpp"
+#include <stdint.h>
+#include <stdarg.h>
+#include <stddef.h>
 
 namespace Kobold {
     namespace Architecture {
-        inline void WaitForInt();
+        void WaitForInt();
         bool IntControl(bool enable);
         void Log(const char* s, size_t l);
         void EarlyInitialize();

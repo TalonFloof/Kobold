@@ -87,7 +87,7 @@ namespace Kobold::Architecture {
         }
     }
 
-    inline void WaitForInt() {
+    void WaitForInt() {
         __asm__ __volatile__ ("wfi");
     }
 

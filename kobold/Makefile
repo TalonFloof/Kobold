@@ -7,7 +7,7 @@ CPPFILES := $(CPPFILES) $(ASMFILES)
 
 CFLAGS := \
 	-ffreestanding \
-	-Os \
+	-O2 \
 	-Wall \
 	-Wextra \
 	-fno-omit-frame-pointer       \
@@ -22,7 +22,7 @@ CFLAGS := \
 	-fno-rtti
 
 build: $(OBJFILES)
-	zig c++ --target=riscv64-freestanding-none -mcmodel=large $(OBJFILES) -O3 -r -o Kobold.o
+	zig c++ --target=riscv64-freestanding-none -mcmodel=large $(OBJFILES) -O2 -r -o Kobold.o
 	zig cc --target=riscv64-freestanding-none -mcmodel=large Kobold.o -Tlinks/riscv64.ld -g -static -o Kobold
 	rm -f Kobold.o
 	rm -f $(OBJFILES)

@@ -1,6 +1,7 @@
 #include "PFN.hpp"
 #include "../Common.hpp"
 #include "../Logging.hpp"
+#include "../Lock.hpp"
 
 using namespace Kobold;
 
@@ -10,7 +11,7 @@ namespace Kobold::Memory {
     PFNEntry* PfnFreeTail = NULL;
     Sync::Lock PfnLock = {0,false,false};
 
-    void* AddFreePage(usize page) {
+    void AddFreePage(usize page) {
         PfnLock.Acquire();
         usize index = page >> 12;
         PfnStart[index].next = NULL;
@@ -29,9 +30,9 @@ namespace Kobold::Memory {
             if(PfnFreeHead->next != NULL)
                 PfnFreeHead->next->prev = NULL;
             PfnFreeHead = PfnFreeHead->next;
-            PfnStart[index]->type = type;
-            PfnStart[index]->pageFrame = pte;
-            PfnStart[index]->references = 0;
+            PfnStart[index].type = type;
+            PfnStart[index].pageEntry = pte;
+            PfnStart[index].references = 0;
             PfnLock.Release();
             return NULL;
         }
@@ -64,6 +65,11 @@ namespace Kobold::Memory {
         if(startAddr == 0)
             Panic("Couldn't allocate PFN Database! (Insufficient Memory Layout)");
         Logging::Log("PFN @ %X [%i entries, %i KiB]", startAddr, entries, neededSize/1024);
+        for(int i=0; i < len; i++) {
+            if(ranges[i].b != 0) {
+                Logging::Log("mem [%x-%x] Usable", ranges[i].a, ranges[i].b-1);
+            }
+        }
         PfnStart = (PFNEntry*)startAddr;
         memset(PfnStart,0,neededSize);
         u64 count = 0;

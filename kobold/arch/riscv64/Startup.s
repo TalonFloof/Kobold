@@ -25,7 +25,7 @@ _start:
 
 .align 12
 __rv64_init_stack_bottom:
-   .zero 4096
+   .zero 8192
 __rv64_init_stack_top:
 .align 12 # Make sure the entries are aligned
 rv64_boot_page_table:
