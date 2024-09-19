@@ -12,10 +12,12 @@ namespace Kobold::Memory {
             u64 index = (vaddr >> (39 - (i * 9))) & 0x1ff;
             PageTableEntry pte = Architecture::ArchPTEToPage(entries[index]);
             if (i + 1 >= 4) {
-                if (entry.valid == 0) {
+                entries[index] = Architecture::PageToArchPTE(entry);
+            } else {
+                if(entries[index].valid == 0) {
 
                 } else {
-
+                    entries = (usize*)((pte.pageFrame << 12) + 0xffff800000000000);
                 }
             }
         }
