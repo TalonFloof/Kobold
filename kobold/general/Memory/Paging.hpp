@@ -7,10 +7,11 @@ namespace Kobold::Memory {
         usize read : 1;
         usize write : 1;
         usize execute : 1;
+        usize user : 1;
         usize noCache : 1;
         usize writeThru : 1;
         usize writeCombine : 1;
-        usize reserved : 5;
+        usize reserved : 4;
         usize pageFrame : (64-12);
     };
 

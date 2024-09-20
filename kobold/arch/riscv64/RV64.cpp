@@ -116,4 +116,12 @@ namespace Kobold::Architecture {
         Logging::Log(" s6 %X  s7 %X  s8 %X  s9 %X", f->s6, f->s7, f->s8, f->s9);
         Logging::Log("s10 %X s11 %X  sp %X  pc %X", f->s10, f->s11, f->sp, f->pc);
     }
+
+    Kobold::Memory::PageTableEntry ArchPTEToPage(usize value) {
+        return {value & 1, (value >> 1) & 1,(value >> 2) & 1,(value >> 3) & 1,(value >> 4) & 1,0,0,0,0,value >> 12};
+    }
+
+    usize PageToArchPTE(Kobold::Memory::PageTableEntry value) {
+        return (value.pageFrame << 12) | (value.user << 4) | (value.execute << 3) | (value.write << 2) | (value.read << 1) | (value.valid);
+    }
 }

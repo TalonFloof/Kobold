@@ -19,8 +19,7 @@ namespace Kobold::Memory {
             PFNEntry* prev;
             usize references;
         };
-        usize pageEntry : 48; // Used on PFN_PAGETABLE to point to the entry on the page table
-        usize reserved : 8;
+        usize pageEntry : 56; // Used on PFN_PAGETABLE to point to the entry on the page table
         usize type : 8;
     };
     void Initialize(dtb_pair* ranges, size_t len);
