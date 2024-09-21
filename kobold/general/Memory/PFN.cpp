@@ -2,6 +2,7 @@
 #include "../Common.hpp"
 #include "../Logging.hpp"
 #include "../Lock.hpp"
+#include "../Memory.hpp"
 
 using namespace Kobold;
 
@@ -16,8 +17,12 @@ namespace Kobold::Memory {
         usize index = page >> 12;
         PfnStart[index].next = NULL;
         PfnStart[index].prev = PfnFreeTail;
-        if(PfnFreeHead == NULL)
+        if(PfnFreeHead == NULL) {
             PfnFreeHead = &PfnStart[index];
+        }
+        if(PfnFreeTail != NULL) {
+            PfnFreeTail->next = &PfnStart[index];
+        }
         PfnFreeTail = &PfnStart[index];
         PfnStart[index].type = PFN_FREE;
         PfnLock.Release();
@@ -26,14 +31,15 @@ namespace Kobold::Memory {
     void* AllocatePage(int type, usize pte) {
         PfnLock.Acquire();
         if(PfnFreeHead != NULL) {
-            int index = (((usize)PfnFreeHead) - ((usize)PfnStart))/sizeof(PFNEntry);
+            u64 index = (((usize)PfnFreeHead) - ((usize)PfnStart))/sizeof(PFNEntry);
             if(PfnFreeHead->next != NULL)
                 PfnFreeHead->next->prev = NULL;
             PfnFreeHead = PfnFreeHead->next;
+            PfnStart[index].pageEntry = pte & 0x7ffffffff000;
             PfnStart[index].type = type;
-            PfnStart[index].pageEntry = pte;
             PfnStart[index].references = 0;
             PfnLock.Release();
+            memset((void*)((index << 12) + 0xffff800000000000),0,4096);
             return (void*)((index << 12) + 0xffff800000000000);
         }
         PfnLock.Release();
@@ -53,7 +59,8 @@ namespace Kobold::Memory {
         PfnLock.Acquire();
         usize index = (((usize)page) >> 12) & 0x7ffffffff;
         if(PfnStart[index].type >= PFN_ACTIVE) {
-            if(--(PfnStart[index].references) <= 0) {
+            PfnStart[index].references -= 1;
+            if(PfnStart[index].references <= 0) {
                 int oldState = PfnStart[index].type;
                 PfnStart[index].type = PFN_FREE;
                 PfnStart[index].prev = PfnFreeTail;
@@ -63,7 +70,7 @@ namespace Kobold::Memory {
                     PfnFreeTail->next = &PfnStart[index];
                 }
                 PfnFreeTail = &PfnStart[index];
-                if(PfnStart[index].pageEntry != 0 && PfnStart[index].type == PFN_PAGETABLE) {
+                if(PfnStart[index].pageEntry != 0 && oldState == PFN_PAGETABLE) {
                     usize entry = PfnStart[index].pageEntry;
                     usize pt = (entry & (~0xfff));
                     *((usize*)(entry + 0xffff800000000000)) = 0;
@@ -89,6 +96,20 @@ namespace Kobold::Memory {
             PfnFreeTail->next = &PfnStart[index];
         PfnFreeTail = &PfnStart[index];
         PfnLock.Release();
+    }
+
+    bool ChangeType(void* page, int type) {
+        usize index = (((usize)page) >> 12) & 0x7ffffffff;
+        PfnLock.Acquire();
+        if(PfnStart[index].type >= PFN_ACTIVE && PfnStart[index].references <= 1) {
+            PfnStart[index].type = type;
+            PfnStart[index].references = 0;
+        } else {
+            PfnLock.Release();
+            return false;
+        }
+        PfnLock.Release();
+        return true;
     }
 
     void Initialize(dtb_pair* ranges, size_t len) {

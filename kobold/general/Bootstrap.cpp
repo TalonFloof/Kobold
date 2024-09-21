@@ -4,6 +4,9 @@
 #include "Logging.hpp"
 #include "DeviceTree/smoldtb.hpp"
 
+#include "Memory/Paging.hpp"
+#include "Memory/PFN.hpp"
+
 using namespace Kobold;
 using namespace Kobold::Architecture;
 
@@ -14,5 +17,6 @@ void KernelInitialize(int hartID, void* deviceTree) {
     Logging::Log("KoboldKernel");
     Logging::Log("Copyright (C) 2024 TalonFloof, Licensed under GNU LGPLv3");
     Initialize(deviceTree);
+
     Panic("Booted Successfully");
 }

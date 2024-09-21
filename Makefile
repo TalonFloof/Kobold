@@ -1,7 +1,7 @@
 build:
 	cd kobold; make build; cd ..
 
-run:
+run: build
 	qemu-system-riscv64 -machine virt -device virtio-gpu-device -device virtio-keyboard-device -device virtio-mouse-device -smp 1 -m 32M -kernel kobold/Kobold -serial stdio -s
 
 clean:

@@ -20,5 +20,11 @@ namespace Kobold::Memory {
 
         usize MapPage(usize vaddr, PageTableEntry entry);
         PageTableEntry GetPage(usize vaddr);
+        void Destroy();
     };
+    AddressSpace CreateAddressSpace(usize paddr);
+
+    #ifndef _PAGING_IMPL
+    extern AddressSpace initialAddr;
+    #endif
 }

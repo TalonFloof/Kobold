@@ -55,6 +55,9 @@ namespace Kobold::Architecture {
         if(hasDebugCon.value) {
             UseLegacyTimer = 0;
         }
+        u64 v;
+        ReadCSR(v,satp);
+        Kobold::Memory::initialAddr.pointer = (usize*)(((v & (0xFFFFFFFFFFF)) << 12) + 0xffff800000000000);
     }
 
     void Initialize(void* deviceTree) {

@@ -25,4 +25,5 @@ namespace Kobold::Memory {
     void ReferencePage(void* page);
     void DereferencePage(void* page);
     void ForceFreePage(void* page);
+    bool ChangeType(void* page, int type);
 }
