@@ -9,8 +9,6 @@
 #define PFN_PAGEDIR 4
 #define PFN_PAGETABLE 5
 #define PFN_TCB 6
-#define PFN_SERVICE_CATEGORY 7
-#define PFN_PFN 128
 
 namespace Kobold::Memory {
     struct PFNEntry {

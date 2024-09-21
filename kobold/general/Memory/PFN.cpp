@@ -68,7 +68,9 @@ namespace Kobold::Memory {
                     usize pt = (entry & (~0xfff));
                     *((usize*)(entry + 0xffff800000000000)) = 0;
                     PfnLock.Release();
-                    DereferencePage((void*)pt);
+                    if(PfnStart[pt >> 12].type != PFN_PAGEDIR) {
+                        DereferencePage((void*)pt);
+                    }
                     return;
                 }
             }

@@ -13,6 +13,7 @@ namespace Kobold::Memory {
             PageTableEntry pte = Architecture::ArchPTEToPage(entries[index]);
             if (i + 1 >= 4) {
                 entries[index] = Architecture::PageToArchPTE(entry);
+                Architecture::InvalidatePage(((usize)entries - 0xffff800000000000));
                 if(pte.valid == 0 && entry.valid != 0) {
                     DereferencePage((void*)((usize)entries - 0xffff800000000000));
                 } else if(pte.valid == 1 && entry.valid == 0) {
@@ -44,6 +45,20 @@ namespace Kobold::Memory {
     }
 
     PageTableEntry AddressSpace::GetPage(usize vaddr) {
-        
+        usize* entries = this->pointer;
+        for(int i=0; i < 4; i++) {
+            u64 index = (vaddr >> (39 - (i * 9))) & 0x1ff;
+            PageTableEntry pte = Architecture::ArchPTEToPage(entries[index]);
+            if (i + 1 >= 4) {
+                return pte;
+            } else {
+                if(pte.valid == 0) {
+                    return {0,0,0,0,0,0,0,0,0,0};
+                } else {
+                    entries = (usize*)((pte.pageFrame << 12) + 0xffff800000000000);
+                }
+            }
+        }
+        __builtin_unreachable();
     }
 }

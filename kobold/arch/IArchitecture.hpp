@@ -17,5 +17,6 @@ namespace Kobold {
         void PrintFrame(Frame* f);
         Kobold::Memory::PageTableEntry ArchPTEToPage(usize value);
         usize PageToArchPTE(Kobold::Memory::PageTableEntry value);
+        void InvalidatePage(usize page);
     }
 }

@@ -124,4 +124,8 @@ namespace Kobold::Architecture {
     usize PageToArchPTE(Kobold::Memory::PageTableEntry value) {
         return (value.pageFrame << 12) | (value.user << 4) | (value.execute << 3) | (value.write << 2) | (value.read << 1) | (value.valid);
     }
+
+    void InvalidatePage(usize page) {
+        __asm__ __volatile__ ("sfence.vma %[val], zero" : [val] "=r"(page) :);
+    }
 }
