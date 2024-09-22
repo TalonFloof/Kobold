@@ -19,7 +19,8 @@ CFLAGS := \
 	-mno-relax \
 	-fno-exceptions \
 	-mabi=lp64 \
-	-fno-rtti
+	-fno-rtti \
+	-D_ARCH_RISCV64
 
 build: $(OBJFILES)
 	zig c++ --target=riscv64-freestanding-none -mcmodel=large $(OBJFILES) -O2 -r -o Kobold.o

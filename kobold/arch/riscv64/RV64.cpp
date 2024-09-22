@@ -105,10 +105,6 @@ namespace Kobold::Architecture {
         return (v & 2) != 0;
     }
 
-    struct Frame {
-        usize ra, gp, tp, t0, t1, t2, t3, t4, t5, t6, a0, a1, a2, a3, a4, a5, a6, a7, s0, s1, s2, s3, s4, s5, s6, s7, s8, s9, s10, s11, sp, pc;
-    };
-
     void PrintFrame(Frame* f) {
         Logging::Log(" ra %X  gp %X  tp %X  t0 %X", f->ra, f->gp, f->tp, f->t0);
         Logging::Log(" t1 %X  t2 %X  t3 %X  t4 %X", f->t1, f->t2, f->t3, f->t4);

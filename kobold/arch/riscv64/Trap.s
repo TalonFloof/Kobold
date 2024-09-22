@@ -2,7 +2,7 @@
 .global _intHandler
 .align 4
 _intHandler:
-    csrw sscratch, sp
+    csrrw sp, sscratch, sp // SP -> Kernel Stack, SScratch -> User Stack
     addi sp, sp, -8 * 32
     sd ra,  8 * 0(sp)
     sd gp,  8 * 1(sp)
@@ -38,13 +38,18 @@ _intHandler:
     csrr a0, sepc
     sd a0, 8 * 31(sp)
 
-    csrr a0, sscratch
+    csrr a0, sscratch // a0 -> User Stack
     sd a0, 8 * 30(sp)
+
+    addi a0, sp, 8 * 32 // SScratch -> Kernel Stack
+    csrw sscratch, a0
 
     mv a0, sp
     call KTrap
-
 trap_exit:
+    ld a1, 8 * 31(a0)
+    csrw sepc, a1
+
     ld ra,  8 * 0(a0)
     ld gp,  8 * 1(a0)
     ld tp,  8 * 2(a0)
@@ -75,7 +80,12 @@ trap_exit:
     ld s9,  8 * 27(a0)
     ld s10, 8 * 28(a0)
     ld s11, 8 * 29(a0)
-    ld sp,  8 * 30(a0)
+    ld sp, 8 * 30(a0)
+    fence
 
     ld a0,  8 * 10(a0)
     sret
+    nop
+
+    j . // Should never reach here, but leave this as a safety check
+    nop
