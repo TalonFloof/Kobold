@@ -8,7 +8,7 @@ namespace Kobold::Userspace {
         Thread* prevQueue;
         Thread* nextQueue;
         Kobold::Memory::AddressSpace addrSpace;
-        __attribute__((aligned(512))) Kobold::Architecture::Frame frame;
+        __attribute__((aligned(256))) Kobold::Architecture::Frame frame;
         __attribute__((aligned(1024))) u8 kstack[1024*3];
     };
 

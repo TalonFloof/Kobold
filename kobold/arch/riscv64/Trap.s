@@ -2,7 +2,23 @@
 .global _intHandler
 .align 4
 _intHandler:
-    csrrw sp, sscratch, sp // SP -> Kernel Stack, SScratch -> User Stack
+    /////////// RETRIEVE STACK TYPE BEGIN ///////////
+    csrrw a2, sscratch, a2
+    sd a0, 0(a2) // Save a0 & a1 to the hart info, this allows us to use this as general purpose registers
+    sd a1, 8(a2)
+    sd sp, 16(a2)
+
+    csrr a0, scause
+    li a1, 8
+    ld sp, 32(a2)
+    bne a0, a1, .after
+    ld sp, 24(a2)
+.after:
+    ld a0, 0(a2)
+    ld a1, 8(a2)
+    csrrw a2, sscratch, a2
+    /////////// RETRIEVE STACK TYPE END ///////////
+
     addi sp, sp, -8 * 32
     sd ra,  8 * 0(sp)
     sd gp,  8 * 1(sp)
@@ -38,14 +54,13 @@ _intHandler:
     csrr a0, sepc
     sd a0, 8 * 31(sp)
 
-    csrr a0, sscratch // a0 -> User Stack
+    csrr a0, sscratch
+    ld a0, 16(a0)
     sd a0, 8 * 30(sp)
-
-    addi a0, sp, 8 * 32 // SScratch -> Kernel Stack
-    csrw sscratch, a0
 
     mv a0, sp
     call KTrap
+.global trap_exit
 trap_exit:
     ld a1, 8 * 31(a0)
     csrw sepc, a1
@@ -81,7 +96,6 @@ trap_exit:
     ld s10, 8 * 28(a0)
     ld s11, 8 * 29(a0)
     ld sp, 8 * 30(a0)
-    fence
 
     ld a0,  8 * 10(a0)
     sret

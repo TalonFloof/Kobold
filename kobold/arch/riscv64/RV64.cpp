@@ -4,6 +4,7 @@
 #include "../../general/DeviceTree/DevTree.hpp"
 #include "CSR.hpp"
 #include "Traps.hpp"
+#include "../../general/Hart.hpp"
 
 using namespace Kobold;
 
@@ -44,6 +45,8 @@ namespace Kobold::Architecture {
     int UseLegacyTimer = 1;
     int UseLegacyConsole = 1;
 
+    Hart initialHart;
+
     void EarlyInitialize() {
         // Check if the Debug Console SBI Extension is available, if its not, use the legacy console functions
         IntControl(false);
@@ -58,6 +61,8 @@ namespace Kobold::Architecture {
         u64 v;
         ReadCSR(v,satp);
         Kobold::Memory::initialAddr.pointer = (usize*)(((v & (0xFFFFFFFFFFF)) << 12) + 0xffff800000000000);
+        initialHart.trapStack = (usize)Kobold::Memory::initialAddr.pointer;
+        WriteCSR(&initialHart,sscratch);
     }
 
     void Initialize(void* deviceTree) {

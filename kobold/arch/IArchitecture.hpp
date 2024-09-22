@@ -3,6 +3,7 @@
 #include <stdarg.h>
 #include <stddef.h>
 #include "../general/Memory/Paging.hpp"
+#include "../general/Hart.hpp"
 
 namespace Kobold {
     namespace Architecture {
@@ -12,7 +13,7 @@ namespace Kobold {
         void EarlyInitialize();
         void Initialize(void* deviceTree);
 
-        int GetHartID();
+        Hart* GetHartInfo();
         struct Frame;
         void PrintFrame(Frame* f);
         Kobold::Memory::PageTableEntry ArchPTEToPage(usize value);
@@ -23,8 +24,12 @@ namespace Kobold {
         struct Frame {
             usize ra, gp, tp, t0, t1, t2, t3, t4, t5, t6, a0, a1, a2, a3, a4, a5, a6, a7, s0, s1, s2, s3, s4, s5, s6, s7, s8, s9, s10, s11, sp, pc;
         };
+        struct FloatFrame {
+            usize fr[32];
+        }
         #else
         struct Frame;
+        struct FloatFrame;
         #endif
     }
 }
