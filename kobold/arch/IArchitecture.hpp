@@ -26,7 +26,7 @@ namespace Kobold {
         };
         struct FloatFrame {
             usize fr[32];
-        }
+        };
         #else
         struct Frame;
         struct FloatFrame;
