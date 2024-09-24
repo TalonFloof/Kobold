@@ -24,6 +24,8 @@ namespace Kobold::Userspace {
         Thread* t = this->head;
         t->nextQueue->prevQueue = NULL;
         this->head = t->nextQueue;
+        if(this->head == NULL)
+            this->tail = NULL;
         t->nextQueue = NULL;
         t->prevQueue = NULL;
         this->lock.Release();
