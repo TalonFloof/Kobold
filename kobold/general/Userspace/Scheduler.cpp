@@ -31,4 +31,13 @@ namespace Kobold::Userspace {
         this->lock.Release();
         return t;
     }
+
+    void Schedule() {
+        for(int i=15; i >= 0; i--) {
+            Thread* t = schedQueues[i].PullFromQueue();
+            if(t == NULL)
+                continue;
+            
+        }
+    }
 }
