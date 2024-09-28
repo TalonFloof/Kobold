@@ -32,12 +32,25 @@ namespace Kobold::Userspace {
         return t;
     }
 
+    void SaveContext(Architecture::Frame* f, Architecture::FloatFrame *ff) {
+        Hart* h = Architecture::GetHartInfo();
+        memcpy(&(((Thread*)h->activeThread)->frame),f,sizeof(Architecture::Frame));
+        if(ff != NULL)
+            memcpy(&(((Thread*)h->activeThread)->floatFrame),ff,sizeof(Architecture::FloatFrame));
+    }
+
     void Schedule() {
+        Thread* t;
         for(int i=15; i >= 0; i--) {
-            Thread* t = schedQueues[i].PullFromQueue();
+            t = schedQueues[i].PullFromQueue();
             if(t == NULL)
                 continue;
-            
+            Hart* h = Architecture::GetHartInfo();
+            h->activeSyscallStack = ((usize)t) + 4096;
+            h->activeThread = t;
+            Architecture::SwitchPageTable((usize)(t->addrSpace.pointer));
+            return;
         }
+        Panic("Schedule Failed");
     }
 }

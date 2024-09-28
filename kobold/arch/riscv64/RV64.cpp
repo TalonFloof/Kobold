@@ -132,4 +132,27 @@ namespace Kobold::Architecture {
     void InvalidatePage(usize page) {
         __asm__ __volatile__ ("sfence.vma %[val], zero" : [val] "=r"(page) :);
     }
+
+    void EnterContext(Frame* f) {
+        u64 v;
+        ReadCSR(v,sstatus);
+        ((StatusRegister)v).spp = !((StatusRegister)v).spp;
+        
+        if(f->sp >= 0xffff800000000000)
+            ;
+        else
+            ;
+    }
+
+    void SwitchPageTable(usize pt) {
+        u64 v = ((pt >> 12) & 0x7ffffffff) | (9ULL << 60ULL);
+        WriteCSR(v,satp);
+        __asm__ __volatile__ ("sfence.vma zero, zero");
+    }
+
+    Hart* GetHartInfo() {
+        usize v;
+        ReadCSR(v,sscratch);
+        return (Hart*)v;
+    }
 }
