@@ -39,7 +39,7 @@ namespace Kobold::Userspace {
             memcpy(&(((Thread*)h->activeThread)->floatFrame),ff,sizeof(Architecture::FloatFrame));
     }
 
-    void Schedule() {
+    Thread* Schedule() {
         Thread* t;
         for(int i=15; i >= 0; i--) {
             t = schedQueues[i].PullFromQueue();
@@ -49,7 +49,7 @@ namespace Kobold::Userspace {
             h->activeSyscallStack = ((usize)t) + 4096;
             h->activeThread = t;
             Architecture::SwitchPageTable((usize)(t->addrSpace.pointer));
-            return;
+            return t;
         }
         Panic("Schedule Failed");
     }

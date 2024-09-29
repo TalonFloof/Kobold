@@ -10,7 +10,7 @@ namespace Kobold::Architecture {
     extern int UseLegacyTimer;
 }
 
-extern "C" Architecture::Frame* KTrap(Architecture::Frame* frame) {
+extern "C" [[noreturn]] void KTrap(Architecture::Frame* frame) {
     usize reason = 0;
     ReadCSR(reason,scause);
     if(reason & (1ULL << 63ULL)) {
@@ -29,5 +29,5 @@ extern "C" Architecture::Frame* KTrap(Architecture::Frame* frame) {
         Architecture::PrintFrame(frame);
         Panic("RISC-V Supervisor Trap");
     }
-    return frame;
+    Architecture::EnterContext(frame);
 }

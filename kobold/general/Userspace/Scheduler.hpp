@@ -11,4 +11,7 @@ namespace Kobold::Userspace {
         void AddToQueue(Thread* t);
         Thread* PullFromQueue();
     };
+
+    void SaveContext(Architecture::Frame* f, Architecture::FloatFrame *ff);
+    Thread* Schedule();
 }

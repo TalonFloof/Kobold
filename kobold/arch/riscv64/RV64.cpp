@@ -8,6 +8,8 @@
 
 using namespace Kobold;
 
+extern "C" void trap_exit(void* ctx);
+
 namespace Kobold::Architecture {
     struct StatusRegister {
         union {
@@ -133,15 +135,13 @@ namespace Kobold::Architecture {
         __asm__ __volatile__ ("sfence.vma %[val], zero" : [val] "=r"(page) :);
     }
 
-    void EnterContext(Frame* f) {
+    [[noreturn]] void EnterContext(Frame* f) {
         u64 v;
         ReadCSR(v,sstatus);
-        ((StatusRegister)v).spp = !((StatusRegister)v).spp;
-        
-        if(f->sp >= 0xffff800000000000)
-            ;
-        else
-            ;
+        ((StatusRegister*)&v)->spp = f->sp >= 0xffff800000000000 ? 1 : 0;
+        ((StatusRegister*)&v)->spie = 1;
+        WriteCSR(v,sstatus);
+        trap_exit((void*)f);
     }
 
     void SwitchPageTable(usize pt) {

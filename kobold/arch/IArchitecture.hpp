@@ -31,7 +31,6 @@ namespace Kobold {
         usize PageToArchPTE(Kobold::Memory::PageTableEntry value);
         void InvalidatePage(usize page);
         void SwitchPageTable(usize pt);
-        void EnterContext(Frame* f);
-
+        [[noreturn]] void EnterContext(Frame* f);
     }
 }

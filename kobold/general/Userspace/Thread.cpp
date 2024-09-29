@@ -1,7 +1,9 @@
 #include "Thread.hpp"
 
-void IdleThread() {
-    while(1) {
-        
+namespace Kobold::Userspace {
+    void IdleThread() {
+        while(1) {
+            
+        }
     }
 }

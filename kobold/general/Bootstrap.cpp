@@ -23,5 +23,8 @@ void KernelInitialize(int hartID, void* deviceTree) {
     Logging::Log("Copyright (C) 2024 TalonFloof, Licensed under GNU LGPLv3");
     Initialize(deviceTree);
 
+    void* p = Memory::AllocatePage(PFN_TCB,0);
+    
+
     Panic("Booted Successfully");
 }
