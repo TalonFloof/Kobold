@@ -34,7 +34,7 @@ void *generic_memcpy(void *dest, const void *src, size_t count) {
   return dest;
 }
 
-int memcmp(const void *s1, const void *s2, size_t n) {
+int generic_memcmp(const void *s1, const void *s2, size_t n) {
   const uint8_t *a = (uint8_t *)s1;
   const uint8_t *b = (uint8_t *)s2;
   size_t i;
@@ -50,13 +50,13 @@ int memcmp(const void *s1, const void *s2, size_t n) {
   return 0;
 }
 
-size_t strlen(const char *str) {
+size_t generic_strlen(const char *str) {
   size_t i = 0;
   while (str[i]) i++;
   return i;
 }
 
-int strcmp(const char *s1, const char *s2) {
+int generic_strcmp(const char *s1, const char *s2) {
   while (*s1 == *s2) {
     if (!*(s1++)) {
       return 0;
