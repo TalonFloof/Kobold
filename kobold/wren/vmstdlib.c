@@ -1,6 +1,6 @@
 #include "vmstdlib.h"
 
-void *memset(void *src, int c, size_t count) {
+void *generic_memset(void *src, int c, size_t count) {
   uint8_t *xs = (uint8_t *)src;
 
   while (count--) *xs++ = c;
@@ -8,7 +8,7 @@ void *memset(void *src, int c, size_t count) {
   return src;
 }
 
-void *memcpy(void *dest, const void *src, size_t count) {
+void *generic_memcpy(void *dest, const void *src, size_t count) {
   const char *sp = (char *)src;
   char *dp = (char *)dest;
   size_t i;
