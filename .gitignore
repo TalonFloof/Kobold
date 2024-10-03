@@ -30,6 +30,9 @@
 *.exe
 *.out
 *.app
+*.elf
 
 *.tmp*
-kobold/Kobold
+
+.zig-cache
+zig-out
