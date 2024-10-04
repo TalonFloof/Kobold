@@ -25,6 +25,13 @@ pub export fn memcmp(s1: *anyopaque, s2: *anyopaque, n: isize) c_int {
 pub export fn strlen(s: *anyopaque) usize {
     return std.mem.len(s);
 }
+// string - conversion
+pub export fn strtod(s: [*c]u8, e: *allowzero [*c]u8) f64 {
+    if(@as(usize, @ptrToInt(e)) != 0) {
+    } else {
+        return try std.fmt.parseFloat(s[0..std.mem.len(s)]);
+    }
+}
 // math
 pub export fn log2(x: f64) f64 {
     return @log2(x);
