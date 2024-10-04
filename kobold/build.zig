@@ -62,5 +62,30 @@ pub fn build(b: *std.Build) void {
     if (getArch(board) == .riscv64) {
         kernel.root_module.code_model = .medium;
     }
+    const halMod = b.addModule("hal", .{
+        .root_source_file = b.path("hal/hal.zig"),
+        .imports = &.{},
+        .target = resolvedTarget,
+        .optimize = optimize,
+    });
+
+    const wrenMod = b.addStaticLibrary(.{
+        .name = "wren",
+        .root_source_file = b.path("wren/main.zig"),
+        .pic = true,
+        .target = resolvedTarget,
+        .optimize = optimize,
+    });
+    wrenMod.addCSourceFiles(.{ .files = &.{
+        "wren/wren_compiler.c",
+        "wren/wren_core.c",
+        "wren/wren_primitive.c",
+        "wren/wren_utils.c",
+        "wren/wren_value.c",
+        "wren/wren_vm.c",
+    } });
+    b.installArtifact(wrenMod);
+    kernel.entry = std.Build.Step.Compile.Entry.disabled;
+    kernel.root_module.addImport("hal", halMod);
     b.installArtifact(kernel);
 }

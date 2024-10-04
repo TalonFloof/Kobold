@@ -1,9 +1,10 @@
-#include <ctype.h>
+//#include <ctype.h>
 #include <errno.h>
-#include <float.h>
+/*#include <float.h>
 #include <math.h>
 #include <string.h>
-#include <time.h>
+#include <time.h>*/
+#include "vmstdlib.h"
 
 #include "wren_common.h"
 #include "wren_core.h"

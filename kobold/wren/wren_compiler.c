@@ -1,7 +1,6 @@
 #include <errno.h>
 #include <stdbool.h>
-#include <stdio.h>
-#include <string.h>
+#include "vmstdlib.h"
 
 #include "wren_common.h"
 #include "wren_compiler.h"

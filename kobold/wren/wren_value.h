@@ -2,7 +2,7 @@
 #define wren_value_h
 
 #include <stdbool.h>
-#include <string.h>
+#include "vmstdlib.h"
 
 #include "wren_common.h"
 #include "wren_math.h"

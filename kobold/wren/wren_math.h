@@ -1,7 +1,7 @@
 #ifndef wren_math_h
 #define wren_math_h
 
-#include <math.h>
+#include "vmstdlib.h"
 #include <stdint.h>
 
 // A union to let us reinterpret a double as raw bits and back.

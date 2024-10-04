@@ -1,6 +1,6 @@
 #include "wren_primitive.h"
 
-#include <math.h>
+#include "vmstdlib.h"
 
 // Validates that [value] is an integer within `[0, count)`. Also allows
 // negative indices which map backwards from the end. Returns the valid positive

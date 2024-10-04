@@ -1,0 +1,12 @@
+{
+    "files.associations": {
+        "*.okm": "oberon",
+        "ctype.h": "c",
+        "math.h": "c",
+        "vmstdlib.h": "c",
+        "stdarg.h": "c",
+        "errno.h": "c",
+        "errno-base.h": "c",
+        "stddef.h": "c"
+    }
+}

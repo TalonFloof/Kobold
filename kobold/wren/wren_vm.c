@@ -1,5 +1,5 @@
 #include <stdarg.h>
-#include <string.h>
+#include "vmstdlib.h"
 
 #include "wren.h"
 #include "wren_common.h"

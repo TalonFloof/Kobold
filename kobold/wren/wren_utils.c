@@ -1,4 +1,4 @@
-#include <string.h>
+#include "vmstdlib.h"
 
 #include "wren_utils.h"
 #include "wren_vm.h"

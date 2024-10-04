@@ -52,7 +52,7 @@
 #endif
 
 #ifndef WREN_OPT_RANDOM
-  #define WREN_OPT_RANDOM 1
+  #define WREN_OPT_RANDOM 0
 #endif
 
 // These flags are useful for debugging and hacking on Wren itself. They are not

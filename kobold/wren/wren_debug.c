@@ -1,4 +1,4 @@
-#include <stdio.h>
+#include "vmstdlib.h"
 
 #include "wren_debug.h"
 
