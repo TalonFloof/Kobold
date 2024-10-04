@@ -83,6 +83,7 @@ pub fn build(b: *std.Build) void {
         "wren/wren_utils.c",
         "wren/wren_value.c",
         "wren/wren_vm.c",
+        "wren/wren_opt_meta.c",
     } });
     b.installArtifact(wrenMod);
     kernel.entry = std.Build.Step.Compile.Entry.disabled;
