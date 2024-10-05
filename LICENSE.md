@@ -7,7 +7,7 @@
 
 ## Preamble
 
-Kobold is an open source project that encourages experimentation and usage of it. We believe that by making software publically viewable, that it may encourage and strengthen both our growth and allow for others to use its ideas in ones own works. However, in order to protect original property, while allowing flexibility of redistribution and modification, it becomes neccesary to include a license document to ensure that the author(s) recieve the credit they deserve as well as any other conditions they believe are just in order to protect their property.
+Kobold is an open-source project that encourages experimentation and usage of it. We believe that by making software publicly viewable, that it may encourage and strengthen both our growth and allow for others to use its ideas in one's own works. However, in order to protect original property, while allowing flexibility of redistribution and modification, it becomes necessary to include a license document to ensure that the author(s) receive the credit they deserve as well as any other conditions they believe are just in order to protect their property.
 
 Many other licenses were considered prior to this one, and the decision to write a new license from scratch was not one that was easily done. However, we believe that by creating this document, that we will be able to protect what is ours while still providing lots of flexibility with others who want to modify and/or redistribute this program.  
 We also hope that we can use this document to see other software use this license to protect their works as well.  
@@ -38,13 +38,13 @@ Failure to comply with listed terms violates the Contributors' Copyright to the 
 
 Sources that are under a Secondary License do not fall under these conditions but rather are under their respective License unless certain files are exempt from the Secondary License. (see **3**)
 
-All Redistributions must use this same license as the original distribution. Only Constributors of the original distribution may change the license, and all derivitatives must use the same terms as the version it is derived from; the Contributor cannot change it.
+All Redistributions must use this same license as the original distribution. Only Contributors of the original distribution may change the license, and all derivatives must use the same terms as the version it is derived from; the Contributor cannot change it.
 
 ## 3. Secondary Licenses
 
-If a directory contains a License file other than this one (also known as a Secondary License), than the files within that directory and its subdirectories falls under that License rather than this one. If a Source file contains a copyright notice for another license, than that specific Source file falls under that Secondary License.
+If a directory contains a License file other than this one (also known as a Secondary License), than the files within that directory and its subdirectories falls under that License rather than this one. If a Source file contains a copyright notice for another license, then that specific Source file falls under that Secondary License.
 
-If you choose to put a Source file under this License rather than a Secondary License specified within that Secondary License's directory or its subdirectories, you may add a list specifing which files are not part of that Secondary License, but rather are part of this license. (see **EXHIBIT B** for how to do this). If you choose to not use the exemption notice list, or cannot due to conditions within the Secondary License, then you may also add a copyright notice within the file(s), which will still exempt it from the Secondary License. (see **EXHIBIT A**)
+If you choose to put a Source file under this License rather than a Secondary License specified within that Secondary License's directory or its subdirectories, you may add a list specifying which files are not part of that Secondary License, but rather are part of this license. (see **EXHIBIT B** for how to do this). If you choose to not use the exemption notice list, or cannot due to conditions within the Secondary License, then you may also add a copyright notice within the file(s), which will still exempt it from the Secondary License. (see **EXHIBIT A**)
 
 Objects and Compiled forms of the program do not require this to be done, though the terms and conditions of those licenses must still be complied with.
 
@@ -54,7 +54,7 @@ Software under the Kobold License is allowed to be linked, and/or interact with 
 
 Secondary Licensed Software linked with Kobold Licensed Software still retains that software's Secondary License and copyright; linking Kobold Licensed Objects with non-kobold Licensed Objects does not force that software to use the Kobold License, it may still continue to retain its own copyright, though it must still give attribution since the Objects are linked to the final binary (implying it was statically linked). (See **section 2**)
 
-For instance if you are making a piece of Software under the MIT License, and you use a library licensed under the Kobold License, that software you wrote in the MIT License is still under the MIT License, while the Objects under the Kobold License are still under the Kobold License. The final linked binary version (assuming you statically linked the Kobold-licensed Objects) of this software is **your property**, however you must still follow **section 2** in order to use the Kobold-licensed Software since it is statically linked to the binary. 
+For instance, if you are making a piece of Software under the MIT License, and you use a library licensed under the Kobold License, that software you wrote in the MIT License is still under the MIT License, while the Objects under the Kobold License are still under the Kobold License. The final linked binary version (assuming you statically linked the Kobold-licensed Objects) of this software is **your property**, however you must still follow **section 2** in order to use the Kobold-licensed Software since it is statically linked to the binary. 
 
 **Section 2** does not apply if the Kobold-licensed Objects are dynamically linked to Secondary Licensed software since the binary is linked during runtime and not at compile-time, though documenting that the library is used would be appreciated, but not required.
 
@@ -75,7 +75,7 @@ Within Source Code:
  * This Source file is licensed under the Kobold License.
  * The original and derivative forms of this file must follow its terms and conditions when/if distributed.
  * 
- * You should have recieved a copy of the original Kobold License file containing more info on these terms.
+ * You should have received a copy of the original Kobold License file containing more info on these terms.
  * If you did not, then you may view <https://github.com/TalonFloof/Kobold/blob/main/LICENSE.md> for more information on the license.
  */
 ```
@@ -86,7 +86,7 @@ Copyright (C) [year range] [copyright holder]
 This software is open-source can may be redistributed
 under certain conditions specified within the Kobold License.
 
-You should have recieved a copy of the original Kobold License file containing more info on these terms.
+You should have received a copy of the original Kobold License file containing more info on these terms.
 If you did not, then you may view <https://github.com/TalonFloof/Kobold/blob/main/LICENSE.md> for more information on the license.
 ```
 
@@ -98,7 +98,7 @@ TXT Version:
 === KOBOLD LICENSE NOTICE ===
 The listed files below are not covered under the [Insert License Name] License, but rather, are part of the Kobold License.
 
-You should have recieved a copy of the license alongside the Sources provided here. If you did not, please see <https://github.com/TalonFloof/Kobold/blob/main/LICENSE.md> for more info.
+You should have received a copy of the license alongside the Sources provided here. If you did not, please see <https://github.com/TalonFloof/Kobold/blob/main/LICENSE.md> for more info.
 
 = EXEMPTION LIST:
 [Insert File List Starting Here]
@@ -108,7 +108,7 @@ Markdown Version:
 # Kobold License Notice
 The listed files below are not covered under the [Insert License Name] License, but rather, are part of the Kobold License.
 
-You should have recieved a copy of the license alongside the Sources provided here. If you did not, please see https://github.com/TalonFloof/Kobold/blob/main/LICENSE.md for more info.
+You should have received a copy of the license alongside the Sources provided here. If you did not, please see https://github.com/TalonFloof/Kobold/blob/main/LICENSE.md for more info.
 
 ## Exemption List
 - [Insert File List Starting Here]
