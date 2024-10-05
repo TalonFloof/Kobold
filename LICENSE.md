@@ -1,163 +1,46 @@
-GNU Lesser General Public License
-=================================
+# Kobold License - v1.0
 
-_Version 3, 29 June 2007_  
-_Copyright © 2007 Free Software Foundation, Inc. &lt;<http://fsf.org/>&gt;_
+THE ACCOMPANYING PROGRAM IS PROVIDED UNDER THE TERMS OF THIS LICENSE DOCUMENT.  
+ANY USE, REDISTRIBUTION, OR MODIFICATION, BOTH PUBLIC AND PRIVATE, CONSTITUTES RECIPIENT'S ACCEPTANCE WITH ALL TERMS SPECIFIED WITHIN THIS DOCUMENT.
 
-Everyone is permitted to copy and distribute verbatim copies
-of this license document, but changing it is not allowed.
+*Copyright © 2024 TalonFloof and Contributors.*
 
+## Preamble
 
-This version of the GNU Lesser General Public License incorporates
-the terms and conditions of version 3 of the GNU General Public
-License, supplemented by the additional permissions listed below.
+Kobold is an open source project that encourages experimentation and usage of it. We believe that by making software publically viewable, that it may encourage and strengthen both our growth and allow for others to use its ideas in ones own works. However, in order to protect original property, while allowing flexibility of redistribution and modification, it becomes neccesary to include a license document to ensure that the author(s) recieve the credit they deserve as well as any other conditions they believe are just in order to protect their property.
 
-### 0. Additional Definitions
+Many other licenses were considered prior to this one, and the decision to write a new license from scratch was not one that was easily taken. However, we believe that by creating this document, that we will be able to protect what is ours while still providing lots of flexibility with others who want to modify and/or redistribute this program.  
+We are by no means lawyers, and it is possible that this document may not be perfect. If you believe there are any issues or loopholes that we did not find, we encourage you to open a pull request at https://github.com/TalonFloof/Kobold. This license is by no means a complete and ratified document and we are always open to have others help improve this document.
 
-As used herein, “this License” refers to version 3 of the GNU Lesser
-General Public License, and the “GNU GPL” refers to version 3 of the GNU
-General Public License.
+## 1. Definitions
 
-“The Library” refers to a covered work governed by this License,
-other than an Application or a Combined Work as defined below.
+- "**License**" refers to this document, as well as all of the terms and conditions stated within it.
+- "**Source**" refers to the preferred form for making modifications, including but not limited to software source code, documentation source, and configuration files.
+- "**Object**" refers to any non-source form that is the result of transformation or translation from sources. This includes compiled object code, generated documentation, and conversions to other media types.
+- "**Contributor**" refers to any individual or legal entity that creates, contributes to the creation of, or owns the software this license is covering.
+- "**Contribution**" refers to 
 
-An “Application” is any work that makes use of an interface provided
-by the Library, but which is not otherwise based on the Library.
-Defining a subclass of a class defined by the Library is deemed a mode
-of using an interface provided by the Library.
+## 2. Redistribution and Modification
 
-A “Combined Work” is a work produced by combining or linking an
-Application with the Library.  The particular version of the Library
-with which the Combined Work was made is also called the “Linked
-Version”.
+A Contributor who chooses to modify or redistribute any Source or Object form of this Software outside of the original repository must comply with the following conditions listed below.
 
-The “Minimal Corresponding Source” for a Combined Work means the
-Corresponding Source for the Combined Work, excluding any source code
-for portions of the Combined Work that, considered in isolation, are
-based on the Application, and not on the Linked Version.
+- Any Redistributions of any Sources must retain this document within the source code.
+- If the Sources are modified from the original works, then any Recipients who have access to the Object form of the Software must also be able to access all of the modified Sources in some form (ex. via websites like GitHub, from package managers, etc.)
 
-The “Corresponding Application Code” for a Combined Work means the
-object code and/or source code for the Application, including any data
-and utility programs needed for reproducing the Combined Work from the
-Application, but excluding the System Libraries of the Combined Work.
+Failure to comply with listed terms violates the Contributors' Copyright to the Software this license covers. This license will also be void, and all rights specified will be automatically terminated.
 
-### 1. Exception to Section 3 of the GNU GPL
+Sources that are under a Secondary License do not fall under these conditions but rather are under their respective License unless certain files are exempt from the Secondary License. (see **3**)
 
-You may convey a covered work under sections 3 and 4 of this License
-without being bound by section 3 of the GNU GPL.
+All Redistributions must use this same license, you cannot switch to a different license.
 
-### 2. Conveying Modified Versions
+## 3. Secondary Licenses
 
-If you modify a copy of the Library, and, in your modifications, a
-facility refers to a function or data to be supplied by an Application
-that uses the facility (other than as an argument passed when the
-facility is invoked), then you may convey a copy of the modified
-version:
+## 4. No Warranty
+***Except as expressively set forth in this License, the Software is provided “as is”, without warranty of any kind, either expressed or implied, including but not limited to the warranties of merchantability, fitness for a particular purpose and noninfringement.*** Recipients of the software must decide what the appropriate use of this software is and must be willing to accept any possible risks if one decides to use or modify it under the conditions of this License.
 
-* **a)** under this License, provided that you make a good faith effort to
-ensure that, in the event an Application does not supply the
-function or data, the facility still operates, and performs
-whatever part of its purpose remains meaningful, or
+## 5. Disclaimer of Liability
+***Except as expressively set forth in this License, neither Recipient nor any Contributors shall have any liability for any direct, indirect, incidental, special, exemplary, or consequential damages (including, but not limited to, procurement of substitute goods or services; loss of use, data, or profits; or business interruption), however caused and on any theory of liability, whether in contract, strict liability, or tort (including negligence or otherwise) arising in any way out of the use or distribution of the Software or the exercise of any rights granted hereunder, even if advised of the possibility of such damages.***
 
-* **b)** under the GNU GPL, with none of the additional permissions of
-this License applicable to that copy.
+## EXHIBIT A: Copyright Notice
 
-### 3. Object Code Incorporating Material from Library Header Files
-
-The object code form of an Application may incorporate material from
-a header file that is part of the Library.  You may convey such object
-code under terms of your choice, provided that, if the incorporated
-material is not limited to numerical parameters, data structure
-layouts and accessors, or small macros, inline functions and templates
-(ten or fewer lines in length), you do both of the following:
-
-* **a)** Give prominent notice with each copy of the object code that the
-Library is used in it and that the Library and its use are
-covered by this License.
-* **b)** Accompany the object code with a copy of the GNU GPL and this license
-document.
-
-### 4. Combined Works
-
-You may convey a Combined Work under terms of your choice that,
-taken together, effectively do not restrict modification of the
-portions of the Library contained in the Combined Work and reverse
-engineering for debugging such modifications, if you also do each of
-the following:
-
-* **a)** Give prominent notice with each copy of the Combined Work that
-the Library is used in it and that the Library and its use are
-covered by this License.
-
-* **b)** Accompany the Combined Work with a copy of the GNU GPL and this license
-document.
-
-* **c)** For a Combined Work that displays copyright notices during
-execution, include the copyright notice for the Library among
-these notices, as well as a reference directing the user to the
-copies of the GNU GPL and this license document.
-
-* **d)** Do one of the following:
-    - **0)** Convey the Minimal Corresponding Source under the terms of this
-License, and the Corresponding Application Code in a form
-suitable for, and under terms that permit, the user to
-recombine or relink the Application with a modified version of
-the Linked Version to produce a modified Combined Work, in the
-manner specified by section 6 of the GNU GPL for conveying
-Corresponding Source.
-    - **1)** Use a suitable shared library mechanism for linking with the
-Library.  A suitable mechanism is one that **(a)** uses at run time
-a copy of the Library already present on the user's computer
-system, and **(b)** will operate properly with a modified version
-of the Library that is interface-compatible with the Linked
-Version.
-
-* **e)** Provide Installation Information, but only if you would otherwise
-be required to provide such information under section 6 of the
-GNU GPL, and only to the extent that such information is
-necessary to install and execute a modified version of the
-Combined Work produced by recombining or relinking the
-Application with a modified version of the Linked Version. (If
-you use option **4d0**, the Installation Information must accompany
-the Minimal Corresponding Source and Corresponding Application
-Code. If you use option **4d1**, you must provide the Installation
-Information in the manner specified by section 6 of the GNU GPL
-for conveying Corresponding Source.)
-
-### 5. Combined Libraries
-
-You may place library facilities that are a work based on the
-Library side by side in a single library together with other library
-facilities that are not Applications and are not covered by this
-License, and convey such a combined library under terms of your
-choice, if you do both of the following:
-
-* **a)** Accompany the combined library with a copy of the same work based
-on the Library, uncombined with any other library facilities,
-conveyed under the terms of this License.
-* **b)** Give prominent notice with the combined library that part of it
-is a work based on the Library, and explaining where to find the
-accompanying uncombined form of the same work.
-
-### 6. Revised Versions of the GNU Lesser General Public License
-
-The Free Software Foundation may publish revised and/or new versions
-of the GNU Lesser General Public License from time to time. Such new
-versions will be similar in spirit to the present version, but may
-differ in detail to address new problems or concerns.
-
-Each version is given a distinguishing version number. If the
-Library as you received it specifies that a certain numbered version
-of the GNU Lesser General Public License “or any later version”
-applies to it, you have the option of following the terms and
-conditions either of that published version or of any later version
-published by the Free Software Foundation. If the Library as you
-received it does not specify a version number of the GNU Lesser
-General Public License, you may choose any version of the GNU Lesser
-General Public License ever published by the Free Software Foundation.
-
-If the Library as you received it specifies that a proxy can decide
-whether future versions of the GNU Lesser General Public License shall
-apply, that proxy's public statement of acceptance of any version is
-permanent authorization for you to choose that version for the
-Library.
+## EXHIBIT B: Secondary License Example Scenerio
