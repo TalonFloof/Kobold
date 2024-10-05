@@ -2,7 +2,7 @@
 
 #if WREN_OPT_META
 
-#include <string.h>
+#include "vmstdlib.h"
 
 #include "wren_vm.h"
 #include "wren_opt_meta.wren.inc"

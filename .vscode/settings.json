@@ -7,6 +7,8 @@
         "stdarg.h": "c",
         "errno.h": "c",
         "errno-base.h": "c",
-        "stddef.h": "c"
+        "stddef.h": "c",
+        "random": "c",
+        "float.h": "c"
     }
 }
