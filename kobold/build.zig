@@ -58,15 +58,26 @@ pub fn build(b: *std.Build) void {
         .target = resolvedTarget,
         .linkage = .static,
         .code_model = .large,
+        .strip = false,
     });
     if (getArch(board) == .riscv64) {
         kernel.root_module.code_model = .medium;
     }
-    const halMod = b.addModule("hal", .{
-        .root_source_file = b.path("hal/hal.zig"),
+    const dtbMod = b.addModule("dtb", .{
+        .root_source_file = b.path("dtb/dtb.zig"),
         .imports = &.{},
         .target = resolvedTarget,
         .optimize = optimize,
+        .red_zone = false,
+        .strip = false,
+    });
+    const halMod = b.addModule("hal", .{
+        .root_source_file = b.path("hal/hal.zig"),
+        .imports = &.{.{ .name = "dtb", .module = dtbMod }},
+        .target = resolvedTarget,
+        .optimize = optimize,
+        .red_zone = false,
+        .strip = false,
     });
 
     const wrenMod = b.addStaticLibrary(.{
@@ -75,6 +86,7 @@ pub fn build(b: *std.Build) void {
         .pic = true,
         .target = resolvedTarget,
         .optimize = optimize,
+        .strip = false,
     });
     wrenMod.addCSourceFiles(.{ .files = &.{
         "wren/wren_compiler.c",
@@ -84,9 +96,13 @@ pub fn build(b: *std.Build) void {
         "wren/wren_value.c",
         "wren/wren_vm.c",
         "wren/wren_opt_meta.c",
+        "wren/vmstdlib_c.c",
+        "wren/tinyprintf.c",
     } });
-    b.installArtifact(wrenMod);
+    //b.installArtifact(wrenMod);
     kernel.entry = std.Build.Step.Compile.Entry.disabled;
+    kernel.root_module.addImport("dtb", dtbMod);
     kernel.root_module.addImport("hal", halMod);
-    b.installArtifact(kernel);
+    kernel.setLinkerScript(b.path(b.fmt("hal/link/{s}.ld", .{@tagName(board)})));
+    b.getInstallStep().dependOn(&b.addInstallArtifact(kernel, .{}).step);
 }
