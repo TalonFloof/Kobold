@@ -11,10 +11,24 @@ pub const arch = switch (builtin.cpu.arch) {
     else => @panic("Unsupported Arch!"),
 };
 
+// #define ALIGN_UP(s, a)      (((s) + ((a) - 1)) & ~((a) - 1))
+//#define ALIGN_DOWN(s, a)    ((s) & ~((a) - 1))
+//#define ALIGNED(s, a)       (!((s) & ((a) - 1)))
+
+pub inline fn AlignUp(comptime T: type, s: T, a: T) T {
+    return (((s) + ((a) - 1)) & ~((a) - 1));
+}
+pub inline fn AlignDown(comptime T: type, s: T, a: T) T {
+    return ((s) & ~((a) - 1));
+}
+pub inline fn Aligned(comptime T: type, s: T, a: T) T {
+    return (!((s) & ((a) - 1)));
+}
+
 pub export fn HALInitialize(stackTop: usize, dtb: *allowzero anyopaque) callconv(.C) noreturn {
     arch.ArchInit(stackTop, dtb);
     root.KoboldInit();
-    while (true) {}
+    @panic("No Command");
 }
 
 pub fn stub() void {}

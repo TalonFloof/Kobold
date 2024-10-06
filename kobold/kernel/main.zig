@@ -1,5 +1,6 @@
 const std = @import("std");
 pub const hal = @import("hal");
+pub const physmem = @import("physmem.zig");
 
 pub fn doLog(
     comptime level: std.log.Level,
@@ -23,7 +24,7 @@ pub fn doLog(
     if (level == .debug) {
         try hal.writer.print(format, args);
     } else {
-        try hal.writer.print(level.asText() ++ "\x1b[0m: " ++ format ++ "\n", args);
+        try hal.writer.print(level.asText() ++ "\x1b[0m | " ++ format ++ "\n", args);
     }
 }
 
@@ -34,8 +35,7 @@ pub const std_options: std.Options = .{
 pub fn panic(msg: []const u8, stacktrace: ?*std.builtin.StackTrace, wat: ?usize) noreturn {
     _ = wat;
     _ = stacktrace;
-    _ = msg;
-    std.log.err("panic!", .{});
+    std.log.err("panic (hart 0x0) {s}", .{msg});
     while (true) {}
 }
 
