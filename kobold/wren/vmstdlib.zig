@@ -13,7 +13,12 @@ pub export fn memset(dest: *anyopaque, c: u8, n: isize) callconv(.C) *void {
 }
 
 pub export fn memmove(dest: *anyopaque, src: *anyopaque, n: isize) callconv(.C) *void {
-    @memcpy(@as(*u8, @alignCast(dest))[0..n], @as(*u8, @alignCast(src))[0..n]) catch return;
+    if (dest <= src) {
+        std.mem.copyForwards(u8, @as(*u8, @alignCast(dest))[0..n], @as(*u8, @alignCast(src))[0..n]);
+    } else {
+        std.mem.copyBackwards(u8, @as(*u8, @alignCast(dest))[0..n], @as(*u8, @alignCast(src))[0..n]);
+    }
+    return @as(*void, @ptrCast(dest));
 }
 
 pub export fn memcmp(s1: *anyopaque, s2: *anyopaque, n: isize) callconv(.C) c_int {
@@ -27,12 +32,6 @@ pub export fn memcmp(s1: *anyopaque, s2: *anyopaque, n: isize) callconv(.C) c_in
 // string
 pub export fn strlen(s: *anyopaque) callconv(.C) usize {
     return std.mem.len(s);
-}
-// string - conversion
-pub export fn strtod(s: [*c]u8, e: *allowzero [*c]u8) callconv(.C) f64 {
-    if (@as(usize, @intFromPtr(e)) != 0) {} else {
-        return try std.fmt.parseFloat(s[0..std.mem.len(s)]);
-    }
 }
 // math
 pub export fn abs(x: c_int) callconv(.C) c_int {
@@ -58,6 +57,9 @@ pub export fn round(x: f64) callconv(.C) f64 {
 }
 pub export fn ceil(x: f64) callconv(.C) f64 {
     return @ceil(x);
+}
+pub export fn trunc(x: f64) callconv(.C) f64 {
+    return @trunc(x);
 }
 pub export fn fmax(x: f64, y: f64) callconv(.C) f64 {
     return @max(x, y);

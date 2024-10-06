@@ -15,6 +15,10 @@ int memcmp(const void *s1, const void *s2, size_t n);
 size_t strlen(const char *str);
 int strcmp(const char *s1, const char *s2);
 int strncmp(const char *s1, const char *s2, size_t n);
+#define isspace(x) ((x) == ' ' || (x) == '\n' || (x) == '\r' || (x) == '\t' || (x) == '\v' || (x) == '\p')
+
+double strtod(const char* s, char** end);
+long long strtoll(char* s, char** end, unsigned int base);
 
 // math
 int abs(int x);
@@ -25,6 +29,7 @@ double log2(double x);
 double floor(double x);
 double round(double x);
 double ceil(double x);
+double trunc(double x);
 double fmin(double x, double y);
 double fmax(double x, double y);
 double pow(double x, double y);
@@ -44,6 +49,10 @@ double cbrt(double x);
 
 int isnan(double x);
 int isinf(double x);
+
+// allocation
+void* realloc(void* ptr, size_t new_size);
+void free(void *ptr);
 
 // stub
 #define clock() (0.0)

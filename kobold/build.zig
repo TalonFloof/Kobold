@@ -1,4 +1,5 @@
 const std = @import("std");
+const builtin = @import("builtin");
 
 pub const Arch = enum {
     riscv64,
@@ -43,6 +44,16 @@ pub fn queryFor(board: Board) std.Target.Query {
     }
 }
 
+pub fn addInstallObjectFile(
+    b: *std.Build,
+    compile: *std.Build.Step.Compile,
+    name: []const u8,
+) *std.Build.Step {
+    // bin always needed to be computed or else the compilation will do nothing. zig build system bug?
+    const bin = compile.getEmittedBin();
+    return &b.addInstallFile(bin, b.fmt("bin/{s}.o", .{name})).step;
+}
+
 pub fn build(b: *std.Build) void {
     const board = getBoard(b) catch @panic("Unknown Board!");
     var targetQuery = queryFor(board);
@@ -80,10 +91,9 @@ pub fn build(b: *std.Build) void {
         .strip = false,
     });
 
-    const wrenMod = b.addStaticLibrary(.{
+    const wrenMod = b.addObject(.{
         .name = "wren",
         .root_source_file = b.path("wren/main.zig"),
-        .pic = true,
         .target = resolvedTarget,
         .optimize = optimize,
         .strip = false,
@@ -99,10 +109,11 @@ pub fn build(b: *std.Build) void {
         "wren/vmstdlib_c.c",
         "wren/tinyprintf.c",
     } });
-    //b.installArtifact(wrenMod);
+    wrenMod.entry = std.Build.Step.Compile.Entry.disabled;
     kernel.entry = std.Build.Step.Compile.Entry.disabled;
     kernel.root_module.addImport("dtb", dtbMod);
     kernel.root_module.addImport("hal", halMod);
     kernel.setLinkerScript(b.path(b.fmt("hal/link/{s}.ld", .{@tagName(board)})));
     b.getInstallStep().dependOn(&b.addInstallArtifact(kernel, .{}).step);
+    b.getInstallStep().dependOn(addInstallObjectFile(b, wrenMod, "wren"));
 }

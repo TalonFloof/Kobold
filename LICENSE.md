@@ -31,14 +31,13 @@ We have built this license to be organized and easy to read, we encourage you to
 A Contributor who chooses to modify and/or redistribute any Source or Object form of this Software outside of the original repository must comply with the following conditions listed below:
 
 - Any Redistributions of any Sources must retain this document within the source code.
-- Any Redistributions of its complete binary form of its Objects (meaning the final compliled form of the Software) must contain a copyright notice (See **EXHIBIT A** for how to do this). They must also contain this document within its documentation and/or any other form of material.
-- If the Sources are modified from the original works, then any Recipients who have access to the Object form have the right to view modified Sources Contributors made; Contributors must disclose modified Sources and have it be accessible in some form. (ex. via websites like GitHub, from package managers, etc.)
+- Any Redistributions of the complete binary form of this Software's Objects (meaning the final compliled form of the Software) must contain this document and/or a copyright notice that notes that this Software is licensed under the Kobold License, within its documentation or any other form of material accessible to the user. If you so choose to, you may only include the copyright notice and omit this document as long as you provide a hyperlink to this document within your notice. (See **EXHIBIT A**  for an example)
+- If the Sources are modified from the original works, then any Recipients who have access to the Object form of this Software have the right to view modified Sources Contributors made; Contributors must disclose modified Sources and have it be accessible in some form. (ex. via websites like GitHub, from package managers, etc.) Unmodified code on Redistributions is exempt from this.
+- All Redistributions must use this same license as the original distribution. Only Contributors of the original distribution may change the license, and all derivatives must use the same terms as the version it is derived from; the Contributor cannot change it.
 
 Failure to comply with listed terms violates the Contributors' Copyright to the Software this license covers. This license will also be void, and all rights specified will be automatically terminated.
 
 Sources that are under a Secondary License do not fall under these conditions but rather are under their respective License unless certain files are exempt from the Secondary License. (see **3**)
-
-All Redistributions must use this same license as the original distribution. Only Contributors of the original distribution may change the license, and all derivatives must use the same terms as the version it is derived from; the Contributor cannot change it.
 
 ## 3. Secondary Licenses
 
@@ -54,9 +53,9 @@ Software under the Kobold License is allowed to be linked, and/or interact with 
 
 Secondary Licensed Software linked with Kobold Licensed Software still retains that software's Secondary License and copyright; linking Kobold Licensed Objects with non-kobold Licensed Objects does not force that software to use the Kobold License, it may still continue to retain its own copyright, though it must still give attribution since the Objects are linked to the final binary (implying it was statically linked). (See **section 2**)
 
-For instance, if you are making a piece of Software under the MIT License, and you use a library licensed under the Kobold License, that software you wrote in the MIT License is still under the MIT License, while the Objects under the Kobold License are still under the Kobold License. The final linked binary version (assuming you statically linked the Kobold-licensed Objects) of this software is **your property**, however you must still follow **section 2** in order to use the Kobold-licensed Software since it is statically linked to the binary. 
+For instance, if you are making a piece of Software under the MIT License, and you use a library licensed under the Kobold License, that software you wrote in the MIT License is still under the MIT License, while the Objects under the Kobold License are still under the Kobold License. The final linked binary version (assuming you statically linked the Kobold-licensed Objects) of this software is **your property** and is still under the MIT License, however you must still follow **section 2** in order to use the Kobold-licensed Software since it is statically linked to the binary. 
 
-**Section 2** does not apply if the Kobold-licensed Objects are dynamically linked to Secondary Licensed software since the binary is linked during runtime and not at compile-time, though documenting that the library is used would be appreciated, but not required.
+**Section 2** does not apply if Kobold-licensed Objects are dynamically linked to Secondary Licensed software since the binary is linked during runtime and not at compile-time, though documenting that the library is used would be appreciated, but not required.
 
 ## 5. No Warranty
 ***Except as expressively set forth in this License, the Software is provided “as is”, without warranty of any kind, either expressed or implied, including but not limited to the warranties of merchantability, fitness for a particular purpose and noninfringement.*** Recipients of the software must decide what the appropriate use of this software is and must be willing to accept any possible risks if one decides to use or modify it under the conditions of this License.
@@ -80,7 +79,7 @@ Within Source Code:
  */
 ```
 
-Documentation/Software Notice:
+Software Copyright Notice:
 ```
 Copyright (C) [year range] [copyright holder]
 This software is open-source can may be redistributed
@@ -90,7 +89,7 @@ You should have received a copy of the original Kobold License file containing m
 If you did not, then you may view <https://github.com/TalonFloof/Kobold/blob/main/LICENSE.md> for more information on the license.
 ```
 
-You aren't required to strictly follow the given documentation/software notice, rather this is a template that you can use that satisfies **section 2**.
+You aren't required to strictly follow the given software copyright notice, rather this is a template that you can use that satisfies **section 2**.
 
 ## EXHIBIT B: Secondary License Exemption Example
 TXT Version:

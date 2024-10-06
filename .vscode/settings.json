@@ -9,6 +9,7 @@
         "errno-base.h": "c",
         "stddef.h": "c",
         "random": "c",
-        "float.h": "c"
+        "float.h": "c",
+        "stdint.h": "c"
     }
 }
