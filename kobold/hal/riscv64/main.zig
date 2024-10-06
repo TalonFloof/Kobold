@@ -23,6 +23,9 @@ comptime {
 pub fn ArchInit(stackTop: usize, dtb: *allowzero anyopaque) void {
     _ = stackTop;
     useLegacyDebugCon = !sbi.dbcn.available();
+    if (useLegacyDebugCon) {
+        std.log.warn("Using Legacy SBI Console!", .{});
+    }
     std.log.debug("Kobold Kernel\n", .{});
     hal.dtb_parser.parse_dtb(dtb) catch @panic("DTB Parse Failed!");
 }

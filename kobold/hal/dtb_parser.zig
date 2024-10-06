@@ -44,6 +44,7 @@ pub fn parse_dtb(v: *anyopaque) !void {
     var state: enum { Outside, InsideMemory, InsideReservedMemory } = .Outside; // Since we don't have a memory allocator yet, we'll have to linearly scan through it and store states as we progress through different nodes.
     var addrSize: u32 = 0;
     var lenSize: u32 = 0;
+    var exitDepth: usize = 1;
     var depth: usize = 1;
 
     var reg: ?[]const u8 = null;
@@ -107,6 +108,7 @@ pub fn parse_dtb(v: *anyopaque) !void {
                 switch (state) {
                     .Outside => {
                         if (std.mem.startsWith(u8, child_name, "reserved-memory")) {
+                            exitDepth = depth;
                             state = .InsideReservedMemory;
                         }
                     },
@@ -117,14 +119,9 @@ pub fn parse_dtb(v: *anyopaque) !void {
                 depth -= 1;
                 switch (state) {
                     .InsideReservedMemory => {
-                        const entrySize = ((addrSize + lenSize) * 4);
-                        const entries = reg.?.len / entrySize;
-                        for (0..entries) |i| {
-                            const begin: u64 = readCells(addrSize, reg.?[(i * entrySize)..]);
-                            const end: u64 = begin + readCells(lenSize, reg.?[((i * entrySize) + (addrSize * 4))..]);
-                            reserve(begin, end);
+                        if (depth < exitDepth) {
+                            state = .Outside;
                         }
-                        state = .Outside;
                     },
                     else => {},
                 }
@@ -134,6 +131,13 @@ pub fn parse_dtb(v: *anyopaque) !void {
                     .InsideReservedMemory => {
                         if (std.mem.eql(u8, prop.name, "reg")) {
                             reg = prop.value;
+                            const entrySize = ((addrSize + lenSize) * 4);
+                            const entries = reg.?.len / entrySize;
+                            for (0..entries) |i| {
+                                const begin: u64 = readCells(addrSize, reg.?[(i * entrySize)..]);
+                                const end: u64 = begin + readCells(lenSize, reg.?[((i * entrySize) + (addrSize * 4))..]);
+                                reserve(begin, end);
+                            }
                         }
                     },
                     .Outside => {},

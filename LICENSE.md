@@ -26,14 +26,16 @@ We have built this license to be organized and easy to read, we encourage you to
 - "**Secondary License**" refers to any licenses outside of the Kobold License, such as the MIT License, the GPL family of licenses, etc. This includes licenses and copyright to Proprietry and Closed-Source software.
 - "**You**" (or "**Your**") refers to an individual or Legal Entity exercising permissions granted by this License.
 
-## 2. Redistribution and Modification
+## 2. Usage, Redistribution, and Modification
 
-A Contributor who chooses to modify and/or redistribute any Source or Object form of this Software outside of the original repository must comply with the following conditions listed below:
+The Kobold License grants all Recipients a perpetual, worldwide, non-exclusive, no-charge, royalty-free, irrevocable copyright license to reproduce, prepare Derivative Works of, publicly display, publicly perform, sublicense, and distribute the Work and such Derivative Works in Source or Object form.
 
-- Any Redistributions of any Sources must retain this document within the source code.
-- Any Redistributions of the complete binary form of this Software's Objects (meaning the final compliled form of the Software) must contain this document and/or a copyright notice that notes that this Software is licensed under the Kobold License, within its documentation or any other form of material accessible to the user. If you so choose to, you may only include the copyright notice and omit this document as long as you provide a hyperlink to this document within your notice. (See **EXHIBIT A**  for an example)
-- If the Sources are modified from the original works, then any Recipients who have access to the Object form of this Software have the right to view modified Sources Contributors made; Contributors must disclose modified Sources and have it be accessible in some form. (ex. via websites like GitHub, from package managers, etc.) Unmodified code on Redistributions is exempt from this.
-- All Redistributions must use this same license as the original distribution. Only Contributors of the original distribution may change the license, and all derivatives must use the same terms as the version it is derived from; the Contributor cannot change it.
+Any Recipients who can obtain a copy of this Software has the right to redistribute and modify any original or Derived Work of this software (this includes both Source and Object forms of it) given that the follow conditions are met:
+
+- Derivitives containing any Sources must retain this document within the source code.
+- Derivitives containing a complete binary form of this Software's Objects (meaning the final compliled form of the Software) must contain this document and/or a copyright notice that notes that this Software is licensed under the Kobold License, within its documentation or any other form of material accessible to the user. If you so choose to, you may only include the copyright notice and omit this document as long as you provide a hyperlink to this document within your notice. (See **EXHIBIT A**  for an example)
+- If the Sources are modified from the original repository, then any Recipients who have access to the Object form of this Software have the right to view modified Sources Contributors made; Contributors must disclose modified Sources and have it be accessible in some form. (ex. via websites like GitHub, from package managers, etc.) Unmodified code on Derived works is exempt from this, though including it for convience sake is recommended.
+- All Derivitives must use this same license as the original distribution. Only Contributors of the original distribution may change the license, and all derivatives must use the same terms as the version it is derived from; the Contributor cannot change it.
 
 Failure to comply with listed terms violates the Contributors' Copyright to the Software this license covers. This license will also be void, and all rights specified will be automatically terminated.
 
