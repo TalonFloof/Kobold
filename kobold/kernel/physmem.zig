@@ -61,6 +61,7 @@ pub fn Allocate(size: usize, align_: usize) ?*anyopaque {
                     var entry = getNewEntry();
                     entry.next = node;
                     entry.prev = node.prev;
+                    node.prev = entry;
                     entry.start = region_start;
                     entry.end = newAddr;
                 }
@@ -119,6 +120,7 @@ pub fn Free(address: usize, size: usize) void {
             var entry = getNewEntry();
             entry.next = node;
             entry.prev = node.prev;
+            node.prev = entry;
             entry.start = address;
             entry.end = end;
             if (prev == null)
@@ -132,8 +134,11 @@ pub fn Free(address: usize, size: usize) void {
     entry.prev = prev;
     entry.start = address;
     entry.end = end;
-    if (prev == null)
+    if (prev == null) {
         firstFree = entry;
+    } else {
+        prev.?.next = entry;
+    }
 }
 
 pub fn PrintMap() void {
