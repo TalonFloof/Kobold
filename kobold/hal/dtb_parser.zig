@@ -152,7 +152,9 @@ pub fn parse_dtb(v: *anyopaque) !void {
     for (0..64) |i| {
         if (freeMemory[i].end == 0) continue;
         std.log.info("mem [{x}-{x}] Usable", .{ freeMemory[i].start, freeMemory[i].end - 1 });
+        physmem.Free(freeMemory[i].start, freeMemory[i].end - freeMemory[i].start);
     }
+    physmem.PrintMap();
 }
 
 fn readU32(value: []const u8) u32 {

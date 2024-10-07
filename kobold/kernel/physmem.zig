@@ -13,7 +13,7 @@ pub const FreeHeader = struct {
     next: ?*FreeHeader = null,
 };
 
-var internalFreeListBuf: [2]FreeHeader = [_]FreeHeader{.{}} ** 2;
+var internalFreeListBuf: [4]FreeHeader = [_]FreeHeader{.{}} ** 2;
 
 var firstFree: ?*FreeHeader = null;
 
@@ -23,7 +23,7 @@ fn getNewEntry() *FreeHeader {
             return &internalFreeListBuf[i];
         }
     }
-    return @ptrCast(Allocate(@sizeOf(FreeHeader), 0).?);
+    return @ptrCast(@alignCast(Allocate(@sizeOf(FreeHeader), 0).?));
 }
 
 fn removeEntry(ptr: *FreeHeader) void {
@@ -37,7 +37,7 @@ fn removeEntry(ptr: *FreeHeader) void {
     }
     for (0..internalFreeListBuf.len) |i| {
         if (@intFromPtr(ptr) == @intFromPtr(&internalFreeListBuf[i])) {
-            internalFreeListBuf[i].size = 0;
+            internalFreeListBuf[i].end = 0;
             return;
         }
     }
@@ -89,21 +89,57 @@ pub fn Allocate(size: usize, align_: usize) ?*anyopaque {
 pub fn Free(address: usize, size: usize) void {
     const end = address + size;
     var cursor = firstFree;
+    var prev: ?*FreeHeader = null;
     while (cursor) |node| {
         const region_start = node.start;
         const region_end = node.end;
         const next = node.next;
+        prev = node.prev;
         if (region_start == end) {
             node.start = address;
-            if (node.prev) |prev| {
-                const prev_region_end = prev.end;
+            if (node.prev) |prv| {
+                const prev_region_end = prv.end;
                 if (prev_region_end == address) {
-                    prev.end = region_end;
+                    prv.end = region_end;
                     removeEntry(node);
                 }
             }
             return;
+        } else if (region_end == address) {
+            node.end = end;
+            if (node.next) |nxt| {
+                const next_region_start = nxt.start;
+                if (next_region_start == end) {
+                    nxt.start = region_start;
+                    removeEntry(node);
+                }
+            }
+            return;
+        } else if (end < region_start) {
+            var entry = getNewEntry();
+            entry.next = node;
+            entry.prev = node.prev;
+            entry.start = address;
+            entry.end = end;
+            if (prev == null)
+                firstFree = entry;
+            return;
         }
         cursor = next;
+    }
+    var entry = getNewEntry();
+    entry.next = null;
+    entry.prev = prev;
+    entry.start = address;
+    entry.end = end;
+    if (prev == null)
+        firstFree = entry;
+}
+
+pub fn PrintMap() void {
+    var cursor = firstFree;
+    while (cursor) |node| {
+        std.log.info("{x}-{x} Free", .{ node.start, node.end - 1 });
+        cursor = node.next;
     }
 }
