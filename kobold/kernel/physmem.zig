@@ -13,6 +13,12 @@ pub const FreeHeader = struct {
     next: ?*FreeHeader = null,
 };
 
+pub const FreeCacheHeader = struct {
+    prev: ?*FreeCacheHeader = null,
+    next: ?*FreeCacheHeader = null,
+    bitmap: std.bit_set.StaticBitSet(128) = std.bit_set.StaticBitSet(128),
+};
+
 var internalFreeListBuf: [8]FreeHeader = [_]FreeHeader{.{}} ** 8;
 
 var firstFree: ?*FreeHeader = null;
