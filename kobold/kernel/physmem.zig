@@ -13,7 +13,7 @@ pub const FreeHeader = struct {
     next: ?*FreeHeader = null,
 };
 
-var internalFreeListBuf: [4]FreeHeader = [_]FreeHeader{.{}} ** 2;
+var internalFreeListBuf: [4]FreeHeader = [_]FreeHeader{.{}} ** 4;
 
 var firstFree: ?*FreeHeader = null;
 
