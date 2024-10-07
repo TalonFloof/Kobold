@@ -13,7 +13,7 @@ pub const FreeHeader = struct {
     next: ?*FreeHeader = null,
 };
 
-var internalFreeListBuf: [4]FreeHeader = [_]FreeHeader{.{}} ** 4;
+var internalFreeListBuf: [2]FreeHeader = [_]FreeHeader{.{}} ** 2;
 
 var firstFree: ?*FreeHeader = null;
 
@@ -64,6 +64,8 @@ pub fn Allocate(size: usize, align_: usize) ?*anyopaque {
                     node.prev = entry;
                     entry.start = region_start;
                     entry.end = newAddr;
+                    if (entry.prev == null)
+                        firstFree = entry;
                 }
                 return @ptrFromInt(newAddr);
             } else {
@@ -95,7 +97,6 @@ pub fn Free(address: usize, size: usize) void {
         const region_start = node.start;
         const region_end = node.end;
         const next = node.next;
-        prev = node.prev;
         if (region_start == end) {
             node.start = address;
             if (node.prev) |prv| {
@@ -127,6 +128,7 @@ pub fn Free(address: usize, size: usize) void {
                 firstFree = entry;
             return;
         }
+        prev = cursor;
         cursor = next;
     }
     var entry = getNewEntry();
