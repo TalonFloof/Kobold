@@ -1,0 +1,27 @@
+name: Makefile CI
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+    - uses: mlugg/setup-zig@v1
+      with:
+        version: 0.13.0
+
+    - name: Build RISC-V 64-bit
+      run: make build_rv64
+
+    - name: Upload RISC-V 64-bit
+      uses: actions/upload-artifact@v3.2.1-node20
+      with:
+        name: rv64-binaries
+        path: kobold/zig-out/bin/*
