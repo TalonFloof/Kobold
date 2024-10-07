@@ -13,7 +13,7 @@ pub const FreeHeader = struct {
     next: ?*FreeHeader = null,
 };
 
-var internalFreeListBuf: [2]FreeHeader = [_]FreeHeader{.{}} ** 2;
+var internalFreeListBuf: [8]FreeHeader = [_]FreeHeader{.{}} ** 8;
 
 var firstFree: ?*FreeHeader = null;
 
@@ -144,7 +144,15 @@ pub fn Free(address: usize, size: usize) void {
 }
 
 pub fn PrintMap() void {
+    const p = Allocate(0x5000,0x1000);
     var cursor = firstFree;
+    while (cursor) |node| {
+        std.log.info("{x}-{x} Free", .{ node.start, node.end - 1 });
+        cursor = node.next;
+    }
+    Free(@intFromPtr(p), 0x5000);
+    cursor = firstFree;
+    std.log.info("TO", .{});
     while (cursor) |node| {
         std.log.info("{x}-{x} Free", .{ node.start, node.end - 1 });
         cursor = node.next;
