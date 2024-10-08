@@ -13,42 +13,85 @@ pub const FreeHeader = struct {
     next: ?*FreeHeader = null,
 };
 
-pub const FreeCacheHeader = struct {
-    prev: ?*FreeCacheHeader = null,
-    next: ?*FreeCacheHeader = null,
-    bitmap: std.bit_set.StaticBitSet(128) = std.bit_set.StaticBitSet(128),
+const FreeCacheList = std.DoublyLinkedList(std.bit_set.StaticBitSet(4096 / @sizeOf(FreeHeader)));
+
+pub const FreeCacheHeader = FreeCacheList.Node;
+
+pub const FreeCache = struct {
+    full: FreeCacheList = .{},
+    partial: FreeCacheList = .{},
+    free: FreeCacheList = .{},
+
+    pub fn GetNewEntry(self: *FreeCache) *FreeHeader {
+        if (self.full.first == null and self.partial.first == null and self.free.first == null) {
+            const header: *FreeCacheHeader = @ptrFromInt(@intFromPtr(&initialCachePage));
+            header.data.setRangeValue(.{ .start = 0, .end = 128 }, true);
+            header.data.unset(0);
+            self.free.prepend(header);
+            std.log.info("Allocator Initialized", .{});
+        }
+        if (self.partial.first) |partialHead| {
+            if (partialHead.data.findFirstSet()) |index| {
+                partialHead.data.unset(index); // Set bit as used
+                if (partialHead.data.findFirstSet() == null) {
+                    // List is now Full
+                    self.partial.remove(partialHead);
+                    self.full.prepend(partialHead);
+                }
+                return @ptrFromInt(@intFromPtr(partialHead) + (index * 32));
+            }
+            unreachable;
+        } else if (self.free.first) |freeHead| {
+            if (freeHead.data.findFirstSet()) |index| {
+                freeHead.data.unset(index);
+                self.free.remove(freeHead);
+                self.partial.prepend(freeHead);
+                return @ptrFromInt(@intFromPtr(freeHead) + (index * 32));
+            }
+            unreachable;
+        } else {
+            const page = Allocate(0x1000, 0x1000);
+            if (page) |p| {
+                const header = @as(*FreeCacheHeader, @alignCast(@ptrCast(p)));
+                header.data.setRangeValue(.{ .start = 0, .end = 128 }, true);
+                header.data.unset(0);
+                if (header.data.findFirstSet()) |index| {
+                    header.data.unset(index);
+                    self.partial.prepend(header);
+                    return @ptrFromInt(@intFromPtr(header) + (index * 32));
+                }
+                unreachable;
+            }
+            @panic("Out of Memory");
+        }
+    }
+
+    pub fn RemoveEntry(self: *FreeCache, entry: *FreeHeader) void {
+        if (entry.prev) |prev| {
+            prev.next = entry.next;
+        } else {
+            firstFree = entry.next;
+        }
+        if (entry.next) |next| {
+            next.prev = entry.prev;
+        }
+        const header: *FreeCacheHeader = @ptrFromInt(hal.AlignDown(usize, @intFromPtr(entry), 4096));
+        if (header.data.count() == 0) { // Full -> Partial
+            self.full.remove(header);
+            self.partial.prepend(header);
+        } else if (header.data.count() <= 2) { // Partial -> Free
+            self.partial.remove(header);
+            self.free.prepend(header);
+        } // Partial - Partial
+        const entryNumber = (@intFromPtr(entry) - @intFromPtr(header)) / 32;
+        header.data.set(entryNumber);
+    }
 };
 
-var internalFreeListBuf: [8]FreeHeader = [_]FreeHeader{.{}} ** 8;
+var initialCachePage: [4096]u8 align(4096) = [_]u8{0} ** 4096;
+var freeCache: FreeCache = .{};
 
 var firstFree: ?*FreeHeader = null;
-
-fn getNewEntry() *FreeHeader {
-    for (0..internalFreeListBuf.len) |i| {
-        if (internalFreeListBuf[i].end == 0) {
-            return &internalFreeListBuf[i];
-        }
-    }
-    return @ptrCast(@alignCast(Allocate(@sizeOf(FreeHeader), 0).?));
-}
-
-fn removeEntry(ptr: *FreeHeader) void {
-    if (ptr.prev) |prev| {
-        prev.next = ptr.next;
-    } else {
-        firstFree = ptr.next;
-    }
-    if (ptr.next) |next| {
-        next.prev = ptr.prev;
-    }
-    for (0..internalFreeListBuf.len) |i| {
-        if (@intFromPtr(ptr) == @intFromPtr(&internalFreeListBuf[i])) {
-            internalFreeListBuf[i].end = 0;
-            return;
-        }
-    }
-    Free(@intFromPtr(ptr), @sizeOf(FreeHeader));
-}
 
 pub fn Allocate(size: usize, align_: usize) ?*anyopaque {
     const newSize = size + align_;
@@ -64,7 +107,7 @@ pub fn Allocate(size: usize, align_: usize) ?*anyopaque {
                 node.start += size + (newAddr - region_start);
                 if (newAddr != region_start) {
                     // insert new entry
-                    var entry = getNewEntry();
+                    var entry = freeCache.GetNewEntry();
                     entry.next = node;
                     entry.prev = node.prev;
                     node.prev = entry;
@@ -86,7 +129,7 @@ pub fn Allocate(size: usize, align_: usize) ?*anyopaque {
                 }
                 return @ptrFromInt(newAddr);
             } else {
-                removeEntry(node);
+                freeCache.RemoveEntry(node);
                 return @ptrFromInt(region_start);
             }
         }
@@ -109,7 +152,7 @@ pub fn Free(address: usize, size: usize) void {
                 const prev_region_end = prv.end;
                 if (prev_region_end == address) {
                     prv.end = region_end;
-                    removeEntry(node);
+                    freeCache.RemoveEntry(node);
                 }
             }
             return;
@@ -119,12 +162,12 @@ pub fn Free(address: usize, size: usize) void {
                 const next_region_start = nxt.start;
                 if (next_region_start == end) {
                     nxt.start = region_start;
-                    removeEntry(node);
+                    freeCache.RemoveEntry(node);
                 }
             }
             return;
         } else if (end < region_start) {
-            var entry = getNewEntry();
+            var entry = freeCache.GetNewEntry();
             entry.next = node;
             entry.prev = node.prev;
             node.prev = entry;
@@ -137,7 +180,7 @@ pub fn Free(address: usize, size: usize) void {
         prev = cursor;
         cursor = next;
     }
-    var entry = getNewEntry();
+    var entry = freeCache.GetNewEntry();
     entry.next = null;
     entry.prev = prev;
     entry.start = address;
@@ -150,7 +193,7 @@ pub fn Free(address: usize, size: usize) void {
 }
 
 pub fn PrintMap() void {
-    const p = Allocate(0x5000,0x1000);
+    const p = Allocate(0x5000, 0x1000);
     var cursor = firstFree;
     while (cursor) |node| {
         std.log.info("{x}-{x} Free", .{ node.start, node.end - 1 });
