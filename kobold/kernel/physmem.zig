@@ -78,7 +78,7 @@ pub const FreeCache = struct {
         if (header.data.count() == 0) { // Full -> Partial
             self.full.remove(header);
             self.partial.prepend(header);
-        } else if (header.data.count() <= 2) { // Partial -> Free
+        } else if (header.data.count() >= 126) { // Partial -> Free
             self.partial.remove(header);
             self.free.prepend(header);
         } // Partial - Partial
