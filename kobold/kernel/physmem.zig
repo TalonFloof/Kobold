@@ -28,7 +28,6 @@ pub const FreeCache = struct {
             header.data.setRangeValue(.{ .start = 0, .end = 128 }, true);
             header.data.unset(0);
             self.free.prepend(header);
-            std.log.info("Allocator Initialized", .{});
         }
         if (self.partial.first) |partialHead| {
             if (partialHead.data.findFirstSet()) |index| {
@@ -193,17 +192,10 @@ pub fn Free(address: usize, size: usize) void {
 }
 
 pub fn PrintMap() void {
-    const p = Allocate(0x5000, 0x1000);
     var cursor = firstFree;
     while (cursor) |node| {
         std.log.info("{x}-{x} Free", .{ node.start, node.end - 1 });
         cursor = node.next;
     }
-    Free(@intFromPtr(p), 0x5000);
-    cursor = firstFree;
-    std.log.info("TO", .{});
-    while (cursor) |node| {
-        std.log.info("{x}-{x} Free", .{ node.start, node.end - 1 });
-        cursor = node.next;
-    }
+    std.log.info("{}", .{freeCache});
 }
