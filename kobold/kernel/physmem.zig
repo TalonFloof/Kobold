@@ -30,6 +30,19 @@ pub const FreeCache = struct {
             self.free.prepend(header);
         }
         if (self.partial.first) |partialHead| {
+            if(self.free.first == null && partialHead.next == null && partialHead.data.count() <= 2) {
+                // Preform Best-Case Allocation
+                const page = Allocate(0x1000, 0x1000);
+                if (page) |p| {
+                    const header = @as(*FreeCacheHeader, @alignCast(@ptrCast(p)));
+                    header.data.setRangeValue(.{ .start = 0, .end = 128 }, true);
+                    header.data.unset(0);
+                    self.free.prepend(header);
+                    std.log.debug("Best-Case Cache Allocation Preformed\n", .{});
+                } else {
+                    std.log.warn("Best-Case Cache Allocation Failed!\n", .{});
+                }
+            }
             if (partialHead.data.findFirstSet()) |index| {
                 partialHead.data.unset(index); // Set bit as used
                 if (partialHead.data.findFirstSet() == null) {
@@ -49,6 +62,7 @@ pub const FreeCache = struct {
             }
             unreachable;
         } else {
+            std.log.warn("Worst-case cache allocation was preformed!", .{});
             const page = Allocate(0x1000, 0x1000);
             if (page) |p| {
                 const header = @as(*FreeCacheHeader, @alignCast(@ptrCast(p)));
