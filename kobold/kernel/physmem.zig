@@ -30,7 +30,7 @@ pub const FreeCache = struct {
             self.free.prepend(header);
         }
         if (self.partial.first) |partialHead| {
-            if(self.free.first == null && partialHead.next == null && partialHead.data.count() <= 2) {
+            if (self.free.first == null and partialHead.next == null and partialHead.data.count() <= 2) {
                 // Preform Best-Case Allocation
                 const page = Allocate(0x1000, 0x1000);
                 if (page) |p| {
@@ -40,7 +40,7 @@ pub const FreeCache = struct {
                     self.free.prepend(header);
                     std.log.debug("Best-Case Cache Allocation Preformed\n", .{});
                 } else {
-                    std.log.warn("Best-Case Cache Allocation Failed!\n", .{});
+                    @panic("Best-Case Cache Allocation Failed!");
                 }
             }
             if (partialHead.data.findFirstSet()) |index| {
