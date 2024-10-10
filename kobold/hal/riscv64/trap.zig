@@ -1,5 +1,5 @@
 comptime {
-    asm(
+    asm (
         \\.global _intHandler
         \\.align 4
         \\_intHandler:
@@ -105,3 +105,5 @@ comptime {
         \\  nop
     );
 }
+
+pub inline fn stub() void {}

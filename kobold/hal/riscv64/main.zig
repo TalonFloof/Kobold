@@ -1,6 +1,7 @@
 const std = @import("std");
 const hal = @import("root").hal;
 const sbi = @import("sbi.zig");
+const trap = @import("trap.zig");
 
 export var initStack = [_]u8{0} ** 8192;
 
@@ -28,6 +29,7 @@ pub fn ArchInit(stackTop: usize, dtb: *allowzero anyopaque) void {
     }
     std.log.debug("Kobold Kernel\n", .{});
     hal.dtb_parser.parse_dtb(dtb) catch @panic("DTB Parse Failed!");
+    trap.stub();
 }
 
 pub fn ArchWriteString(_: @TypeOf(.{}), string: []const u8) error{}!usize {
