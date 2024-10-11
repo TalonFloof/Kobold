@@ -2,6 +2,7 @@ const std = @import("std");
 pub const hal = @import("hal");
 pub const physmem = @import("physmem.zig");
 pub const Spinlock = @import("spinlock.zig").Spinlock;
+pub const personality = @import("personality.zig");
 
 pub const kmain_log = std.log.scoped(.KernelMain);
 
