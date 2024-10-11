@@ -3,13 +3,14 @@ pub const hal = @import("hal");
 pub const physmem = @import("physmem.zig");
 pub const Spinlock = @import("spinlock.zig").Spinlock;
 
+pub const kmain_log = std.log.scoped(.KernelMain);
+
 pub fn doLog(
     comptime level: std.log.Level,
     comptime scope: @TypeOf(.EnumLiteral),
     comptime format: []const u8,
     args: anytype,
 ) void {
-    _ = scope;
     switch (level) {
         .info => {
             _ = try hal.writer.write("\x1b[36m");
@@ -25,7 +26,8 @@ pub fn doLog(
     if (level == .debug) {
         try hal.writer.print(format, args);
     } else {
-        try hal.writer.print(level.asText() ++ "\x1b[0m | " ++ format ++ "\n", args);
+        try hal.writer.print(level.asText() ++ "\x1b[0m\x1b[30m {s}", .{@tagName(scope)});
+        try hal.writer.print("\x1b[0m " ++ format ++ "\n", args);
     }
 }
 
@@ -36,7 +38,7 @@ pub const std_options: std.Options = .{
 pub fn panic(msg: []const u8, stacktrace: ?*std.builtin.StackTrace, wat: ?usize) noreturn {
     _ = wat;
     _ = stacktrace;
-    std.log.err("panic (hart 0x0) {s}", .{msg});
+    kmain_log.err("panic (hart 0x0) {s}", .{msg});
     while (true) {}
 }
 

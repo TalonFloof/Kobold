@@ -96,7 +96,7 @@ pub fn build(b: *std.Build) void {
         .root_source_file = b.path("wren/main.zig"),
         .target = resolvedTarget,
         .optimize = optimize,
-        .strip = false,
+        .strip = true,
     });
     wrenMod.addCSourceFiles(.{ .files = &.{
         "wren/wren_compiler.c",

@@ -5,6 +5,8 @@ const hal = @import("root").hal;
 
 var freeMemory: [64]physmem.PhysicalRange = [_]physmem.PhysicalRange{.{ .start = 0, .end = 0 }} ** 64;
 
+pub const dtb_log = std.log.scoped(.HAL_DeviceTreeParser);
+
 extern const __KERNEL_BEGIN__: *allowzero anyopaque;
 extern const __KERNEL_END__: *allowzero anyopaque;
 
@@ -151,7 +153,7 @@ pub fn parse_dtb(v: *anyopaque) !void {
     reserve(@intFromPtr(v), @intFromPtr(v) + try dtb.totalSize(v));
     for (0..64) |i| {
         if (freeMemory[i].end == 0) continue;
-        std.log.info("mem [{x}-{x}] Usable", .{ freeMemory[i].start, freeMemory[i].end - 1 });
+        dtb_log.info("mem [{x}-{x}] Usable", .{ freeMemory[i].start, freeMemory[i].end - 1 });
         physmem.Free(freeMemory[i].start, freeMemory[i].end - freeMemory[i].start);
     }
 }

@@ -13,6 +13,8 @@ pub const FreeHeader = struct {
     next: ?*FreeHeader = null,
 };
 
+pub const physmem_log = std.log.scoped(.FreeListAllocator);
+
 const FreeCacheList = std.DoublyLinkedList(std.bit_set.StaticBitSet(4096 / @sizeOf(FreeHeader)));
 
 pub const FreeCacheHeader = FreeCacheList.Node;
@@ -38,7 +40,7 @@ pub const FreeCache = struct {
                     header.data.setRangeValue(.{ .start = 0, .end = 128 }, true);
                     header.data.unset(0);
                     self.free.prepend(header);
-                    std.log.debug("Best-Case Cache Allocation Preformed\n", .{});
+                    physmem_log.debug("Best-Case Cache Allocation Preformed\n", .{});
                 } else {
                     @panic("Best-Case Cache Allocation Failed!");
                 }
@@ -62,7 +64,7 @@ pub const FreeCache = struct {
             }
             unreachable;
         } else {
-            std.log.warn("Worst-case cache allocation was preformed!", .{});
+            physmem_log.warn("Worst-case cache allocation was preformed!", .{});
             const page = Allocate(0x1000, 0x1000);
             if (page) |p| {
                 const header = @as(*FreeCacheHeader, @alignCast(@ptrCast(p)));
@@ -208,8 +210,8 @@ pub fn Free(address: usize, size: usize) void {
 pub fn PrintMap() void {
     var cursor = firstFree;
     while (cursor) |node| {
-        std.log.info("{x}-{x} Free", .{ node.start, node.end - 1 });
+        physmem_log.info("{x}-{x} Free", .{ node.start, node.end - 1 });
         cursor = node.next;
     }
-    std.log.info("{}", .{freeCache});
+    physmem_log.info("{}", .{freeCache});
 }

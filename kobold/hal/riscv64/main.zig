@@ -9,6 +9,8 @@ var useLegacyDebugCon: bool = true;
 
 pub const Writer = std.io.Writer(@TypeOf(.{}), error{}, ArchWriteString);
 
+pub const arch_log = std.log.scoped(.HAL_RISCV64);
+
 comptime {
     asm (
         \\.section .text.boot
@@ -25,7 +27,7 @@ pub fn ArchInit(stackTop: usize, dtb: *allowzero anyopaque) void {
     _ = stackTop;
     useLegacyDebugCon = !sbi.dbcn.available();
     if (useLegacyDebugCon) {
-        std.log.warn("Using Legacy SBI Console!", .{});
+        arch_log.warn("Using Legacy SBI Console!", .{});
     }
     std.log.debug("Kobold Kernel\n", .{});
     hal.dtb_parser.parse_dtb(dtb) catch @panic("DTB Parse Failed!");

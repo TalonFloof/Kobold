@@ -107,3 +107,5 @@ comptime {
 }
 
 pub inline fn stub() void {}
+
+pub export fn ArchTrap() callconv(.C) void {}
