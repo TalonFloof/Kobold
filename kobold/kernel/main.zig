@@ -40,6 +40,15 @@ pub fn panic(msg: []const u8, stacktrace: ?*std.builtin.StackTrace, wat: ?usize)
     _ = wat;
     _ = stacktrace;
     kmain_log.err("panic (hart 0x0) {s}", .{msg});
+    kmain_log.debug("Stack Backtrace\n", .{});
+    const frameStart = @returnAddress();
+    var it = std.debug.StackIterator.init(frameStart, null);
+    while (it.next()) |frame| {
+        if (frame == 0) {
+            break;
+        }
+        kmain_log.debug("  \x1b[30m0x{x:0>16}\x1b[0m\n", .{frame});
+    }
     while (true) {}
 }
 
