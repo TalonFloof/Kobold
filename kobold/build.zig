@@ -40,6 +40,9 @@ pub fn queryFor(board: Board) std.Target.Query {
         .qemu_riscv64 => return .{
             .cpu_arch = .riscv64,
         },
+        .pc_x86_64 => return .{
+            .cpu_arch = .x86_64,
+        },
         else => @panic("Unsupported Board"),
     }
 }
@@ -56,10 +59,23 @@ pub fn addInstallObjectFile(
 
 pub fn build(b: *std.Build) void {
     const board = getBoard(b) catch @panic("Unknown Board!");
+    var modTargetQuery = queryFor(board);
     var targetQuery = queryFor(board);
+    //if (getArch(board) == .x86_64) {
+    //    const Features = std.Target.x86.Feature;
+    //    targetQuery.cpu_features_sub.addFeature(@intFromEnum(Features.mmx));
+    //    targetQuery.cpu_features_sub.addFeature(@intFromEnum(Features.sse));
+    //    targetQuery.cpu_features_sub.addFeature(@intFromEnum(Features.sse2));
+    //    targetQuery.cpu_features_sub.addFeature(@intFromEnum(Features.avx));
+    //    targetQuery.cpu_features_sub.addFeature(@intFromEnum(Features.avx2));
+    //    targetQuery.cpu_features_add.addFeature(@intFromEnum(Features.soft_float));
+    //}
+    modTargetQuery.os_tag = .freestanding;
+    modTargetQuery.abi = .none;
     targetQuery.os_tag = .freestanding;
     targetQuery.abi = .none;
     const resolvedTarget = b.resolveTargetQuery(targetQuery);
+    const resolvedModTarget = b.resolveTargetQuery(modTargetQuery);
     const optimize = b.standardOptimizeOption(.{});
 
     const kernel = b.addExecutable(.{
@@ -94,8 +110,9 @@ pub fn build(b: *std.Build) void {
     const wrenMod = b.addObject(.{
         .name = "wren",
         .root_source_file = b.path("wren/main.zig"),
-        .target = resolvedTarget,
+        .target = resolvedModTarget,
         .optimize = optimize,
+        .code_model = .medium,
         .strip = true,
     });
     wrenMod.addCSourceFiles(.{ .files = &.{
@@ -106,6 +123,7 @@ pub fn build(b: *std.Build) void {
         "wren/wren_value.c",
         "wren/wren_vm.c",
         "wren/wren_opt_meta.c",
+        "wren/wren_debug.c",
         "wren/vmstdlib_c.c",
         "wren/tinyprintf.c",
     } });

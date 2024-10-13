@@ -2,27 +2,38 @@ const std = @import("std");
 
 pub export var errno: c_int = 0;
 
+pub export fn realloc(old: ?*anyopaque, size: isize) callconv(.C) ?*anyopaque {
+    _ = old;
+    _ = size;
+    return null;
+}
+
+pub export fn free(ptr: *anyopaque) callconv(.C) void {
+    _ = ptr;
+}
+
 // memory
-pub export fn memcpy(dest: *anyopaque, src: *anyopaque, n: isize) callconv(.C) *void {
-    std.mem.copyForwards(u8, @as(*u8, @alignCast(dest))[0..n], @as(*u8, @alignCast(src))[0..n]);
-    return @as(*void, @ptrCast(dest));
+pub export fn memcpy(dest: *anyopaque, src: *anyopaque, n: isize) callconv(.C) *anyopaque {
+    std.mem.copyForwards(u8, @as([*]u8, @ptrCast(@alignCast(dest)))[0..@bitCast(n)], @as([*]u8, @ptrCast(@alignCast(src)))[0..@bitCast(n)]);
+    return dest;
 }
 
-pub export fn memset(dest: *anyopaque, c: u8, n: isize) callconv(.C) *void {
-    @memset(@as(*u8, @alignCast(dest))[0..n], c);
+pub export fn memset(dest: *anyopaque, c: u8, n: isize) callconv(.C) *anyopaque {
+    @memset(@as([*]u8, @ptrCast(@alignCast(dest)))[0..@bitCast(n)], c);
+    return dest;
 }
 
-pub export fn memmove(dest: *anyopaque, src: *anyopaque, n: isize) callconv(.C) *void {
-    if (dest <= src) {
-        std.mem.copyForwards(u8, @as(*u8, @alignCast(dest))[0..n], @as(*u8, @alignCast(src))[0..n]);
+pub export fn memmove(dest: *anyopaque, src: *anyopaque, n: isize) callconv(.C) *anyopaque {
+    if (@intFromPtr(dest) <= @intFromPtr(src)) {
+        std.mem.copyForwards(u8, @as([*]u8, @ptrCast(@alignCast(dest)))[0..@bitCast(n)], @as([*]u8, @ptrCast(@alignCast(src)))[0..@bitCast(n)]);
     } else {
-        std.mem.copyBackwards(u8, @as(*u8, @alignCast(dest))[0..n], @as(*u8, @alignCast(src))[0..n]);
+        std.mem.copyBackwards(u8, @as([*]u8, @ptrCast(@alignCast(dest)))[0..@bitCast(n)], @as([*]u8, @ptrCast(@alignCast(src)))[0..@bitCast(n)]);
     }
-    return @as(*void, @ptrCast(dest));
+    return dest;
 }
 
 pub export fn memcmp(s1: *anyopaque, s2: *anyopaque, n: isize) callconv(.C) c_int {
-    switch (std.mem.order(@as(*u8, @alignCast(s1))[0..n], @as(*u8, @alignCast(s2))[0..n])) {
+    switch (std.mem.order(u8, @as([*]u8, @ptrCast(@alignCast(s1)))[0..@bitCast(n)], @as([*]u8, @ptrCast(@alignCast(s2)))[0..@bitCast(n)])) {
         .lt => return -1,
         .gt => return 1,
         .eq => return 0,
@@ -31,11 +42,11 @@ pub export fn memcmp(s1: *anyopaque, s2: *anyopaque, n: isize) callconv(.C) c_in
 }
 // string
 pub export fn strlen(s: *anyopaque) callconv(.C) usize {
-    return std.mem.len(s);
+    return std.mem.len(@as([*c]u8, @ptrCast(s)));
 }
 // math
 pub export fn abs(x: c_int) callconv(.C) c_int {
-    return @abs(x);
+    return @bitCast(@abs(x));
 }
 pub export fn fabs(x: f64) callconv(.C) f64 {
     return @abs(x);
@@ -71,7 +82,7 @@ pub export fn pow(x: f64, y: f64) callconv(.C) f64 {
     return std.math.pow(f64, x, y);
 }
 pub export fn fmod(x: f64, y: f64) callconv(.C) f64 {
-    return std.math.mod(f64, x, y);
+    return std.math.mod(f64, x, y) catch @panic("wren fmod failure");
 }
 pub export fn modf(x: f64, y: *allowzero f64) callconv(.C) f64 {
     const r = std.math.modf(x);

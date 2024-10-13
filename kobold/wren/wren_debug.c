@@ -42,7 +42,7 @@ void wrenDebugPrintStackTrace(WrenVM* vm)
   }
 }
 
-static void dumpObject(Obj* obj)
+/*static void dumpObject(Obj* obj)
 {
   switch (obj->type)
   {
@@ -386,3 +386,4 @@ void wrenDumpStack(ObjFiber* fiber)
   }
   printf("\n");
 }
+*/

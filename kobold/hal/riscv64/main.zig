@@ -7,9 +7,7 @@ export var initStack = [_]u8{0} ** 8192;
 
 var useLegacyDebugCon: bool = true;
 
-pub const Writer = std.io.Writer(@TypeOf(.{}), error{}, ArchWriteString);
-
-pub const arch_log = std.log.scoped(.HAL_RISCV64);
+const arch_log = std.log.scoped(.HAL_RISCV64);
 
 comptime {
     asm (
@@ -23,18 +21,17 @@ comptime {
     );
 }
 
-pub fn ArchInit(stackTop: usize, dtb: *allowzero anyopaque) void {
+fn ArchInit(stackTop: usize, dtb: *allowzero anyopaque) void {
     _ = stackTop;
     useLegacyDebugCon = !sbi.dbcn.available();
     if (useLegacyDebugCon) {
         arch_log.warn("Using Legacy SBI Console!", .{});
     }
-    std.log.debug("Kobold Kernel\n", .{});
     hal.dtb_parser.parse_dtb(dtb) catch @panic("DTB Parse Failed!");
     trap.stub();
 }
 
-pub fn ArchWriteString(_: @TypeOf(.{}), string: []const u8) error{}!usize {
+fn ArchWriteString(_: @TypeOf(.{}), string: []const u8) error{}!usize {
     if (!useLegacyDebugCon) {
         var i: isize = 0;
         while (i < string.len) {
@@ -49,3 +46,8 @@ pub fn ArchWriteString(_: @TypeOf(.{}), string: []const u8) error{}!usize {
     }
     return string.len;
 }
+
+pub const Interface: hal.ArchInterface = .{
+    .init = ArchInit,
+    .write = ArchWriteString,
+};

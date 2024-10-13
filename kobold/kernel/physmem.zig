@@ -1,6 +1,8 @@
 const std = @import("std");
 const hal = @import("root").hal;
 
+// TODO: Add support for 64-bit paged systems
+
 pub const PhysicalRange = struct {
     start: usize = 0,
     end: usize = 0,
