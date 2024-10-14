@@ -1,5 +1,6 @@
 const std = @import("std");
 const hal = @import("root").hal;
+const Spinlock = @import("root").Spinlock;
 
 // TODO: Add support for 64-bit paged systems
 
@@ -20,6 +21,8 @@ pub const physmem_log = std.log.scoped(.FreeListAllocator);
 const FreeCacheList = std.DoublyLinkedList(std.bit_set.StaticBitSet(4096 / @sizeOf(FreeHeader)));
 
 pub const FreeCacheHeader = FreeCacheList.Node;
+
+var lock: Spinlock = .unaquired;
 
 pub const FreeCache = struct {
     full: FreeCacheList = .{},
@@ -111,6 +114,7 @@ var freeCache: FreeCache = .{};
 var firstFree: ?*FreeHeader = null;
 
 pub fn Allocate(size: usize, align_: usize) ?*anyopaque {
+    lock.Acquire();
     const newSize = size + align_;
 
     var cursor = firstFree;
@@ -133,9 +137,11 @@ pub fn Allocate(size: usize, align_: usize) ?*anyopaque {
                     if (entry.prev == null)
                         firstFree = entry;
                 }
+                lock.Release();
                 return @ptrFromInt(newAddr);
             } else {
                 node.start += size;
+                lock.Release();
                 return @ptrFromInt(region_start);
             }
         } else if (region_size == newSize) {
@@ -144,18 +150,22 @@ pub fn Allocate(size: usize, align_: usize) ?*anyopaque {
                 if (newAddr != region_start) {
                     node.end = newAddr;
                 }
+                lock.Release();
                 return @ptrFromInt(newAddr);
             } else {
                 freeCache.RemoveEntry(node);
+                lock.Release();
                 return @ptrFromInt(region_start);
             }
         }
         cursor = next;
     }
+    lock.Release();
     return null;
 }
 
 pub fn Free(address: usize, size: usize) void {
+    lock.Acquire();
     const end = address + size;
     var cursor = firstFree;
     var prev: ?*FreeHeader = null;
@@ -172,6 +182,7 @@ pub fn Free(address: usize, size: usize) void {
                     freeCache.RemoveEntry(node);
                 }
             }
+            lock.Release();
             return;
         } else if (region_end == address) {
             node.end = end;
@@ -182,6 +193,7 @@ pub fn Free(address: usize, size: usize) void {
                     freeCache.RemoveEntry(node);
                 }
             }
+            lock.Release();
             return;
         } else if (end < region_start) {
             var entry = freeCache.GetNewEntry();
@@ -192,6 +204,7 @@ pub fn Free(address: usize, size: usize) void {
             entry.end = end;
             if (prev == null)
                 firstFree = entry;
+            lock.Release();
             return;
         }
         prev = cursor;
@@ -207,6 +220,7 @@ pub fn Free(address: usize, size: usize) void {
     } else {
         prev.?.next = entry;
     }
+    lock.Release();
 }
 
 pub fn PrintMap() void {

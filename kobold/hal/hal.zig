@@ -2,15 +2,16 @@ const std = @import("std");
 const builtin = @import("builtin");
 pub const dtb_parser = @import("dtb_parser.zig");
 const root = @import("root");
-
-pub const Writer = std.io.Writer(@TypeOf(.{}), error{}, arch.write);
-pub const writer = Writer{ .context = .{} };
-
-pub const arch: ArchInterface = (switch (builtin.cpu.arch) {
+pub const archData = (switch (builtin.cpu.arch) {
     .riscv64 => @import("riscv64/main.zig"),
     .x86_64 => @import("x86_64/main.zig"),
     else => @panic("Unsupported Arch!"),
-}).Interface;
+});
+pub const arch: ArchInterface = archData.Interface;
+pub const HartInfo = @import("hart.zig").HartInfo;
+
+pub const Writer = std.io.Writer(@TypeOf(.{}), error{}, arch.write);
+pub const writer = Writer{ .context = .{} };
 
 // #define ALIGN_UP(s, a)      (((s) + ((a) - 1)) & ~((a) - 1))
 //#define ALIGN_DOWN(s, a)    ((s) & ~((a) - 1))
@@ -37,4 +38,5 @@ pub fn stub() void {}
 pub const ArchInterface = struct {
     init: fn (stackTop: usize, dtb: *allowzero anyopaque) void,
     write: fn (_: @TypeOf(.{}), string: []const u8) error{}!usize,
+    getHart: fn () *HartInfo,
 };

@@ -61,15 +61,15 @@ pub fn build(b: *std.Build) void {
     const board = getBoard(b) catch @panic("Unknown Board!");
     var modTargetQuery = queryFor(board);
     var targetQuery = queryFor(board);
-    //if (getArch(board) == .x86_64) {
-    //    const Features = std.Target.x86.Feature;
-    //    targetQuery.cpu_features_sub.addFeature(@intFromEnum(Features.mmx));
-    //    targetQuery.cpu_features_sub.addFeature(@intFromEnum(Features.sse));
-    //    targetQuery.cpu_features_sub.addFeature(@intFromEnum(Features.sse2));
-    //    targetQuery.cpu_features_sub.addFeature(@intFromEnum(Features.avx));
-    //    targetQuery.cpu_features_sub.addFeature(@intFromEnum(Features.avx2));
-    //    targetQuery.cpu_features_add.addFeature(@intFromEnum(Features.soft_float));
-    //}
+    if (getArch(board) == .x86_64) {
+        const Features = std.Target.x86.Feature;
+        targetQuery.cpu_features_sub.addFeature(@intFromEnum(Features.mmx));
+        targetQuery.cpu_features_sub.addFeature(@intFromEnum(Features.sse));
+        targetQuery.cpu_features_sub.addFeature(@intFromEnum(Features.sse2));
+        targetQuery.cpu_features_sub.addFeature(@intFromEnum(Features.avx));
+        targetQuery.cpu_features_sub.addFeature(@intFromEnum(Features.avx2));
+        targetQuery.cpu_features_add.addFeature(@intFromEnum(Features.soft_float));
+    }
     modTargetQuery.os_tag = .freestanding;
     modTargetQuery.abi = .none;
     targetQuery.os_tag = .freestanding;
@@ -82,7 +82,7 @@ pub fn build(b: *std.Build) void {
         .name = "kernel",
         .root_source_file = b.path("kernel/main.zig"),
         .optimize = optimize,
-        .target = resolvedTarget,
+        .target = resolvedModTarget,
         .linkage = .static,
         .code_model = .large,
         .strip = false,
@@ -127,6 +127,8 @@ pub fn build(b: *std.Build) void {
         "wren/vmstdlib_c.c",
         "wren/tinyprintf.c",
     } });
+    kernel.want_lto = false;
+    kernel.root_module.omit_frame_pointer = false;
     wrenMod.entry = std.Build.Step.Compile.Entry.disabled;
     kernel.entry = std.Build.Step.Compile.Entry.disabled;
     kernel.root_module.addImport("dtb", dtbMod);

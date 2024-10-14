@@ -17,7 +17,7 @@ SECTIONS
 
     _TEXT_START_ = .;
     .text : {
-        *(.text .text.*)
+        *(.text .text.* .ltext .ltext.*)
     } : text
 
     . += CONSTANT(MAXPAGESIZE);
@@ -25,7 +25,7 @@ SECTIONS
 
     _RODATA_START_ = .;
     .rodata : {
-        *(.rodata .rodata.*)
+        *(.rodata .rodata.* .lrodata .lrodata.*)
     } : rodata
 
     . += CONSTANT(MAXPAGESIZE);
@@ -33,14 +33,14 @@ SECTIONS
 
     _DATA_START_ = .;
     .data : {
-        *(.data .data.*)
+        *(.data .data.* .ldata .ldata.*)
     } : data
     _DATA_END_ = .;
 
     _BSS_START_ = .;
     .bss : {
         *(COMMON)
-        *(.bss .bss.*)
+        *(.bss .bss.* .lbss .lbss.*)
     } : data
     _BSS_END_ = .;
 }
