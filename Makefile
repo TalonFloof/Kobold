@@ -24,3 +24,7 @@ run_pc64: iso
 
 run_rv64: build_rv64
 	qemu-system-riscv64 -machine virt -m 128M -serial stdio -device ramfb -device virtio-keyboard-device -device virtio-mouse-device -kernel kobold/zig-out/bin/kernel
+
+limine-zig:
+	git clone https://github.com/limine-bootloader/limine-zig.git --depth=1
+	rm -f -r limine-zig/.git

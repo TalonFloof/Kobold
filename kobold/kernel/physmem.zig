@@ -1,6 +1,6 @@
 const std = @import("std");
 const hal = @import("root").hal;
-const Spinlock = @import("root").Spinlock;
+const Spinlock = @import("spinlock.zig").Spinlock;
 
 // TODO: Add support for 64-bit paged systems
 
@@ -39,7 +39,7 @@ pub const FreeCache = struct {
         if (self.partial.first) |partialHead| {
             if (self.free.first == null and partialHead.next == null and partialHead.data.count() <= 2) {
                 // Preform Best-Case Allocation
-                const page = Allocate(0x1000, 0x1000);
+                const page = allocate(0x1000, 0x1000);
                 if (page) |p| {
                     const header = @as(*FreeCacheHeader, @alignCast(@ptrCast(p)));
                     header.data.setRangeValue(.{ .start = 0, .end = 128 }, true);
@@ -70,7 +70,7 @@ pub const FreeCache = struct {
             unreachable;
         } else {
             physmem_log.warn("Worst-case cache allocation was preformed!", .{});
-            const page = Allocate(0x1000, 0x1000);
+            const page = allocate(0x1000, 0x1000);
             if (page) |p| {
                 const header = @as(*FreeCacheHeader, @alignCast(@ptrCast(p)));
                 header.data.setRangeValue(.{ .start = 0, .end = 128 }, true);
@@ -113,8 +113,7 @@ var freeCache: FreeCache = .{};
 
 var firstFree: ?*FreeHeader = null;
 
-pub fn Allocate(size: usize, align_: usize) ?*anyopaque {
-    lock.Acquire();
+fn allocate(size: usize, align_: usize) ?*anyopaque {
     const newSize = size + align_;
 
     var cursor = firstFree;
@@ -137,11 +136,9 @@ pub fn Allocate(size: usize, align_: usize) ?*anyopaque {
                     if (entry.prev == null)
                         firstFree = entry;
                 }
-                lock.Release();
                 return @ptrFromInt(newAddr);
             } else {
                 node.start += size;
-                lock.Release();
                 return @ptrFromInt(region_start);
             }
         } else if (region_size == newSize) {
@@ -150,22 +147,26 @@ pub fn Allocate(size: usize, align_: usize) ?*anyopaque {
                 if (newAddr != region_start) {
                     node.end = newAddr;
                 }
-                lock.Release();
                 return @ptrFromInt(newAddr);
             } else {
                 freeCache.RemoveEntry(node);
-                lock.Release();
                 return @ptrFromInt(region_start);
             }
         }
         cursor = next;
     }
-    lock.Release();
     return null;
 }
 
+pub fn Allocate(size: usize, align_: usize) ?*anyopaque {
+    lock.acquire();
+    const a = allocate(size, align_);
+    lock.release();
+    return a;
+}
+
 pub fn Free(address: usize, size: usize) void {
-    lock.Acquire();
+    lock.acquire();
     const end = address + size;
     var cursor = firstFree;
     var prev: ?*FreeHeader = null;
@@ -182,7 +183,7 @@ pub fn Free(address: usize, size: usize) void {
                     freeCache.RemoveEntry(node);
                 }
             }
-            lock.Release();
+            lock.release();
             return;
         } else if (region_end == address) {
             node.end = end;
@@ -193,7 +194,7 @@ pub fn Free(address: usize, size: usize) void {
                     freeCache.RemoveEntry(node);
                 }
             }
-            lock.Release();
+            lock.release();
             return;
         } else if (end < region_start) {
             var entry = freeCache.GetNewEntry();
@@ -204,7 +205,7 @@ pub fn Free(address: usize, size: usize) void {
             entry.end = end;
             if (prev == null)
                 firstFree = entry;
-            lock.Release();
+            lock.release();
             return;
         }
         prev = cursor;
@@ -220,7 +221,7 @@ pub fn Free(address: usize, size: usize) void {
     } else {
         prev.?.next = entry;
     }
-    lock.Release();
+    lock.release();
 }
 
 pub fn PrintMap() void {

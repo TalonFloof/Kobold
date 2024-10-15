@@ -16,6 +16,7 @@ pub const HartInfo = struct {
 
             tss: TSS = TSS{},
         },
+        .riscv32, .riscv64 => struct {},
         else => |v| @compileError("Unsupported Architecture " ++ v),
     };
 
@@ -25,4 +26,17 @@ pub const HartInfo = struct {
     activeSyscallStack: usize = 0,
     trapStack: usize = 0,
     archData: ArchData = ArchData{},
+
+    comptime {
+        if (@offsetOf(@This(), "tempReg1") != 0)
+            @panic("HartInfo.tempReg1 offset invalid!");
+        if (@offsetOf(@This(), "tempReg2") != @sizeOf(usize))
+            @panic("HartInfo.tempReg2 offset invalid!");
+        if (@offsetOf(@This(), "activeContextStack") != @sizeOf(usize) * 2)
+            @panic("HartInfo.activeContextStack offset invalid!");
+        if (@offsetOf(@This(), "activeSyscallStack") != @sizeOf(usize) * 3)
+            @panic("HartInfo.activeSyscallStack offset invalid!");
+        if (@offsetOf(@This(), "trapStack") != @sizeOf(usize) * 4)
+            @panic("HartInfo.trapStack offset invalid!");
+    }
 };

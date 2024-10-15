@@ -9,6 +9,8 @@ var useLegacyDebugCon: bool = true;
 
 const arch_log = std.log.scoped(.HAL_RISCV64);
 
+var zeroHart: hal.HartInfo = .{};
+
 comptime {
     asm (
         \\.section .text.boot
@@ -23,6 +25,10 @@ comptime {
 
 fn ArchInit(stackTop: usize, dtb: *allowzero anyopaque) void {
     _ = stackTop;
+    asm volatile ("csrw sscratch, %[arg1]"
+        :
+        : [arg1] "r" (&zeroHart),
+    );
     useLegacyDebugCon = !sbi.dbcn.available();
     if (useLegacyDebugCon) {
         arch_log.warn("Using Legacy SBI Console!", .{});
@@ -47,7 +53,14 @@ fn ArchWriteString(_: @TypeOf(.{}), string: []const u8) error{}!usize {
     return string.len;
 }
 
+fn ArchGetHart() *hal.HartInfo {
+    return @as(*hal.HartInfo, @ptrFromInt(asm volatile ("csrr %[ret], sscratch"
+        : [ret] "=r" (-> u64),
+    )));
+}
+
 pub const Interface: hal.ArchInterface = .{
     .init = ArchInit,
     .write = ArchWriteString,
+    .getHart = ArchGetHart,
 };
