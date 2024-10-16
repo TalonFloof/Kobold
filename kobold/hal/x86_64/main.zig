@@ -2,6 +2,7 @@ const std = @import("std");
 const hal = @import("root").hal;
 const io = @import("io.zig");
 const gdt = @import("gdt.zig");
+const mem = @import("mem.zig");
 
 pub export fn _start() callconv(.Naked) noreturn {
     asm volatile (
@@ -59,6 +60,7 @@ fn ArchInit(stackTop: usize, limine_header: *allowzero anyopaque) void {
     wrmsr(0xC0000102, @intFromPtr(&zeroHart));
     zeroHart.archData.tss.rsp[0] = stackTop;
     gdt.initialize();
+    mem.init();
 }
 
 fn ArchWriteString(_: @TypeOf(.{}), string: []const u8) error{}!usize {

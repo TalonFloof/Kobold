@@ -33,8 +33,6 @@ pub export fn HALInitialize(stackTop: usize, dtb: *allowzero anyopaque) callconv
     @panic("No Command");
 }
 
-pub fn stub() void {}
-
 pub const ArchInterface = struct {
     init: fn (stackTop: usize, dtb: *allowzero anyopaque) void,
     write: fn (_: @TypeOf(.{}), string: []const u8) error{}!usize,

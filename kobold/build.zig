@@ -58,7 +58,7 @@ pub fn addInstallObjectFile(
 }
 
 pub fn build(b: *std.Build) void {
-    const board = getBoard(b) catch @panic("Unknown Board!");
+    const board = getBoard(b) catch .pc_x86_64;
     var modTargetQuery = queryFor(board);
     var targetQuery = queryFor(board);
     if (getArch(board) == .x86_64) {
@@ -90,6 +90,15 @@ pub fn build(b: *std.Build) void {
     if (getArch(board) == .riscv64) {
         kernel.root_module.code_model = .medium;
     }
+
+    const limineMod = b.addModule("limine", .{
+        .root_source_file = b.path("../limine-zig/limine.zig"),
+        .imports = &.{},
+        .target = resolvedTarget,
+        .optimize = optimize,
+        .red_zone = false,
+        .strip = false,
+    });
     const dtbMod = b.addModule("dtb", .{
         .root_source_file = b.path("dtb/dtb.zig"),
         .imports = &.{},
@@ -100,7 +109,7 @@ pub fn build(b: *std.Build) void {
     });
     const halMod = b.addModule("hal", .{
         .root_source_file = b.path("hal/hal.zig"),
-        .imports = &.{.{ .name = "dtb", .module = dtbMod }},
+        .imports = &.{ .{ .name = "dtb", .module = dtbMod }, .{ .name = "limine", .module = limineMod } },
         .target = resolvedTarget,
         .optimize = optimize,
         .red_zone = false,

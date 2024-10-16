@@ -53,6 +53,5 @@ pub fn panic(msg: []const u8, stacktrace: ?*std.builtin.StackTrace, wat: ?usize)
 }
 
 pub export fn KoboldInit() void {
-    hal.stub();
     elf.kelf_log.debug("", .{});
 }

@@ -37,3 +37,4 @@
 .zig-cache
 zig-out
 kobold.iso
+limine-zig/

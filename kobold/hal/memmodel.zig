@@ -17,7 +17,7 @@ pub const LayoutType = enum {
     }
 };
 
-pub const HALPageFrame = switch(@sizeOf(usize)) {
+pub const HALPageFrame = switch (@sizeOf(usize)) {
     4 => extern struct {
         valid: u1,
         read: u1,
@@ -30,8 +30,8 @@ pub const HALPageFrame = switch(@sizeOf(usize)) {
         phys: u20,
 
         comptime {
-            if(@sizeOf(@This()) != 4)
-                @compilerError("HALPageFrame does not match usize!");
+            if (@sizeOf(@This()) != 4)
+                @compileError("HALPageFrame does not match usize!");
         }
     },
     8 => extern struct {
@@ -44,17 +44,18 @@ pub const HALPageFrame = switch(@sizeOf(usize)) {
         writeComb: u1,
         unused: u5,
         phys: u44,
+        reserved: u8,
 
         comptime {
-            if(@sizeOf(@This()) != 8)
-                @compilerError("HALPageFrame does not match usize!");
+            if (@sizeOf(@This()) != 8)
+                @compileError("HALPageFrame does not match usize!");
         }
     },
-    else => @compilerError("Unsupported Arch USize"),
+    else => @compileError("Unsupported Arch USize"),
 };
 
 pub const MemoryModel = struct {
     layout: LayoutType,
-    mmFrameToHalFrame: fn () HALPageFrame,
-    halFrameToMmFrame: fn () usize,
+    mmFrameToHalFrame: ?fn (usize) HALPageFrame,
+    halFrameToMmFrame: ?fn (HALPageFrame) usize,
 };
