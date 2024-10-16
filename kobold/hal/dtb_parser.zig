@@ -153,7 +153,7 @@ pub fn parse_dtb(v: *anyopaque) !void {
     reserve(@intFromPtr(v), @intFromPtr(v) + try dtb.totalSize(v));
     for (0..64) |i| {
         if (freeMemory[i].end == 0) continue;
-        dtb_log.info("mem [{x}-{x}] Usable", .{ freeMemory[i].start, freeMemory[i].end - 1 });
+        dtb_log.info("mem [0x{x:0>16}-0x{x:0>16}] usable", .{ freeMemory[i].start, freeMemory[i].end - 1 });
         physmem.Free(freeMemory[i].start, freeMemory[i].end - freeMemory[i].start);
     }
 }

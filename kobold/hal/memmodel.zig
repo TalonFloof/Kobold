@@ -23,10 +23,11 @@ pub const HALPageFrame = switch (@sizeOf(usize)) {
         read: u1,
         write: u1,
         execute: u1,
+        user: u1,
         noCache: u1,
         writeThru: u1,
         writeComb: u1,
-        unused: u5,
+        unused: u4,
         phys: u20,
 
         comptime {
@@ -39,10 +40,11 @@ pub const HALPageFrame = switch (@sizeOf(usize)) {
         read: u1,
         write: u1,
         execute: u1,
+        user: u1,
         noCache: u1,
         writeThru: u1,
         writeComb: u1,
-        unused: u5,
+        unused: u4,
         phys: u44,
         reserved: u8,
 

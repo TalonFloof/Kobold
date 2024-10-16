@@ -82,7 +82,7 @@ pub fn build(b: *std.Build) void {
         .name = "kernel",
         .root_source_file = b.path("kernel/main.zig"),
         .optimize = optimize,
-        .target = resolvedModTarget,
+        .target = resolvedTarget,
         .linkage = .static,
         .code_model = .large,
         .strip = false,
