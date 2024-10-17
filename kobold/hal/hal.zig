@@ -9,6 +9,7 @@ pub const archData = (switch (builtin.cpu.arch) {
 });
 pub const arch: ArchInterface = archData.Interface;
 pub const HartInfo = @import("hart.zig").HartInfo;
+const memmodel = @import("memmodel.zig");
 
 pub const Writer = std.io.Writer(@TypeOf(.{}), error{}, arch.write);
 pub const writer = Writer{ .context = .{} };
@@ -37,4 +38,5 @@ pub const ArchInterface = struct {
     init: fn (stackTop: usize, dtb: *allowzero anyopaque) void,
     write: fn (_: @TypeOf(.{}), string: []const u8) error{}!usize,
     getHart: fn () *HartInfo,
+    memModel: memmodel.MemoryModel,
 };

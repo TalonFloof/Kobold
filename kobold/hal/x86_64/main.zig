@@ -82,4 +82,7 @@ pub const Interface: hal.ArchInterface = .{
     .init = ArchInit,
     .write = ArchWriteString,
     .getHart = ArchGetHart,
+    .memModel = .{
+        .layout = .Paging4Layer,
+    },
 };

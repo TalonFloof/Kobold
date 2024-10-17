@@ -18,7 +18,7 @@ pub const LayoutType = enum {
 };
 
 pub const HALPageFrame = switch (@sizeOf(usize)) {
-    4 => extern struct {
+    4 => packed struct {
         valid: u1,
         read: u1,
         write: u1,
@@ -35,7 +35,7 @@ pub const HALPageFrame = switch (@sizeOf(usize)) {
                 @compileError("HALPageFrame does not match usize!");
         }
     },
-    8 => extern struct {
+    8 => packed struct {
         valid: u1,
         read: u1,
         write: u1,
@@ -58,6 +58,6 @@ pub const HALPageFrame = switch (@sizeOf(usize)) {
 
 pub const MemoryModel = struct {
     layout: LayoutType,
-    mmFrameToHalFrame: ?fn (usize) HALPageFrame,
-    halFrameToMmFrame: ?fn (HALPageFrame) usize,
+    mmFrameToHalFrame: ?fn (usize) HALPageFrame = null,
+    halFrameToMmFrame: ?fn (HALPageFrame) usize = null,
 };
