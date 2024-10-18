@@ -224,11 +224,18 @@ pub fn Free(address: usize, size: usize) void {
     lock.release();
 }
 
+pub fn AllocateC(size: usize) callconv(.C) ?*anyopaque {
+    return Allocate(size + @sizeOf(usize), 0);
+}
+
+pub fn FreeC(addr: ?*anyopaque, size: usize) callconv(.C) void {
+    Free(@intFromPtr(addr.?), size);
+}
+
 pub fn PrintMap() void {
     var cursor = firstFree;
     while (cursor) |node| {
-        physmem_log.info("{x}-{x} Free", .{ node.start, node.end - 1 });
+        physmem_log.info("0x{x}-0x{x} Free", .{ node.start, node.end - 1 });
         cursor = node.next;
     }
-    physmem_log.info("{}", .{freeCache});
 }

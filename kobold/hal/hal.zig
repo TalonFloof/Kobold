@@ -38,5 +38,7 @@ pub const ArchInterface = struct {
     init: fn (stackTop: usize, dtb: *allowzero anyopaque) void,
     write: fn (_: @TypeOf(.{}), string: []const u8) error{}!usize,
     getHart: fn () *HartInfo,
+    intControl: fn (bool) bool,
+    waitForInt: fn () void,
     memModel: memmodel.MemoryModel,
 };

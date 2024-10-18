@@ -1,8 +1,15 @@
 const std = @import("std");
 const hal = @import("root").hal;
+const physmem = @import("root").physmem;
 const io = @import("io.zig");
 const gdt = @import("gdt.zig");
 const mem = @import("mem.zig");
+const limine = @import("limine");
+const elf = @import("root").elf;
+const flanterm = @cImport({
+    @cInclude("flanterm.h");
+    @cInclude("backends/fb.h");
+});
 
 pub export fn _start() callconv(.Naked) noreturn {
     asm volatile (
@@ -20,6 +27,10 @@ pub export fn _start() callconv(.Naked) noreturn {
         \\jmp HALInitialize
     );
 }
+
+export var moduleRequest: limine.ModuleRequest = .{};
+export var fbRequest: limine.FramebufferRequest = .{};
+var termCtx: ?*flanterm.flanterm_context = null;
 
 var zeroHart: hal.HartInfo = .{};
 
@@ -61,6 +72,52 @@ fn ArchInit(stackTop: usize, limine_header: *allowzero anyopaque) void {
     zeroHart.archData.tss.rsp[0] = stackTop;
     gdt.initialize();
     mem.init();
+
+    if (fbRequest.response) |response| {
+        const fb = response.framebuffers()[0]; // 0x292D3E
+        const ansi = [_]u32{ 0x292D3E, 0xF07178, 0x62DE84, 0xFFCB6B, 0x75A1FF, 0xF580FF, 0x60BAEC, 0xABB2BF };
+        const brightAnsi = [_]u32{ 0x959DCB, 0xF07178, 0xC3E88D, 0xFF5572, 0x82AAFF, 0xFFCB6B, 0x676E95, 0xFFFEFE };
+        const bg: u32 = 0x292D3E;
+        const fg: u32 = 0xBFC7D5;
+        termCtx = flanterm.flanterm_fb_init(
+            physmem.AllocateC,
+            physmem.FreeC,
+            @ptrFromInt(@intFromPtr(fb.address)),
+            fb.width,
+            fb.height,
+            fb.pitch,
+            fb.red_mask_size,
+            fb.red_mask_shift,
+            fb.green_mask_size,
+            fb.green_mask_shift,
+            fb.blue_mask_size,
+            fb.blue_mask_shift,
+            null,
+            @ptrFromInt(@intFromPtr(&ansi)),
+            @ptrFromInt(@intFromPtr(&brightAnsi)),
+            @ptrFromInt(@intFromPtr(&bg)),
+            @ptrFromInt(@intFromPtr(&fg)),
+            @ptrFromInt(@intFromPtr(&bg)),
+            @ptrFromInt(@intFromPtr(&fg)),
+            null,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+        );
+    }
+
+    if (moduleRequest.response) |response| {
+        const len = response.modules().len;
+        var i: usize = 0;
+        for (response.modules()) |module| {
+            std.log.info("Load Module ({}/{}) {s}", .{ i + 1, len, module.cmdline });
+            elf.RelocateELF(@ptrCast(module.address)) catch @panic("failed!");
+            i += 1;
+        }
+    }
 }
 
 fn ArchWriteString(_: @TypeOf(.{}), string: []const u8) error{}!usize {
@@ -71,6 +128,9 @@ fn ArchWriteString(_: @TypeOf(.{}), string: []const u8) error{}!usize {
             std.atomic.spinLoopHint();
         io.outb(0x3f8, string[@bitCast(i)]);
     }
+    if (termCtx) |ctx| {
+        flanterm.flanterm_write(ctx, string.ptr, string.len);
+    }
     return string.len;
 }
 
@@ -78,10 +138,30 @@ fn ArchGetHart() *hal.HartInfo {
     return @as(*hal.HartInfo, @ptrFromInt(rdmsr(0xC0000102)));
 }
 
+fn ArchIntControl(enable: bool) bool {
+    const old = asm volatile (
+        \\pushfq
+        \\popq %rax
+        : [o] "={rax}" (-> u64),
+    );
+    if (enable) {
+        asm volatile ("sti");
+    } else {
+        asm volatile ("cli");
+    }
+    return old & 0x200 != 0;
+}
+
+fn ArchWaitForInt() void {
+    asm volatile ("hlt");
+}
+
 pub const Interface: hal.ArchInterface = .{
     .init = ArchInit,
     .write = ArchWriteString,
     .getHart = ArchGetHart,
+    .intControl = ArchIntControl,
+    .waitForInt = ArchWaitForInt,
     .memModel = .{
         .layout = .Paging4Layer,
     },

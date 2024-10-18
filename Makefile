@@ -11,7 +11,7 @@ iso: build_pc64
 	rm -r --force /tmp/kobold_iso
 	git clone --branch v8.x-binary --depth 1 https://github.com/limine-bootloader/limine /tmp/limine
 	mkdir -p /tmp/kobold_iso/EFI/BOOT
-	cp --force /tmp/limine/BOOTX64.EFI /tmp/limine/limine-uefi-cd.bin /tmp/limine/limine-bios-cd.bin /tmp/limine/limine-bios.sys boot/x86_64/* kobold/zig-out/bin/kernel /tmp/kobold_iso
+	cp --force /tmp/limine/BOOTX64.EFI /tmp/limine/limine-uefi-cd.bin /tmp/limine/limine-bios-cd.bin /tmp/limine/limine-bios.sys boot/x86_64/* kobold/zig-out/bin/* /tmp/kobold_iso
 	mv /tmp/kobold_iso/BOOTX64.EFI /tmp/kobold_iso/EFI/BOOT/BOOTX64.EFI
 	xorriso -as mkisofs -b limine-bios-cd.bin -no-emul-boot -boot-load-size 4 -boot-info-table --efi-boot limine-uefi-cd.bin -efi-boot-part --efi-boot-image --protective-msdos-label /tmp/kobold_iso -o kobold.iso
 	zig cc /tmp/limine/limine.c -o /tmp/limine/limine

@@ -27,7 +27,7 @@ pub fn doLog(
     if (level == .debug) {
         try hal.writer.print(format, args);
     } else {
-        try hal.writer.print(level.asText() ++ "\x1b[0m\x1b[30m {s}", .{@tagName(scope)});
+        try hal.writer.print(level.asText() ++ "\x1b[0m\x1b[1;30m {s}", .{@tagName(scope)});
         try hal.writer.print("\x1b[0m " ++ format ++ "\n", args);
     }
 }
@@ -39,6 +39,7 @@ pub const std_options: std.Options = .{
 pub fn panic(msg: []const u8, stacktrace: ?*std.builtin.StackTrace, wat: ?usize) noreturn {
     _ = wat;
     _ = stacktrace;
+    _ = hal.arch.intControl(false);
     kmain_log.err("panic (hart 0x0) {s}", .{msg});
     kmain_log.debug("Stack Backtrace\n", .{});
     const frameStart = @returnAddress();
@@ -47,9 +48,12 @@ pub fn panic(msg: []const u8, stacktrace: ?*std.builtin.StackTrace, wat: ?usize)
         if (frame == 0) {
             break;
         }
-        kmain_log.debug("  \x1b[30m0x{x:0>16}\x1b[0m\n", .{frame});
+        kmain_log.debug("  \x1b[1;30m0x{x:0>16}\x1b[0m\n", .{frame});
     }
-    while (true) {}
+    while (true) {
+        _ = hal.arch.intControl(false);
+        hal.arch.waitForInt();
+    }
 }
 
 pub export fn KoboldInit() void {

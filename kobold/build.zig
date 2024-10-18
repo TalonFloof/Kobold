@@ -115,15 +115,25 @@ pub fn build(b: *std.Build) void {
         .red_zone = false,
         .strip = false,
     });
+    if (getArch(board) == .x86_64) {
+        halMod.addCSourceFiles(.{ .files = &.{
+            "../flanterm/flanterm.c",
+            "../flanterm/backends/fb.c",
+        }, .flags = &.{ "-ffreestanding", "-fdelete-null-pointer-checks", "-O2" } });
+        halMod.addIncludePath(b.path("../flanterm"));
+    }
 
     const wrenMod = b.addObject(.{
         .name = "wren",
         .root_source_file = b.path("wren/main.zig"),
         .target = resolvedModTarget,
         .optimize = optimize,
-        .code_model = .medium,
+        .code_model = .large,
         .strip = true,
     });
+    if (getArch(board) == .riscv64) {
+        wrenMod.root_module.code_model = .medium;
+    }
     wrenMod.addCSourceFiles(.{ .files = &.{
         "wren/wren_compiler.c",
         "wren/wren_core.c",
