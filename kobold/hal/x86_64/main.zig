@@ -192,6 +192,24 @@ const Context = packed struct {
     }
 };
 
+const NativePTEEntry = packed struct {
+    valid: u1 = 0,
+    write: u1 = 0,
+    user: u1 = 0,
+    writeThrough: u1 = 0,
+    cacheDisable: u1 = 0,
+    reserved1: u2 = 0,
+    pat: u1 = 0,
+    reserved2: u4 = 0,
+    phys: u51 = 0,
+    noExecute: u1 = 0,
+};
+
+fn fthConvert(pte: usize) hal.memmodel.HALPageFrame {
+    const nativeEntry: *NativePTEEntry = @alignCast(@ptrCast(&pte));
+    
+}
+
 pub const Interface: hal.ArchInterface = .{
     .init = ArchInit,
     .write = ArchWriteString,
@@ -200,6 +218,7 @@ pub const Interface: hal.ArchInterface = .{
     .waitForInt = ArchWaitForInt,
     .memModel = .{
         .layout = .Paging4Layer,
+        .mmFrameToHalFrame = 
     },
     .Context = Context,
 };

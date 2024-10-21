@@ -25,7 +25,7 @@ pub const HALPageFrame = switch (@sizeOf(usize)) {
         user: u1,
         noCache: u1,
         writeThru: u1,
-        writeComb: u1,
+        writeComb: u1, // noCache must be 1 and writeThru must be 0 if writeComb is 1
         unused: u4,
         phys: u20,
 
@@ -42,7 +42,7 @@ pub const HALPageFrame = switch (@sizeOf(usize)) {
         user: u1,
         noCache: u1,
         writeThru: u1,
-        writeComb: u1,
+        writeComb: u1, // noCache must be 1 and writeThru must be 0 if writeComb is 1
         unused: u4,
         phys: u44,
         reserved: u8,
