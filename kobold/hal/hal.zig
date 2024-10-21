@@ -30,6 +30,8 @@ pub inline fn Aligned(comptime T: type, s: T, a: T) T {
 
 pub export fn HALInitialize(stackTop: usize, dtb: *allowzero anyopaque) callconv(.C) noreturn {
     arch.init(stackTop, dtb);
+    if (arch.memModel.layout == .Flat)
+        @panic("MMUless setups are not supported!");
     root.KoboldInit();
     @panic("No Command");
 }
@@ -41,4 +43,5 @@ pub const ArchInterface = struct {
     intControl: fn (bool) bool,
     waitForInt: fn () void,
     memModel: memmodel.MemoryModel,
+    Context: type,
 };

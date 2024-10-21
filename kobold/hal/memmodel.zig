@@ -5,8 +5,7 @@ const builtin = @import("builtin");
 // TODO: Finish This
 
 pub const LayoutType = enum {
-    FlatNoProt,
-    FlatPhysProt,
+    Flat,
     Paging2Layer,
     Paging3Layer,
     Paging4Layer,

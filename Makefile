@@ -4,7 +4,9 @@ build_rv64:
 
 build_pc64: limine-zig
 	rm -r -f kobold/zig-out/
+	nasm -f elf64 kobold/hal/x86_64/lowlevel.s -o lowlevel.o
 	cd kobold; zig build -Dboard=pc_x86_64; cd ..
+	rm -r -f lowlevel.o
 
 iso: build_pc64
 	rm -r --force /tmp/limine

@@ -121,6 +121,7 @@ pub fn build(b: *std.Build) void {
             "../flanterm/backends/fb.c",
         }, .flags = &.{ "-ffreestanding", "-fdelete-null-pointer-checks", "-O2" } });
         halMod.addIncludePath(b.path("../flanterm"));
+        halMod.addObjectFile(b.path("../lowlevel.o"));
     }
 
     const wrenMod = b.addObject(.{

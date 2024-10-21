@@ -3,6 +3,7 @@ const hal = @import("root").hal;
 const physmem = @import("root").physmem;
 const io = @import("io.zig");
 const gdt = @import("gdt.zig");
+const idt = @import("idt.zig");
 const mem = @import("mem.zig");
 const limine = @import("limine");
 const elf = @import("root").elf;
@@ -71,13 +72,14 @@ fn ArchInit(stackTop: usize, limine_header: *allowzero anyopaque) void {
     wrmsr(0xC0000102, @intFromPtr(&zeroHart));
     zeroHart.archData.tss.rsp[0] = stackTop;
     gdt.initialize();
+    idt.initialize();
     mem.init();
 
     if (fbRequest.response) |response| {
         const fb = response.framebuffers()[0]; // 0x292D3E
         const ansi = [_]u32{ 0x292D3E, 0xF07178, 0x62DE84, 0xFFCB6B, 0x75A1FF, 0xF580FF, 0x60BAEC, 0xABB2BF };
         const brightAnsi = [_]u32{ 0x959DCB, 0xF07178, 0xC3E88D, 0xFF5572, 0x82AAFF, 0xFFCB6B, 0x676E95, 0xFFFEFE };
-        const bg: u32 = 0x292D3E;
+        const bg: u32 = 0x0e0f15;
         const fg: u32 = 0xBFC7D5;
         termCtx = flanterm.flanterm_fb_init(
             physmem.AllocateC,
@@ -156,6 +158,40 @@ fn ArchWaitForInt() void {
     asm volatile ("hlt");
 }
 
+const Context = packed struct {
+    r15: u64 = 0,
+    r14: u64 = 0,
+    r13: u64 = 0,
+    r12: u64 = 0,
+    r11: u64 = 0,
+    r10: u64 = 0,
+    r9: u64 = 0,
+    r8: u64 = 0,
+    rbp: u64 = 0,
+    rdi: u64 = 0,
+    rsi: u64 = 0,
+    rdx: u64 = 0,
+    rcx: u64 = 0,
+    rbx: u64 = 0,
+    rax: u64 = 0,
+    errcode: u64 = 0,
+    rip: u64 = 0,
+    cs: u64 = 0,
+    rflags: u64 = 0x202,
+    rsp: u64 = 0,
+    ss: u64 = 0,
+
+    pub fn Dump(self: *Context) void {
+        std.log.debug(" rax 0x{x: <16}    rbx 0x{x: <16}    rcx 0x{x: <16}\n", .{ self.rax, self.rbx, self.rcx });
+        std.log.debug(" rdx 0x{x: <16}    rsi 0x{x: <16}    rdi 0x{x: <16}\n", .{ self.rdx, self.rsi, self.rdi });
+        std.log.debug(" rbp 0x{x: <16}     r8 0x{x: <16}     r9 0x{x: <16}\n", .{ self.rbp, self.r8, self.r9 });
+        std.log.debug(" r10 0x{x: <16}    r11 0x{x: <16}    r12 0x{x: <16}\n", .{ self.r10, self.r11, self.r12 });
+        std.log.debug(" r13 0x{x: <16}    r14 0x{x: <16}    r15 0x{x: <16}\n", .{ self.r13, self.r14, self.r15 });
+        std.log.debug(" rip 0x{x: <16}    rsp 0x{x: <16} rflags 0x{x: <16}\n", .{ self.rip, self.rsp, self.rflags });
+        std.log.debug(" error code: 0x{x}\n", .{self.errcode});
+    }
+};
+
 pub const Interface: hal.ArchInterface = .{
     .init = ArchInit,
     .write = ArchWriteString,
@@ -165,4 +201,5 @@ pub const Interface: hal.ArchInterface = .{
     .memModel = .{
         .layout = .Paging4Layer,
     },
+    .Context = Context,
 };
