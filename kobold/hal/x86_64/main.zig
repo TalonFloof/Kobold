@@ -192,22 +192,64 @@ const Context = packed struct {
     }
 };
 
-const NativePTEEntry = packed struct {
-    valid: u1 = 0,
-    write: u1 = 0,
-    user: u1 = 0,
-    writeThrough: u1 = 0,
-    cacheDisable: u1 = 0,
-    reserved1: u2 = 0,
-    pat: u1 = 0,
-    reserved2: u4 = 0,
-    phys: u51 = 0,
-    noExecute: u1 = 0,
-};
+//const NativePTEEntry = packed struct {
+//    valid: u1 = 0, // 0
+//    write: u1 = 0, // 1
+//    user: u1 = 0, // 2
+//    writeThrough: u1 = 0, // 3
+//    cacheDisable: u1 = 0, // 4
+//    reserved1: u2 = 0, // 5-6
+//    pat: u1 = 0, // 7
+//    reserved2: u4 = 0, // 8-11
+//    phys: u51 = 0,
+//    noExecute: u1 = 0,
+//};
 
-fn fthConvert(pte: usize) hal.memmodel.HALPageFrame {
-    const nativeEntry: *NativePTEEntry = @alignCast(@ptrCast(&pte));
-    
+fn fthConvert(pte: usize, high: bool) hal.memmodel.HALPageFrame { // high set if not at 4 KiB granularity
+    const frame: hal.memmodel.HALPageFrame = .{};
+    const branch: bool = high and ((pte & 0x80) == 0);
+    frame.valid = pte & 1
+    frame.read = if(branch) 0 else (pte & 1);
+    frame.write = if(branch) 0 else ((pte >> 1) & 1);
+    frame.execute = if(branch) 0 else (((~pte) >> 63) & 1);
+    frame.noCache = (pte >> 4) & 1;
+    frame.writeThru = (pte >> 3) & 1;
+    if(high) {
+        frame.writeComb = (pte >> 12) & 1;
+    } else {
+        frame.writeComb = (pte >> 7) & 1;
+    }
+    frame.highLeaf = if(high and !branch) 1 else 0;
+    frame.phys (pte >> 12) & (if(high) 0xf_ffff_fffe else 0xf_ffff_ffff);
+    return frame;
+}
+
+fn htfConvert(pte: hal.memmodel.HALPageFrame) usize {
+    var frame: usize = 0;
+    if(pte.valid == 0)
+        return 0;
+    if(pte.read == 0 and pte.write == 0 and pte.execute == 0) { // Branch
+        frame |= 0x3; // VALID | WRITE
+        frame |= pte.user << 2;
+        frame |= ((~pte.execute) & 1) << 63;
+        frame |= pte.noCache << 4;
+        frame |= pte.writeThru << 3;
+        frame |= pte.writeComb << 12;
+        frame |= pte.phys << 12;
+    } else { // Leaf
+        frame |= 0x1; // VALID
+        frame |= pte.write << 1;
+        frame |= ((~pte.execute) & 1) << 63;
+        frame |= pte.noCache << 4;
+        frame |= pte.writeThru << 3;
+        if(pte.highLeaf) {
+            frame |= 0x80 | (pte.writeComb << 12); // PS | PAT
+        } else {
+            frame |= pte.writeComb << 7;
+        }
+        frame |= pte.phys << 12;
+    }
+    return frame;
 }
 
 pub const Interface: hal.ArchInterface = .{
@@ -218,7 +260,8 @@ pub const Interface: hal.ArchInterface = .{
     .waitForInt = ArchWaitForInt,
     .memModel = .{
         .layout = .Paging4Layer,
-        .mmFrameToHalFrame = 
+        .nativeToHal = fthConvert,
+        .halToNative = htfConvert,
     },
     .Context = Context,
 };
