@@ -36,9 +36,7 @@ pub const HALPageFrame = switch (@sizeOf(usize)) {
         noCache: u1,
         writeThru: u1,
         writeComb: u1, // noCache must be 1 and writeThru must be 0 if writeComb is 1, does nothing if not supported
-        highLeaf: u1, // Leaf pages that are not at the lowest level (4 KiB) must set this to 1,
-                      // for compatibility with x86, non-x86 archs will not have this set during native2hal conversion
-                      // unless explicitly used on the native frame
+        highLeaf: u1, // Leaf pages that are not at the lowest level (4 KiB) must set this to 1, for compatibility with x86
         unused: u3,
         phys: u20,
 
@@ -56,9 +54,7 @@ pub const HALPageFrame = switch (@sizeOf(usize)) {
         noCache: u1,
         writeThru: u1,
         writeComb: u1, // noCache must be 1 and writeThru must be 0 if writeComb is 1, does nothing if not supported
-        highLeaf: u1, // Leaf pages that are not at the lowest level (4 KiB) must set this to 1,
-                      // for compatibility with x86, non-x86 archs will not have this set during native2hal conversion
-                      // unless explicitly used on the native frame
+        highLeaf: u1, // Leaf pages that are not at the lowest level (4 KiB) must set this to 1, for compatibility with x86
         unused: u3,
         phys: u44,
         reserved: u8,
