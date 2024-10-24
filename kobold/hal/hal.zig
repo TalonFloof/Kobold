@@ -9,7 +9,7 @@ pub const archData = (switch (builtin.cpu.arch) {
 });
 pub const arch: ArchInterface = archData.Interface;
 pub const HartInfo = @import("hart.zig").HartInfo;
-const memmodel = @import("memmodel.zig");
+pub const memmodel = @import("memmodel.zig");
 
 pub const Writer = std.io.Writer(@TypeOf(.{}), error{}, arch.write);
 pub const writer = Writer{ .context = .{} };

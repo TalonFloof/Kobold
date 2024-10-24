@@ -208,27 +208,27 @@ const Context = packed struct {
 fn fthConvert(pte: usize, high: bool) hal.memmodel.HALPageFrame { // high set if not at 4 KiB granularity
     const frame: hal.memmodel.HALPageFrame = .{};
     const branch: bool = high and ((pte & 0x80) == 0);
-    frame.valid = pte & 1
-    frame.read = if(branch) 0 else (pte & 1);
-    frame.write = if(branch) 0 else ((pte >> 1) & 1);
-    frame.execute = if(branch) 0 else (((~pte) >> 63) & 1);
+    frame.valid = pte & 1;
+    frame.read = if (branch) 0 else (pte & 1);
+    frame.write = if (branch) 0 else ((pte >> 1) & 1);
+    frame.execute = if (branch) 0 else (((~pte) >> 63) & 1);
     frame.noCache = (pte >> 4) & 1;
     frame.writeThru = (pte >> 3) & 1;
-    if(high) {
+    if (high) {
         frame.writeComb = (pte >> 12) & 1;
     } else {
         frame.writeComb = (pte >> 7) & 1;
     }
-    frame.highLeaf = if(high and !branch) 1 else 0;
-    frame.phys (pte >> 12) & (if(high) 0xf_ffff_fffe else 0xf_ffff_ffff);
+    frame.highLeaf = if (high and !branch) 1 else 0;
+    frame.phys(pte >> 12) & (if (high) 0xf_ffff_fffe else 0xf_ffff_ffff);
     return frame;
 }
 
 fn htfConvert(pte: hal.memmodel.HALPageFrame) usize {
     var frame: usize = 0;
-    if(pte.valid == 0)
+    if (pte.valid == 0)
         return 0;
-    if(pte.read == 0 and pte.write == 0 and pte.execute == 0) { // Branch
+    if (pte.read == 0 and pte.write == 0 and pte.execute == 0) { // Branch
         frame |= 0x3; // VALID | WRITE
         frame |= pte.user << 2;
         frame |= ((~pte.execute) & 1) << 63;
@@ -242,7 +242,7 @@ fn htfConvert(pte: hal.memmodel.HALPageFrame) usize {
         frame |= ((~pte.execute) & 1) << 63;
         frame |= pte.noCache << 4;
         frame |= pte.writeThru << 3;
-        if(pte.highLeaf) {
+        if (pte.highLeaf) {
             frame |= 0x80 | (pte.writeComb << 12); // PS | PAT
         } else {
             frame |= pte.writeComb << 7;

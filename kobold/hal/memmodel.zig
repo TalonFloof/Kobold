@@ -15,8 +15,8 @@ pub const LayoutType = enum {
         return self == .Paging2Layer or self == .Paging3Layer or self == .Paging4Layer or self == .Paging5Layer;
     }
 
-    pub fn layerCount(self: LayoutType) int {
-        return switch(self) {
+    pub fn layerCount(self: LayoutType) comptime_int {
+        return switch (self) {
             .Paging2Layer => 2,
             .Paging3Layer => 3,
             .Paging4Layer => 4,
