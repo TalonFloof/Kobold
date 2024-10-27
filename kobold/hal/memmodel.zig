@@ -4,6 +4,8 @@ const builtin = @import("builtin");
 
 // TODO: Finish This
 
+pub const PageDirectory = []usize;
+
 pub const LayoutType = enum {
     Flat,
     Paging2Layer, // Only usable if @sizeOf(usize) == 4

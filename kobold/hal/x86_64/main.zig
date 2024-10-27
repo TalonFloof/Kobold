@@ -7,6 +7,7 @@ const idt = @import("idt.zig");
 const mem = @import("mem.zig");
 const limine = @import("limine");
 const elf = @import("root").elf;
+const acpi = @import("acpi.zig");
 const flanterm = @cImport({
     @cInclude("flanterm.h");
     @cInclude("backends/fb.h");
@@ -111,6 +112,8 @@ fn ArchInit(stackTop: usize, limine_header: *allowzero anyopaque) void {
         );
     }
 
+    acpi.init();
+
     if (moduleRequest.response) |response| {
         const len = response.modules().len;
         var i: usize = 0;
@@ -191,19 +194,6 @@ const Context = packed struct {
         std.log.debug(" error code: 0x{x}\n", .{self.errcode});
     }
 };
-
-//const NativePTEEntry = packed struct {
-//    valid: u1 = 0, // 0
-//    write: u1 = 0, // 1
-//    user: u1 = 0, // 2
-//    writeThrough: u1 = 0, // 3
-//    cacheDisable: u1 = 0, // 4
-//    reserved1: u2 = 0, // 5-6
-//    pat: u1 = 0, // 7
-//    reserved2: u4 = 0, // 8-11
-//    phys: u51 = 0,
-//    noExecute: u1 = 0,
-//};
 
 fn fthConvert(pte: usize, high: bool) hal.memmodel.HALPageFrame { // high set if not at 4 KiB granularity
     const frame: hal.memmodel.HALPageFrame = .{};

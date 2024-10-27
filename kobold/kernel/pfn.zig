@@ -1,5 +1,6 @@
 // TODO: PFN Support
 const std = @import("std");
+const physmem = @import("physmem.zig");
 
 var pfn: ?[]PFNEntry = null;
 var pfnBaseAddr: usize = 0;
@@ -9,7 +10,7 @@ pub const PFNEntryType = enum(u8) {
     reserved = 1, // Memory that will never be reclaimed
     pageTable = 2, // Memory Reserved for a branch of a page table
     pageDir = 3, // Memory Reserved for the trunk of a page table
-}
+};
 
 pub const PFNEntry = packed struct {
     ref: usize,
@@ -17,4 +18,9 @@ pub const PFNEntry = packed struct {
     pfnType: PFNEntryType,
 };
 
-pub fn init() void {}
+pub fn init(base: u64, entries: usize) void {
+    pfn = @as([*]PFNEntry, @alignCast(@ptrCast(physmem.Allocate(@sizeOf(PFNEntry) * entries, 0).?)))[0..entries];
+    pfnBaseAddr = base;
+    @memset(@as([*]u8, @ptrCast(pfn.?.ptr))[0 .. @sizeOf(PFNEntry) * entries], 0);
+    std.log.info("PFN @ 0x{x} ({} entries, {} KiB)", .{ @intFromPtr(pfn.?.ptr), entries, (entries * @sizeOf(PFNEntry)) / 1024 });
+}

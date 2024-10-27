@@ -126,7 +126,7 @@ pub fn build(b: *std.Build) void {
 
     const wrenMod = b.addObject(.{
         .name = "wren",
-        .root_source_file = b.path("wren/main.zig"),
+        .root_source_file = b.path("personalities/Wren/main.zig"),
         .target = resolvedModTarget,
         .optimize = optimize,
         .code_model = .large,
@@ -136,16 +136,16 @@ pub fn build(b: *std.Build) void {
         wrenMod.root_module.code_model = .medium;
     }
     wrenMod.addCSourceFiles(.{ .files = &.{
-        "wren/wren_compiler.c",
-        "wren/wren_core.c",
-        "wren/wren_primitive.c",
-        "wren/wren_utils.c",
-        "wren/wren_value.c",
-        "wren/wren_vm.c",
-        "wren/wren_opt_meta.c",
-        "wren/wren_debug.c",
-        "wren/vmstdlib_c.c",
-        "wren/tinyprintf.c",
+        "personalities/Wren/wren_compiler.c",
+        "personalities/Wren/wren_core.c",
+        "personalities/Wren/wren_primitive.c",
+        "personalities/Wren/wren_utils.c",
+        "personalities/Wren/wren_value.c",
+        "personalities/Wren/wren_vm.c",
+        "personalities/Wren/wren_opt_meta.c",
+        "personalities/Wren/wren_debug.c",
+        "personalities/Wren/vmstdlib_c.c",
+        "personalities/Wren/tinyprintf.c",
     } });
     kernel.want_lto = false;
     kernel.root_module.omit_frame_pointer = false;
