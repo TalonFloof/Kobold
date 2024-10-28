@@ -48,6 +48,7 @@ extern IRQHandler
         mov rdi, %1
         mov rsi, rsp
         call ExceptionHandler
+        mov rdi, rax
         jmp ContextEnter
 %endmacro
 
@@ -60,6 +61,7 @@ extern IRQHandler
         mov rdi, %1
         mov rsi, rsp
         call ExceptionHandler
+        mov rdi, rax
         jmp ContextEnter
 %endmacro
 
@@ -72,6 +74,7 @@ extern IRQHandler
         mov rdi, %1
         mov rsi, rsp
         call IRQHandler
+        mov rdi, rax
         jmp ContextEnter
 %endmacro
 
@@ -114,15 +117,6 @@ ISR_NO_ERROR_CODE 31
 %assign num (num + 1)
 %endrep
 
-section .rodata
-global ISRTable
-ISRTable:
-%assign num 0
-%rep 256-32
-    dq int%[num]
-%assign num (num + 1)
-%endrep
-
 global ContextEnter
 ContextEnter:
     mov rsp, rdi
@@ -131,3 +125,12 @@ ContextEnter:
     iretq
     ud2
     ud2
+
+section .rodata
+global ISRTable
+ISRTable:
+%assign num 0
+%rep 256-32
+    dq int%[num]
+%assign num (num + 1)
+%endrep

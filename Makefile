@@ -4,8 +4,8 @@ build_rv64:
 
 build_pc64: limine-zig
 	rm -r -f kobold/zig-out/
-	nasm -f elf64 kobold/hal/x86_64/lowlevel.s -o lowlevel.o
-	cd kobold; zig build -Dboard=pc_x86_64; cd ..
+	nasm -f elf64 -O0 kobold/hal/x86_64/lowlevel.s -o lowlevel.o
+	cd kobold; zig build -Dboard=pc_x86_64 -Doptimize=Debug; cd ..
 	rm -r -f lowlevel.o
 
 iso: build_pc64
@@ -22,7 +22,7 @@ iso: build_pc64
 	rm -r --force /tmp/kobold_iso
 
 run_pc64: iso
-	qemu-system-x86_64 -m 32M -serial stdio -cdrom kobold.iso -no-shutdown -no-reboot
+	qemu-system-x86_64 -enable-kvm -cpu host -m 32M -serial stdio -cdrom kobold.iso -no-shutdown -no-reboot
 
 run_rv64: build_rv64
 	qemu-system-riscv64 -machine virt -m 128M -serial stdio -device ramfb -device virtio-keyboard-device -device virtio-mouse-device -kernel kobold/zig-out/bin/kernel

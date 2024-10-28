@@ -8,6 +8,7 @@ const mem = @import("mem.zig");
 const limine = @import("limine");
 const elf = @import("root").elf;
 const acpi = @import("acpi.zig");
+const timer = @import("timer.zig");
 const flanterm = @cImport({
     @cInclude("flanterm.h");
     @cInclude("backends/fb.h");
@@ -61,7 +62,6 @@ pub fn wrmsr(index: u32, val: u64) void {
 fn ArchInit(stackTop: usize, limine_header: *allowzero anyopaque) void {
     _ = limine_header;
     asm volatile ("cli");
-    // TODO: Implement x86_64 init
     io.outb(0x3f8 + 1, 0x00); // Disable all interrupts
     io.outb(0x3f8 + 3, 0x80); // Enable DLAB (set baud rate divisor)
     io.outb(0x3f8 + 0, 0x01); // Set divisor to 1 (lo byte) 115200 baud
@@ -112,7 +112,13 @@ fn ArchInit(stackTop: usize, limine_header: *allowzero anyopaque) void {
         );
     }
 
+    if (cpuid(0x80000001).edx & (@as(u32, @intCast(1)) << 20) == 0) {
+        std.log.warn("WARNING!!!! Your CPU does not support the NX (No Execute) bit extension!", .{});
+        std.log.warn("            This allows for programs to exploit buffer overflows to run malicious code.", .{});
+        std.log.warn("            Your machine's security is at risk!", .{});
+    }
     acpi.init();
+    timer.init();
 
     if (moduleRequest.response) |response| {
         const len = response.modules().len;
@@ -221,7 +227,6 @@ fn htfConvert(pte: hal.memmodel.HALPageFrame) usize {
     if (pte.read == 0 and pte.write == 0 and pte.execute == 0) { // Branch
         frame |= 0x3; // VALID | WRITE
         frame |= pte.user << 2;
-        frame |= ((~pte.execute) & 1) << 63;
         frame |= pte.noCache << 4;
         frame |= pte.writeThru << 3;
         frame |= pte.writeComb << 12;
@@ -242,12 +247,46 @@ fn htfConvert(pte: hal.memmodel.HALPageFrame) usize {
     return frame;
 }
 
+// This CPUID struct and function orginates from the Rise operating system
+// https://github.com/davidgm94/rise/blob/main/src/lib/arch/x86/common.zig
+// Rise is licensed under the 3-clause BSD License
+pub const CPUID = extern struct {
+    eax: u32,
+    ebx: u32,
+    edx: u32,
+    ecx: u32,
+};
+
+pub inline fn cpuid(leaf: u32) CPUID {
+    var eax: u32 = undefined;
+    var ebx: u32 = undefined;
+    var edx: u32 = undefined;
+    var ecx: u32 = undefined;
+
+    asm volatile (
+        \\cpuid
+        : [eax] "={eax}" (eax),
+          [ebx] "={ebx}" (ebx),
+          [edx] "={edx}" (edx),
+          [ecx] "={ecx}" (ecx),
+        : [leaf] "{eax}" (leaf),
+    );
+
+    return CPUID{
+        .eax = eax,
+        .ebx = ebx,
+        .edx = edx,
+        .ecx = ecx,
+    };
+}
+
 pub const Interface: hal.ArchInterface = .{
     .init = ArchInit,
     .write = ArchWriteString,
     .getHart = ArchGetHart,
     .intControl = ArchIntControl,
     .waitForInt = ArchWaitForInt,
+    .setTimerDeadline = timer.setDeadline,
     .memModel = .{
         .layout = .Paging4Layer,
         .nativeToHal = fthConvert,

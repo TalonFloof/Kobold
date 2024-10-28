@@ -110,5 +110,34 @@ pub fn init() void {
     } else {
         @panic("System does not support ACPI!");
     }
-    if (MADTAddr) |madt| {}
+    if (MADTAddr) |madt| {
+        var entry = &madt.firstEntry;
+        while (@intFromPtr(entry) < @intFromPtr(madt) + madt.acpiHeader.length) : (entry = @as(*MADTRecordHeader, @ptrFromInt(@intFromPtr(entry) + entry.recordLength))) {
+            if (entry.recordType == 1) { // I/O APIC Record
+                const data = @as(*MADTIOApicRecord, @ptrCast(&entry.recordData));
+                if (data.gsiBase == 0) {
+                    apic.ioapic_regSelect = @as(*allowzero u32, @ptrFromInt(@as(usize, @intCast(data.addr))));
+                    apic.ioapic_ioWindow = @as(*allowzero u32, @ptrFromInt(@as(usize, @intCast(data.addr)) + 0x10));
+                }
+            } else if (entry.recordType == 2) { // I/O APIC IRQ Redirect
+                const data = @as(*MADTIRQRedirectRecord, @ptrCast(&entry.recordData));
+                apic.ioapic_redirect[data.gsi] = @as(u8, @intCast(data.irqSource));
+                if (data.irqSource != data.gsi) {
+                    apic.ioapic_redirect[data.irqSource] = 0xff;
+                }
+                if ((data.flags & 2) != 0) {
+                    apic.ioapic_activelow[data.gsi] = true;
+                }
+                if ((data.flags & 4) != 0) {
+                    apic.ioapic_leveltrig[data.gsi] = true;
+                }
+            }
+        }
+        if (@intFromPtr(apic.ioapic_regSelect) == 0) {
+            @panic("No I/O APIC was specified in the MADT!");
+        }
+    } else {
+        @panic("ACPI didn't provide an MADT and we don't know how to parse the MP table (if it even exist!)");
+    }
+    apic.setup();
 }

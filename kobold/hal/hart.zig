@@ -26,6 +26,7 @@ pub const HartInfo = struct {
     activeSyscallStack: usize = 0,
     trapStack: usize = 0,
     archData: ArchData = ArchData{},
+    hartID: usize = 0,
 
     comptime {
         if (@offsetOf(@This(), "tempReg1") != 0)

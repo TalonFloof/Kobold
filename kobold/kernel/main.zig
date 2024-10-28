@@ -1,4 +1,5 @@
 const std = @import("std");
+const builtin = @import("builtin");
 pub const hal = @import("hal");
 pub const physmem = @import("physmem.zig");
 pub const Spinlock = @import("spinlock.zig").Spinlock;
@@ -35,6 +36,7 @@ pub fn doLog(
 
 pub const std_options: std.Options = .{
     .logFn = doLog,
+    .log_level = .debug,
 };
 
 pub fn panic(msg: []const u8, stacktrace: ?*std.builtin.StackTrace, wat: ?usize) noreturn {
@@ -58,5 +60,5 @@ pub fn panic(msg: []const u8, stacktrace: ?*std.builtin.StackTrace, wat: ?usize)
 }
 
 pub export fn KoboldInit() void {
-    elf.kelf_log.debug("", .{});
+    _ = hal.AlignDown(u32, 0, 4096); // Prevents release builds from failing
 }

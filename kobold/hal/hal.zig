@@ -33,7 +33,8 @@ pub export fn HALInitialize(stackTop: usize, dtb: *allowzero anyopaque) callconv
     if (arch.memModel.layout == .Flat)
         @panic("MMUless setups are not supported!");
     root.KoboldInit();
-    @panic("No Command");
+    _ = arch.intControl(true);
+    while (true) {}
 }
 
 pub const ArchInterface = struct {
@@ -42,6 +43,7 @@ pub const ArchInterface = struct {
     getHart: fn () *HartInfo,
     intControl: fn (bool) bool,
     waitForInt: fn () void,
+    setTimerDeadline: ?fn (usize) void, // In Microseconds, will be ticked if not implemented
     memModel: memmodel.MemoryModel,
     Context: type,
 };

@@ -116,10 +116,12 @@ pub fn build(b: *std.Build) void {
         .strip = false,
     });
     if (getArch(board) == .x86_64) {
-        halMod.addCSourceFiles(.{ .files = &.{
-            "../flanterm/flanterm.c",
-            "../flanterm/backends/fb.c",
-        }, .flags = &.{ "-ffreestanding", "-fdelete-null-pointer-checks", "-O2" } });
+        halMod.addCSourceFiles(.{
+            .files = &.{
+                "../flanterm/flanterm.c",
+                "../flanterm/backends/fb.c",
+            },
+        });
         halMod.addIncludePath(b.path("../flanterm"));
         halMod.addObjectFile(b.path("../lowlevel.o"));
     }
