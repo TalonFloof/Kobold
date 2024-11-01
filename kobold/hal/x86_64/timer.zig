@@ -4,8 +4,6 @@ const io = @import("io.zig");
 const apic = @import("apic.zig");
 const acpi = @import("acpi.zig");
 
-extern fn ExecuteNInstructions(u32) callconv(.C) void;
-
 pub fn rdtsc() u64 {
     var rax: u64 = undefined;
     var rdx: u64 = undefined;

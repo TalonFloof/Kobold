@@ -11,6 +11,7 @@ pub const ThreadState = enum {
 };
 
 pub const Thread = struct {
+    threadID: i64,
     prevQueue: ?*Thread = null,
     nextQueue: ?*Thread = null,
     prevTeamThread: ?*Thread = null,
