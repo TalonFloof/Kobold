@@ -132,7 +132,6 @@ fn ArchInit(stackTop: usize, limine_header: *allowzero anyopaque) void {
 }
 
 fn ArchWriteString(_: @TypeOf(.{}), string: []const u8) error{}!usize {
-    // TODO: Implement x86_64 write string
     var i: isize = 0;
     while (i < string.len) : (i += 1) {
         while ((io.inb(0x3F8 + 5) & 0x20) == 0)
@@ -200,6 +199,8 @@ const Context = packed struct {
         std.log.debug(" error code: 0x{x}\n", .{self.errcode});
     }
 };
+
+const FloatContext = packed struct {};
 
 fn fthConvert(pte: usize, high: bool) hal.memmodel.HALPageFrame { // high set if not at 4 KiB granularity
     const frame: hal.memmodel.HALPageFrame = .{};

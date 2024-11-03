@@ -2,9 +2,7 @@ const std = @import("std");
 const hal = @import("root").hal;
 const builtin = @import("builtin");
 
-// TODO: Finish This
-
-pub const PageDirectory = []usize;
+pub const PageDirectory = *anyopaque;
 
 pub const LayoutType = enum {
     Flat,

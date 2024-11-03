@@ -1,6 +1,7 @@
 const std = @import("std");
 const hal = @import("root").hal;
 const Spinlock = @import("root").Spinlock;
+const team = @import("team.zig");
 
 pub const ThreadState = enum {
     Embryo,
@@ -16,11 +17,15 @@ pub const Thread = struct {
     nextQueue: ?*Thread = null,
     prevTeamThread: ?*Thread = null,
     nextTeamThread: ?*Thread = null,
+    team: *team.Team,
+    name: [32]u8 = [_]u8{0} ** 32,
     state: ThreadState = .Embryo,
-    priority: usize = 10,
+    shouldKill: bool = false,
+    priority: usize = 31,
     kstack: []u8,
     activeUstack: usize = 0,
     gpContext: hal.arch.Context = .{},
+    fContext: hal.Arch.FloatContext = .{},
 };
 
 pub const Queue = struct {

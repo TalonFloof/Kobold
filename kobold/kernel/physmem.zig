@@ -2,8 +2,6 @@ const std = @import("std");
 const hal = @import("root").hal;
 const Spinlock = @import("spinlock.zig").Spinlock;
 
-// TODO: Add support for 64-bit paged systems
-
 pub const PhysicalRange = struct {
     start: usize = 0,
     end: usize = 0,

@@ -46,4 +46,5 @@ pub const ArchInterface = struct {
     setTimerDeadline: ?fn (usize) void, // In Microseconds, will be ticked if not implemented
     memModel: memmodel.MemoryModel,
     Context: type,
+    FloatContext: type,
 };
