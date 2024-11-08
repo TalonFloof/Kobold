@@ -22,7 +22,7 @@ iso: build_pc64
 	rm -r --force /tmp/kobold_iso
 
 run_pc64: iso
-	qemu-system-x86_64 -enable-kvm -cpu host -m 32M -serial stdio -cdrom kobold.iso -no-shutdown -no-reboot
+	qemu-system-x86_64 -enable-kvm -cpu host,migratable=off -m 32M -serial stdio -cdrom kobold.iso -no-shutdown -no-reboot
 
 run_rv64: build_rv64
 	qemu-system-riscv64 -machine virt -m 128M -serial stdio -device ramfb -device virtio-keyboard-device -device virtio-mouse-device -kernel kobold/zig-out/bin/kernel

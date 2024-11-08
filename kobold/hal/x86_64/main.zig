@@ -294,4 +294,5 @@ pub const Interface: hal.ArchInterface = .{
         .halToNative = htfConvert,
     },
     .Context = Context,
+    .FloatContext = FloatContext,
 };
