@@ -13,6 +13,14 @@ pub const KernelCall = enum {
     GetDeviceTree, // ACPI-based systems will return the RSDP when you use this, otherwise return a parsed device tree
     IsACPIBased,
     RegisterSyscall,
+
+    RegisterHook,
+    FreeHook,
+};
+
+pub const HookTypes = enum {
+    ThreadSpawnHook,
+    ThreadDeathHook,
 };
 
 pub const PersonalityHeader = struct {

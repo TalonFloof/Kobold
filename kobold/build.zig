@@ -85,7 +85,6 @@ pub fn build(b: *std.Build) void {
         .target = resolvedTarget,
         .linkage = .static,
         .code_model = .large,
-        .strip = false,
     });
     if (getArch(board) == .riscv64) {
         kernel.root_module.code_model = .medium;
@@ -97,7 +96,6 @@ pub fn build(b: *std.Build) void {
         .target = resolvedTarget,
         .optimize = optimize,
         .red_zone = false,
-        .strip = false,
     });
     const dtbMod = b.addModule("dtb", .{
         .root_source_file = b.path("dtb/dtb.zig"),
@@ -105,7 +103,6 @@ pub fn build(b: *std.Build) void {
         .target = resolvedTarget,
         .optimize = optimize,
         .red_zone = false,
-        .strip = false,
     });
     const halMod = b.addModule("hal", .{
         .root_source_file = b.path("hal/hal.zig"),
@@ -113,7 +110,6 @@ pub fn build(b: *std.Build) void {
         .target = resolvedTarget,
         .optimize = optimize,
         .red_zone = false,
-        .strip = false,
     });
     if (getArch(board) == .x86_64) {
         halMod.addCSourceFiles(.{
@@ -127,8 +123,16 @@ pub fn build(b: *std.Build) void {
     }
 
     const ipcMod = b.addObject(.{
-        .name = "wren",
+        .name = "ipc",
         .root_source_file = b.path("personalities/IPC/main.zig"),
+        .target = resolvedModTarget,
+        .optimize = optimize,
+        .code_model = .large,
+        .strip = true,
+    });
+    const vfsMod = b.addObject(.{
+        .name = "vfs",
+        .root_source_file = b.path("personalities/VFS/main.zig"),
         .target = resolvedModTarget,
         .optimize = optimize,
         .code_model = .large,
@@ -136,6 +140,7 @@ pub fn build(b: *std.Build) void {
     });
     if (getArch(board) == .riscv64) {
         ipcMod.root_module.code_model = .medium;
+        vfsMod.root_module.code_model = .medium;
     }
     kernel.want_lto = false;
     kernel.root_module.omit_frame_pointer = false;
@@ -145,4 +150,5 @@ pub fn build(b: *std.Build) void {
     kernel.setLinkerScript(b.path(b.fmt("hal/link/{s}.ld", .{@tagName(board)})));
     b.getInstallStep().dependOn(&b.addInstallArtifact(kernel, .{}).step);
     b.getInstallStep().dependOn(addInstallObjectFile(b, ipcMod, "ipc"));
+    b.getInstallStep().dependOn(addInstallObjectFile(b, vfsMod, "vfs"));
 }

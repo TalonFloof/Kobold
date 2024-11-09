@@ -1,5 +1,6 @@
 // TODO: PFN Support
 const std = @import("std");
+const hal = @import("root").hal;
 const physmem = @import("physmem.zig");
 
 var pfn: ?[]PFNEntry = null;
@@ -19,7 +20,8 @@ pub const PFNEntry = packed struct {
 };
 
 pub fn init(base: u64, entries: usize) void {
-    pfn = @as([*]PFNEntry, @alignCast(@ptrCast(physmem.Allocate(@sizeOf(PFNEntry) * entries, 0).?)))[0..entries];
+    hal.debug.DebugInit();
+    pfn = @as([*]PFNEntry, @alignCast(@ptrCast(physmem.Allocate(@sizeOf(PFNEntry) * entries, @alignOf(PFNEntry)).?)))[0..entries];
     pfnBaseAddr = base;
     @memset(@as([*]u8, @ptrCast(pfn.?.ptr))[0 .. @sizeOf(PFNEntry) * entries], 0);
     std.log.info("PFN @ 0x{x} ({} entries, {} KiB)", .{ @intFromPtr(pfn.?.ptr), entries, (entries * @sizeOf(PFNEntry)) / 1024 });

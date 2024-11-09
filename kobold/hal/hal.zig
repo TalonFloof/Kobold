@@ -10,6 +10,7 @@ pub const archData = (switch (builtin.cpu.arch) {
 pub const arch: ArchInterface = archData.Interface;
 pub const HartInfo = @import("hart.zig").HartInfo;
 pub const memmodel = @import("memmodel.zig");
+pub const debug = @import("debug/debug.zig");
 
 pub const Writer = std.io.Writer(@TypeOf(.{}), error{}, arch.write);
 pub const writer = Writer{ .context = .{} };
@@ -33,8 +34,7 @@ pub export fn HALInitialize(stackTop: usize, dtb: *allowzero anyopaque) callconv
     if (arch.memModel.layout == .Flat)
         @panic("MMUless setups are not supported!");
     root.KoboldInit();
-    _ = arch.intControl(true);
-    while (true) {}
+    @panic("No Command");
 }
 
 pub const ArchInterface = struct {
@@ -44,6 +44,7 @@ pub const ArchInterface = struct {
     intControl: fn (bool) bool,
     waitForInt: fn () void,
     setTimerDeadline: ?fn (usize) void, // In Microseconds, will be ticked if not implemented
+    debugGet: ?fn () u8,
     memModel: memmodel.MemoryModel,
     Context: type,
     FloatContext: type,

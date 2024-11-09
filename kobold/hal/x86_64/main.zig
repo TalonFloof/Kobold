@@ -121,11 +121,21 @@ fn ArchInit(stackTop: usize, limine_header: *allowzero anyopaque) void {
     timer.init();
 
     if (moduleRequest.response) |response| {
-        const len = response.modules().len;
+        var len = response.modules().len;
         var i: usize = 0;
         for (response.modules()) |module| {
+            if (std.mem.eql(u8, @ptrCast(module.cmdline[0..std.mem.len(module.cmdline)]), "KernelDebug")) {
+                len -= 1;
+                hal.debug.file.LoadDebugFile(@ptrCast(module.address));
+                break;
+            }
+        }
+        for (response.modules()) |module| {
+            if (std.mem.eql(u8, @ptrCast(module.cmdline[0..std.mem.len(module.cmdline)]), "KernelDebug")) {
+                continue;
+            }
             std.log.info("Load Module ({}/{}) {s}", .{ i + 1, len, module.cmdline });
-            elf.RelocateELF(@ptrCast(module.address)) catch @panic("failed!");
+            //elf.RelocateELF(@ptrCast(module.address)) catch @panic("failed!");
             i += 1;
         }
     }
@@ -281,6 +291,55 @@ pub inline fn cpuid(leaf: u32) CPUID {
     };
 }
 
+var isShiftPressed: bool = false;
+
+pub const unshiftedMap = [128]u8{
+    0,    27,  '1', '2', '3', '4', '5', '6', '7',  '8', '9', '0',  '-',  '=', 8,   '\t',
+    'q',  'w', 'e', 'r', 't', 'y', 'u', 'i', 'o',  'p', '[', ']',  '\n', 0,   'a', 's',
+    'd',  'f', 'g', 'h', 'j', 'k', 'l', ';', '\'', '`', 0,   '\\', 'z',  'x', 'c', 'v',
+    'b',  'n', 'm', ',', '.', '/', 0,   '*', 0,    ' ', 0,   0,    0,    0,   0,   0,
+    0,    0,   0,   0,   0,   0,   0,   0,   0,    0,   0,   0,    0,    0,   0,   0,
+    '\\', 0,   0,   0,   0,   0,   0,   0,   0,    0,   0,   0,    0,    0,   0,   0,
+    0,    0,   0,   0,   0,   0,   0,   0,   0,    0,   0,   0,    0,    0,   0,   0,
+    0,    0,   0,   0,   0,   0,   0,   0,   0,    0,   0,   0,    0,    0,   0,   0,
+};
+
+pub const shiftedMap = [128]u8{
+    0,   27,  '!', '@', '#', '$', '%', '^', '&', '*', '(', ')', '_',  '+', 8,   '\t',
+    'Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P', '{', '}', '\n', 0,   'A', 'S',
+    'D', 'F', 'G', 'H', 'J', 'K', 'L', ':', '"', '~', 0,   '|', 'Z',  'X', 'C', 'V',
+    'B', 'N', 'M', '<', '>', '?', 0,   '*', 0,   ' ', 0,   0,   0,    0,   0,   0,
+    0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,    0,   0,   0,
+    '|', 0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,    0,   0,   0,
+    0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,    0,   0,   0,
+    0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,    0,   0,   0,
+};
+
+fn ArchDebugGet() u8 {
+    while (true) {
+        var status = io.inb(0x64);
+        while ((status & 1) != 0) {
+            const key = io.inb(0x60);
+            if ((status & 0x20) != 0) {
+                status = io.inb(0x64);
+                continue;
+            }
+            if (key == 0x2a or key == 0x36) {
+                isShiftPressed = true;
+            } else if (key == 0xaa or key == 0xb6) {
+                isShiftPressed = false;
+            } else if (key < 128) {
+                const char = if (isShiftPressed) shiftedMap[key] else unshiftedMap[key];
+                if (char != 0) {
+                    return char;
+                }
+            }
+            status = io.inb(0x64);
+        }
+        std.atomic.spinLoopHint();
+    }
+}
+
 pub const Interface: hal.ArchInterface = .{
     .init = ArchInit,
     .write = ArchWriteString,
@@ -288,6 +347,7 @@ pub const Interface: hal.ArchInterface = .{
     .intControl = ArchIntControl,
     .waitForInt = ArchWaitForInt,
     .setTimerDeadline = timer.setDeadline,
+    .debugGet = ArchDebugGet,
     .memModel = .{
         .layout = .Paging4Layer,
         .nativeToHal = fthConvert,

@@ -1,12 +1,16 @@
 build_rv64:
 	rm -r -f kobold/zig-out/
 	cd kobold; zig build -Dboard=qemu_riscv64; cd ..
+	nm -B -S -n kobold/zig-out/bin/kernel | python3 scripts/generateDebugFile.py kobold/zig-out/bin/kernel.dbg
+	objcopy -S kobold/zig-out/bin/kernel
 
 build_pc64: limine-zig
 	rm -r -f kobold/zig-out/
 	nasm -f elf64 -O0 kobold/hal/x86_64/lowlevel.s -o lowlevel.o
 	cd kobold; zig build -Dboard=pc_x86_64 -Doptimize=Debug; cd ..
 	rm -r -f lowlevel.o
+	nm -B -S -n kobold/zig-out/bin/* | python3 scripts/generateDebugFile.py kobold/zig-out/bin/kernel.dbg
+	# objcopy -S kobold/zig-out/bin/kernel
 
 iso: build_pc64
 	rm -r --force /tmp/limine

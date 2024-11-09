@@ -5,7 +5,6 @@ pub const physmem = @import("physmem.zig");
 pub const Spinlock = @import("spinlock.zig").Spinlock;
 pub const elf = @import("elf.zig");
 pub const pfn = @import("pfn.zig");
-pub const port = @import("port.zig");
 
 pub const kmain_log = std.log.scoped(.KernelMain);
 
@@ -40,20 +39,12 @@ pub const std_options: std.Options = .{
     .log_level = .debug,
 };
 
-pub fn panic(msg: []const u8, stacktrace: ?*std.builtin.StackTrace, wat: ?usize) noreturn {
-    _ = wat;
+pub fn panic(msg: []const u8, stacktrace: ?*std.builtin.StackTrace, retAddr: ?usize) noreturn {
     _ = stacktrace;
     _ = hal.arch.intControl(false);
     kmain_log.err("panic (hart 0x0) {s}", .{msg});
-    kmain_log.debug("Stack Backtrace\n", .{});
-    const frameStart = @returnAddress();
-    var it = std.debug.StackIterator.init(frameStart, null);
-    while (it.next()) |frame| {
-        if (frame == 0) {
-            break;
-        }
-        kmain_log.debug("  \x1b[1;30m0x{x:0>16}\x1b[0m\n", .{frame});
-    }
+    hal.debug.PrintBacktrace(retAddr orelse @returnAddress());
+    hal.debug.EnterDebugger();
     while (true) {
         _ = hal.arch.intControl(false);
         hal.arch.waitForInt();
