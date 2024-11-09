@@ -3,12 +3,7 @@ const std = @import("std");
 pub const KernelCall = enum {
     Log,
     Panic,
-    RegisterRuntime,
-    RegisterKIP,
-    RegisterPort,
     SpawnKThread,
-    SendMessage, // Non-KIP Ports Only
-    RecieveMessage, // Non-KIP Ports Only
     MemAlloc,
     MemFree,
     IRQEnableDisable,
@@ -17,6 +12,7 @@ pub const KernelCall = enum {
     FindPersonality,
     GetDeviceTree, // ACPI-based systems will return the RSDP when you use this, otherwise return a parsed device tree
     IsACPIBased,
+    RegisterSyscall,
 };
 
 pub const PersonalityHeader = struct {

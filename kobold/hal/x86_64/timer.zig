@@ -19,6 +19,7 @@ var ticksPerSecond: u64 = 0;
 
 pub fn init() void {
     if (ticksPerSecond == 0) {
+        std.log.info("{}", .{hal.archData.cpuid(0x15)});
         if ((hal.archData.cpuid(0x80000007).edx & (1 << 8)) == 0) {
             std.log.warn("TSC isn't invariant, reverting to discrete timer for timekeeping", .{});
         }

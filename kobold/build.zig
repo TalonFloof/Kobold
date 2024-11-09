@@ -126,36 +126,23 @@ pub fn build(b: *std.Build) void {
         halMod.addObjectFile(b.path("../lowlevel.o"));
     }
 
-    const wrenMod = b.addObject(.{
+    const ipcMod = b.addObject(.{
         .name = "wren",
-        .root_source_file = b.path("personalities/Wren/main.zig"),
+        .root_source_file = b.path("personalities/IPC/main.zig"),
         .target = resolvedModTarget,
         .optimize = optimize,
         .code_model = .large,
         .strip = true,
     });
     if (getArch(board) == .riscv64) {
-        wrenMod.root_module.code_model = .medium;
+        ipcMod.root_module.code_model = .medium;
     }
-    wrenMod.addCSourceFiles(.{ .files = &.{
-        "personalities/Wren/wren_compiler.c",
-        "personalities/Wren/wren_core.c",
-        "personalities/Wren/wren_primitive.c",
-        "personalities/Wren/wren_utils.c",
-        "personalities/Wren/wren_value.c",
-        "personalities/Wren/wren_vm.c",
-        "personalities/Wren/wren_opt_meta.c",
-        "personalities/Wren/wren_debug.c",
-        "personalities/Wren/vmstdlib_c.c",
-        "personalities/Wren/tinyprintf.c",
-    } });
     kernel.want_lto = false;
     kernel.root_module.omit_frame_pointer = false;
-    wrenMod.entry = std.Build.Step.Compile.Entry.disabled;
     kernel.entry = std.Build.Step.Compile.Entry.disabled;
     kernel.root_module.addImport("dtb", dtbMod);
     kernel.root_module.addImport("hal", halMod);
     kernel.setLinkerScript(b.path(b.fmt("hal/link/{s}.ld", .{@tagName(board)})));
     b.getInstallStep().dependOn(&b.addInstallArtifact(kernel, .{}).step);
-    b.getInstallStep().dependOn(addInstallObjectFile(b, wrenMod, "wren"));
+    b.getInstallStep().dependOn(addInstallObjectFile(b, ipcMod, "ipc"));
 }
