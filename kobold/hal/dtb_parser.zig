@@ -1,7 +1,7 @@
 const std = @import("std");
 const dtb = @import("dtb");
 const physmem = @import("root").physmem;
-const hal = @import("root").hal;
+const hal = @import("hal.zig");
 
 var freeMemory: [64]physmem.PhysicalRange = [_]physmem.PhysicalRange{.{ .start = 0, .end = 0 }} ** 64;
 

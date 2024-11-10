@@ -1,5 +1,5 @@
 const std = @import("std");
-const hal = @import("root").hal;
+const hal = @import("../hal.zig");
 const physmem = @import("root").physmem;
 const io = @import("io.zig");
 const gdt = @import("gdt.zig");

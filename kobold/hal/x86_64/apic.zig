@@ -1,5 +1,5 @@
 const std = @import("std");
-const hal = @import("root").hal;
+const hal = @import("../hal.zig");
 
 pub var lapic_ptr: usize = 0;
 pub var ioapic_regSelect: *allowzero volatile u32 = @as(*allowzero volatile u32, @ptrFromInt(0));

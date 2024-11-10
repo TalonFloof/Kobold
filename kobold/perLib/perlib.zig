@@ -1,4 +1,5 @@
 const std = @import("std");
+pub const Spinlock = @import("spinlock.zig").Spinlock;
 
 pub const KernelCall = enum {
     Log,

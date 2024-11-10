@@ -1,5 +1,5 @@
 const std = @import("std");
-const hal = @import("root").hal;
+const hal = @import("hal.zig");
 const builtin = @import("builtin");
 
 pub const PageDirectory = *anyopaque;

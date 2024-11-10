@@ -78,6 +78,12 @@ pub fn build(b: *std.Build) void {
     const resolvedModTarget = b.resolveTargetQuery(modTargetQuery);
     const optimize = b.standardOptimizeOption(.{});
 
+    const perlibMod = b.addModule("perlib", .{
+        .root_source_file = b.path("perLib/perlib.zig"),
+        .target = resolvedTarget,
+        .optimize = optimize,
+        .red_zone = false,
+    });
     const kernel = b.addExecutable(.{
         .name = "kernel",
         .root_source_file = b.path("kernel/main.zig"),
@@ -89,7 +95,6 @@ pub fn build(b: *std.Build) void {
     if (getArch(board) == .riscv64) {
         kernel.root_module.code_model = .medium;
     }
-
     const limineMod = b.addModule("limine", .{
         .root_source_file = b.path("../limine-zig/limine.zig"),
         .imports = &.{},
@@ -106,7 +111,7 @@ pub fn build(b: *std.Build) void {
     });
     const halMod = b.addModule("hal", .{
         .root_source_file = b.path("hal/hal.zig"),
-        .imports = &.{ .{ .name = "dtb", .module = dtbMod }, .{ .name = "limine", .module = limineMod } },
+        .imports = &.{ .{ .name = "dtb", .module = dtbMod }, .{ .name = "limine", .module = limineMod }, .{ .name = "perlib", .module = perlibMod } },
         .target = resolvedTarget,
         .optimize = optimize,
         .red_zone = false,
@@ -149,6 +154,7 @@ pub fn build(b: *std.Build) void {
     kernel.entry = std.Build.Step.Compile.Entry.disabled;
     kernel.root_module.addImport("dtb", dtbMod);
     kernel.root_module.addImport("hal", halMod);
+    kernel.root_module.addImport("perlib", perlibMod);
     kernel.setLinkerScript(b.path(b.fmt("hal/link/{s}.ld", .{@tagName(board)})));
     b.getInstallStep().dependOn(&b.addInstallArtifact(kernel, .{}).step);
     b.getInstallStep().dependOn(addInstallObjectFile(b, ipcMod, "ipc"));

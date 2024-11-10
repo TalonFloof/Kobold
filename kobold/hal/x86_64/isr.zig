@@ -1,5 +1,5 @@
 const std = @import("std");
-const hal = @import("root").hal;
+const hal = @import("../hal.zig");
 const apic = @import("apic.zig");
 
 pub fn stub() void {}
@@ -8,7 +8,7 @@ pub export fn ExceptionHandler(entry: u8, con: *hal.arch.Context) callconv(.C) v
     // TODO: Write Exception Handler
     std.log.err("Unexpected Exception 0x{x}", .{entry});
     con.Dump();
-    @panic("Unexpected Exception!");
+    hal.HALOops("Unexpected Exception!");
 }
 
 pub export fn IRQHandler(entry: u8, con: *hal.arch.Context) callconv(.C) *hal.arch.Context {

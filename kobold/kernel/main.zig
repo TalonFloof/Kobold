@@ -2,7 +2,7 @@ const std = @import("std");
 const builtin = @import("builtin");
 pub const hal = @import("hal");
 pub const physmem = @import("physmem.zig");
-pub const Spinlock = @import("spinlock.zig").Spinlock;
+pub const Spinlock = @import("perlib").Spinlock;
 pub const elf = @import("elf.zig");
 pub const pfn = @import("pfn.zig");
 
@@ -42,7 +42,7 @@ pub const std_options: std.Options = .{
 pub fn panic(msg: []const u8, stacktrace: ?*std.builtin.StackTrace, retAddr: ?usize) noreturn {
     _ = stacktrace;
     _ = hal.arch.intControl(false);
-    kmain_log.err("panic (hart 0x0) {s}", .{msg});
+    kmain_log.err("panic (hart 0x{x}) {s}", .{ hal.arch.getHart().hartID, msg });
     hal.debug.PrintBacktrace(retAddr orelse @returnAddress());
     hal.debug.EnterDebugger();
     while (true) {

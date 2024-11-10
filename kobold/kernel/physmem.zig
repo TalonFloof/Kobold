@@ -1,6 +1,6 @@
 const std = @import("std");
 const hal = @import("root").hal;
-const Spinlock = @import("spinlock.zig").Spinlock;
+const Spinlock = @import("perlib").Spinlock;
 
 pub const PhysicalRange = struct {
     start: usize = 0,

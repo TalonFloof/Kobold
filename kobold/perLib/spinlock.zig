@@ -12,7 +12,7 @@ pub const Spinlock = enum(u8) {
             }
             std.atomic.spinLoopHint();
         }
-        @panic("Deadlock");
+        @panic("Deadlock detected");
     }
 
     pub inline fn release(spinlock: *volatile Spinlock) void {

@@ -1,5 +1,5 @@
 const std = @import("std");
-const hal = @import("root").hal;
+const hal = @import("../hal.zig");
 
 var gdtEntries = [16]u64{
     0x0000000000000000, // 0x00: NULL

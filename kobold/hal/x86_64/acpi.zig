@@ -1,5 +1,5 @@
 const std = @import("std");
-const hal = @import("root").hal;
+const hal = @import("../hal.zig");
 const limine = @import("limine");
 const apic = @import("apic.zig");
 
@@ -91,7 +91,7 @@ pub const acpi_log = std.log.scoped(.ACPI);
 pub fn init() void {
     if (rsdp_request.response) |rsdp_response| {
         if (@intFromPtr(rsdp_response.address) == 0) {
-            @panic("System does not support ACPI!");
+            hal.HALOops("System does not support ACPI!");
         }
         const rsdp: *RSDP = @as(*RSDP, @ptrCast(rsdp_response.address));
         const rsdt = @as(*Header, @ptrFromInt(@as(usize, @intCast(rsdp.RSDT)) + 0xffff800000000000));
@@ -108,7 +108,7 @@ pub fn init() void {
             }
         }
     } else {
-        @panic("System does not support ACPI!");
+        hal.HALOops("System does not support ACPI!");
     }
     if (MADTAddr) |madt| {
         var entry = &madt.firstEntry;
@@ -134,10 +134,10 @@ pub fn init() void {
             }
         }
         if (@intFromPtr(apic.ioapic_regSelect) == 0) {
-            @panic("No I/O APIC was specified in the MADT!");
+            hal.HALOops("No I/O APIC was specified in the MADT!");
         }
     } else {
-        @panic("ACPI didn't provide an MADT and we don't know how to parse the MP table (if it even exist!)");
+        hal.HALOops("ACPI didn't provide an MADT and we don't know how to parse the MP table (if it even exist!)");
     }
     apic.setup();
 }
