@@ -1,4 +1,4 @@
-name: RISC-V Build
+name: X86-64 Build
 
 on:
   push:
@@ -17,11 +17,11 @@ jobs:
       with:
         version: 0.13.0
 
-    - name: Build RISC-V 64-bit
-      run: make build_rv64
+    - name: Build x86-64
+      run: make iso
 
-    - name: Upload RISC-V 64-bit
+    - name: Upload x86-64
       uses: actions/upload-artifact@v4
       with:
-        name: rv64-binaries
-        path: kobold/zig-out/bin/*
+        name: kobold.iso
+        path: kobold.iso

@@ -136,6 +136,32 @@ pub fn sbCommand(cmd: []const u8, iter: *std.mem.SplitIterator(u8, .sequence)) v
     }
 }
 
+pub fn snCommand(cmd: []const u8, iter: *std.mem.SplitIterator(u8, .sequence)) void {
+    _ = cmd;
+    if (iter.peek() != null) {
+        const sym = iter.rest();
+        const range = file.GetSymbolRange(sym);
+        if (range.start == 0 and range.end == 0) {
+            std.log.debug("Symbol \"{s}\" is not within the debug file\n", .{sym});
+            return;
+        }
+        const slice = @as([*]const u8, @ptrFromInt(range.start))[0..range.end];
+        if (slice.len == 1) {
+            std.log.debug("u8 {s} = 0x{x}\n", .{ sym, @as(*u8, @ptrFromInt(range.start)).* });
+        } else if (slice.len == 2) {
+            std.log.debug("u16 {s} = 0x{x}\n", .{ sym, @as(*u16, @ptrFromInt(range.start)).* });
+        } else if (slice.len == 4) {
+            std.log.debug("u32 {s} = 0x{x}\n", .{ sym, @as(*u32, @ptrFromInt(range.start)).* });
+        } else if (slice.len == 8) {
+            std.log.debug("u64 {s} = 0x{x}\n", .{ sym, @as(*u64, @ptrFromInt(range.start)).* });
+        } else {
+            std.log.debug("A symbol with {} bytes does not translate to a number, use sb to dump the data instead\n", .{slice.len});
+        }
+    } else {
+        std.log.debug("Usage: sn <symbolName>\n", .{});
+    }
+}
+
 pub fn symsCommand(cmd: []const u8, iter: *std.mem.SplitIterator(u8, .sequence)) void {
     _ = cmd;
     if (iter.peek() != null) {
@@ -169,5 +195,6 @@ pub fn DebugInit() void {
     NewDebugCommand("help", "Prints this message", &helpCommand);
     NewDebugCommand("bt", "Prints a Stack Backtrace", &backtraceCommand);
     NewDebugCommand("sb", "Dump hex data (in byte sizes) within a given symbol", &sbCommand);
+    NewDebugCommand("sn", "Dump number within a given symbol", &snCommand);
     NewDebugCommand("syms", "Searches for symbols and lists them out", &symsCommand);
 }
