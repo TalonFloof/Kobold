@@ -10,7 +10,7 @@ build_pc64: limine-zig
 	cd kobold; zig build -Dboard=pc_x86_64 -Doptimize=Debug; cd ..
 	rm -r -f lowlevel.o
 	nm -B -S -n kobold/zig-out/bin/* | python3 scripts/generateDebugFile.py kobold/zig-out/bin/kernel.dbg
-	# objcopy -S kobold/zig-out/bin/kernel
+	objcopy -S kobold/zig-out/bin/kernel
 
 iso: build_pc64
 	rm -r --force /tmp/limine
