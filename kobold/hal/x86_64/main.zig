@@ -315,6 +315,8 @@ pub const shiftedMap = [128]u8{
     0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,    0,   0,   0,
 };
 
+extern fn disasm(addr: usize, str: *anyopaque) callconv(.C) usize;
+
 fn ArchDebugGet() u8 {
     while (true) {
         var status = io.inb(0x64);
@@ -348,6 +350,7 @@ pub const Interface: hal.ArchInterface = .{
     .waitForInt = ArchWaitForInt,
     .setTimerDeadline = timer.setDeadline,
     .debugGet = ArchDebugGet,
+    .debugDisasm = disasm,
     .memModel = .{
         .layout = .Paging4Layer,
         .nativeToHal = fthConvert,

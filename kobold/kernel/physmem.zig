@@ -230,10 +230,16 @@ pub fn FreeC(addr: ?*anyopaque, size: usize) callconv(.C) void {
     Free(@intFromPtr(addr.?), size);
 }
 
-pub fn PrintMap() void {
+pub fn PrintMap(cmd: []const u8, iter: *std.mem.SplitIterator(u8, .sequence)) void {
+    _ = cmd;
+    _ = iter;
     var cursor = firstFree;
     while (cursor) |node| {
-        physmem_log.info("0x{x}-0x{x} Free", .{ node.start, node.end - 1 });
+        std.log.debug("0x{x}-0x{x} Free\n", .{ node.start, node.end - 1 });
         cursor = node.next;
     }
+}
+
+pub fn DebugInit() void {
+    hal.debug.NewDebugCommand("freeMap", "Prints all avaiable ranges of memory that can be used for allocations", &PrintMap);
 }

@@ -114,9 +114,11 @@ pub fn build(b: *std.Build) void {
     if (getArch(board) == .x86_64) {
         halMod.addCSourceFiles(.{
             .files = &.{
+                "hal/x86_64/disasm.c",
                 "../flanterm/flanterm.c",
                 "../flanterm/backends/fb.c",
             },
+            .flags = &.{"-fno-sanitize=undefined"},
         });
         halMod.addIncludePath(b.path("../flanterm"));
         halMod.addObjectFile(b.path("../lowlevel.o"));

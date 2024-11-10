@@ -162,6 +162,41 @@ pub fn snCommand(cmd: []const u8, iter: *std.mem.SplitIterator(u8, .sequence)) v
     }
 }
 
+pub fn siCommand(cmd: []const u8, iter: *std.mem.SplitIterator(u8, .sequence)) void {
+    _ = cmd;
+    if (hal.arch.debugDisasm) |disasm| {
+        const sym = iter.rest();
+        const range = file.GetSymbolRange(sym);
+        if (range.start == 0 and range.end == 0) {
+            std.log.debug("Symbol \"{s}\" is not within the debug file\n", .{sym});
+            return;
+        }
+        const end = range.start + range.end;
+        var buf: [256]u8 = [_]u8{0} ** 256;
+        var i = range.start;
+        while (i < end) {
+            std.log.debug("{x}: ", .{i});
+            i = disasm(i, &buf);
+            std.log.debug("{s}\n", .{@as([*c]u8, @ptrFromInt(@intFromPtr(&buf)))});
+            @memset(@as([*]u8, @alignCast(@ptrCast(&buf)))[0..256], 0);
+        }
+    } else {
+        std.log.debug("This architecture does not have an available disassembler\n", .{});
+    }
+}
+
+pub fn nsCommand(cmd: []const u8, iter: *std.mem.SplitIterator(u8, .sequence)) void {
+    _ = cmd;
+    if (iter.next()) |addrStr| {
+        const addr = std.fmt.parseInt(usize, addrStr, 0) catch 0;
+        std.log.debug("0x{x} = ", .{addr});
+        file.PrintSymbolName(addr);
+        std.log.debug("\n", .{});
+    } else {
+        std.log.debug("Usage: ns <address>\n", .{});
+    }
+}
+
 pub fn symsCommand(cmd: []const u8, iter: *std.mem.SplitIterator(u8, .sequence)) void {
     _ = cmd;
     if (iter.peek() != null) {
@@ -196,5 +231,7 @@ pub fn DebugInit() void {
     NewDebugCommand("bt", "Prints a Stack Backtrace", &backtraceCommand);
     NewDebugCommand("sb", "Dump hex data (in byte sizes) within a given symbol", &sbCommand);
     NewDebugCommand("sn", "Dump number within a given symbol", &snCommand);
+    NewDebugCommand("si", "Disassembles the given symbol", &siCommand);
+    NewDebugCommand("ns", "Retrieves the nearest symbol to a given address", &nsCommand);
     NewDebugCommand("syms", "Searches for symbols and lists them out", &symsCommand);
 }

@@ -21,6 +21,7 @@ pub const PFNEntry = packed struct {
 
 pub fn init(base: u64, entries: usize) void {
     hal.debug.DebugInit();
+    physmem.DebugInit();
     pfn = @as([*]PFNEntry, @alignCast(@ptrCast(physmem.Allocate(@sizeOf(PFNEntry) * entries, @alignOf(PFNEntry)).?)))[0..entries];
     pfnBaseAddr = base;
     @memset(@as([*]u8, @ptrCast(pfn.?.ptr))[0 .. @sizeOf(PFNEntry) * entries], 0);

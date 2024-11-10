@@ -43,8 +43,9 @@ pub const ArchInterface = struct {
     getHart: fn () *HartInfo,
     intControl: fn (bool) bool,
     waitForInt: fn () void,
-    setTimerDeadline: ?fn (usize) void, // In Microseconds, will be ticked if not implemented
-    debugGet: ?fn () u8,
+    setTimerDeadline: ?fn (usize) void = null, // In Microseconds, will be ticked if not implemented
+    debugGet: ?fn () u8 = null,
+    debugDisasm: ?fn (usize, *anyopaque) callconv(.C) usize = null,
     memModel: memmodel.MemoryModel,
     Context: type,
     FloatContext: type,
