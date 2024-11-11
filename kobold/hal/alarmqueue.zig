@@ -6,3 +6,19 @@
 // though this error tends to be within nanosecond ranges, which is not enough for most software to notice.
 const std = @import("std");
 const hal = @import("hal.zig");
+const Spinlock = @import("perlib").Spinlock;
+
+pub const AlarmQueueNode = struct {
+    deadline: u64,
+    data: ?*anyopaque = null,
+    func: *fn(?*anyopaque) callconv(.C) void,
+};
+
+const AlarmQueueList = std.DoublyLinkedList(AlarmQueueNode);
+pub const AlarmQueue = struct {
+    lock: Spinlock = .unaquired,
+    ticks: u64 = 0,
+    list: AlarmQueueList = .{},
+
+    
+};
