@@ -25,6 +25,8 @@ pub const HartInfo = struct {
     activeContextStack: usize = 0,
     activeSyscallStack: usize = 0,
     trapStack: usize = 0,
+    timerCounter: u64 = 0, // In microseconds
+    timerNextInterval: u64 = 0, // The inital set time of the timer, in microseconds
     archData: ArchData = ArchData{},
     hartID: usize = 0,
 
