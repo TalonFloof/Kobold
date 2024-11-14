@@ -12,26 +12,33 @@ const physmem = @import("root").physmem;
 pub const AlarmQueueNode = struct {
     deadline: u64,
     data: ?*anyopaque = null,
-    func: *fn(?*anyopaque) callconv(.C) void,
+    func: *fn (?*anyopaque) callconv(.C) void,
 };
 
 const AlarmQueueList = std.DoublyLinkedList(AlarmQueueNode);
 pub const AlarmQueue = struct {
     lock: Spinlock = .unaquired,
     list: AlarmQueueList = .{},
+    timerCounter: u64 = 0,
+    timerNextInterval: u64 = 0,
 
-    pub fn addAlarm(timeout: u64, func: *fn(?*anyopaque) callconv(.C) void, data: ?*anyopaque) void {
-        const node = @ptrCast(@alignCast(physmem.Allocate(@sizeOf(AlarmQueueList.Node),@alignOf(AlarmQueueList.node)).?));
+    pub fn addAlarm(self: *AlarmQueue, timeout: u64, func: *fn (?*anyopaque) callconv(.C) void, data: ?*anyopaque) void {
+        const old = hal.arch.intControl(false);
+        self.lock.acquire();
+        const node: AlarmQueueList.Node = @ptrCast(@alignCast(physmem.Allocate(@sizeOf(AlarmQueueList.Node), @alignOf(AlarmQueueList.node)).?));
         node.data.deadline = hal.arch.getHart().timerCounter + timeout;
         node.data.data = data;
         node.data.func = func;
+        self.schedule();
+        self.lock.release();
+        _ = hal.arch.intControl(old);
     }
 
-    fn recalibrate() void {
+    fn schedule(self: *AlarmQueue) void {
         const elapsedTime = hal.arch.getHart().timerNextInterval - hal.arch.getRemainingTime();
-        var ind = list.first;
-        while(ind != null) {
-            
+        var closestDeadline: u64 = 0xffff_ffff_ffff_ffff;
+        var ind = self.list.first;
+        while (ind != null) {
             ind = ind.?.next;
         }
     }
