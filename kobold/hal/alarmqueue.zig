@@ -22,11 +22,11 @@ pub const AlarmQueue = struct {
     timerCounter: u64 = 0,
     timerNextInterval: u64 = 0,
 
-    pub fn addAlarm(self: *AlarmQueue, timeout: u64, func: *fn (?*anyopaque) callconv(.C) void, data: ?*anyopaque) void {
+    pub fn addAlarm(self: *AlarmQueue, timeout: u64, func: *fn (?*anyopaque) callconv(.C) void, data: ?*anyopaque) *AlarmQueueList.Node {
         const old = hal.arch.intControl(false);
         self.lock.acquire();
         const node: AlarmQueueList.Node = @ptrCast(@alignCast(physmem.Allocate(@sizeOf(AlarmQueueList.Node), @alignOf(AlarmQueueList.node)).?));
-        node.data.deadline = hal.arch.getHart().timerCounter + timeout;
+        node.data.deadline = self.timerCounter + timeout;
         node.data.data = data;
         node.data.func = func;
         self.schedule();
@@ -34,12 +34,40 @@ pub const AlarmQueue = struct {
         _ = hal.arch.intControl(old);
     }
 
+    pub fn removeAlarm(self: *AlarmQueue, aqn: *AlarmQueueList.Node) void {
+        const old = hal.arch.intControl(false);
+        self.lock.acquire();
+        self.list.remove(aqn);
+        self.schedule();
+        self.lock.release();
+        _ = hal.arch.intControl(old);
+    }
+
     fn schedule(self: *AlarmQueue) void {
-        const elapsedTime = hal.arch.getHart().timerNextInterval - hal.arch.getRemainingTime();
+        const elapsedTime = self.timerNextInterval - hal.arch.getRemainingTime();
+        self.timerCounter += elapsedTime;
         var closestDeadline: u64 = 0xffff_ffff_ffff_ffff;
         var ind = self.list.first;
-        while (ind != null) {
-            ind = ind.?.next;
+        while (ind) |i| {
+            if(self.timerCounter >= i.data.deadline) {
+                const next = i.next;
+                i.data.func(i.data.data);
+                list.remove(i);
+                ind = next;
+            } else if(i.data.deadline < closestDeadline) {
+                closestDeadline = i.data.deadline;
+                ind = i.next;
+            } else {
+                ind = i.next;
+            }
+        }
+        if(closestDeadline == 0xffff_ffff_ffff_ffff) {
+            self.timerNextInterval = 0;
+            return;
+        } else {
+            self.timerNextInterval = closestDeadline-self.timerCounter;
+            hal.arch.setTimerDeadline(self.timerNextInterval);
+            return;
         }
     }
 };

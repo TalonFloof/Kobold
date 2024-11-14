@@ -20,9 +20,8 @@ pub const Thread = struct {
     name: [32]u8 = [_]u8{0} ** 32,
     state: ThreadState = .Embryo,
     shouldKill: bool = false,
-    priority: usize = 31,
+    priority: usize = 16,
     kstack: []u8,
-    activeUstack: usize = 0,
     gpContext: hal.arch.Context = .{},
     fContext: hal.Arch.FloatContext = .{},
 };
