@@ -74,12 +74,12 @@ pub fn init() void {
     apic.write(0x320, 0x20);
 }
 
-pub fn setDeadline(microsecs: usize) void {
-    const t: usize = @intFromFloat(@as(f64, @floatFromInt(ticksPerSecond)) * (@as(f64, @floatFromInt(microsecs)) / 1000000.0));
+pub fn setDeadline(microsecs: u64) void {
+    const t: u64 = @intFromFloat(@as(f64, @floatFromInt(ticksPerSecond)) * (@as(f64, @floatFromInt(microsecs)) / 1000000.0));
     apic.write(0x380, t);
 }
 
-pub fn getRemainingUs() usize {
+pub fn getRemainingUs() u64 {
     const count = 0xffffffff - apic.read(0x390);
     return @intFromFloat(@as(f64, @floatFromInt(count)) * (@as(f64, @floatFromInt(ticksPerSecond)) / 1000000.0));
 }

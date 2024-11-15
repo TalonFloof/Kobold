@@ -349,6 +349,7 @@ pub const Interface: hal.ArchInterface = .{
     .intControl = ArchIntControl,
     .waitForInt = ArchWaitForInt,
     .setTimerDeadline = timer.setDeadline,
+    .getRemainingTime = timer.getRemainingUs,
     .debugGet = ArchDebugGet,
     .debugDisasm = disasm,
     .memModel = .{

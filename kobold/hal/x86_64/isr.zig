@@ -13,7 +13,12 @@ pub export fn ExceptionHandler(entry: u8, con: *hal.arch.Context) callconv(.C) v
 
 pub export fn IRQHandler(entry: u8, con: *hal.arch.Context) callconv(.C) *hal.arch.Context {
     // TODO: Write IRQ Handler
-    std.log.warn("IRQ 0x{x}!", .{entry - 0x20});
     apic.write(0xb0, 0);
+    if (entry - 0x20 == 0x0) {
+        const queue = &(hal.arch.getHart()).alarmQueue;
+        queue.lock.acquire();
+        queue.schedule();
+        queue.lock.release();
+    }
     return con;
 }

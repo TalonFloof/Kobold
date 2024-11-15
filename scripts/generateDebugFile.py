@@ -27,7 +27,6 @@ for file in files.keys():
         if syms[i][1] == -1:
             if i+1 < len(syms):
                 syms[i][1] = syms[i+1][0]-syms[i][0]
-                print(syms[i][3], syms[i][1])
             else:
                 syms[i][1] = 0
 

@@ -223,7 +223,7 @@ pub fn Free(address: usize, size: usize) void {
 }
 
 pub fn AllocateC(size: usize) callconv(.C) ?*anyopaque {
-    return Allocate(size + @sizeOf(usize), 0);
+    return Allocate(size, @alignOf(usize));
 }
 
 pub fn FreeC(addr: ?*anyopaque, size: usize) callconv(.C) void {
@@ -234,10 +234,13 @@ pub fn PrintMap(cmd: []const u8, iter: *std.mem.SplitIterator(u8, .sequence)) vo
     _ = cmd;
     _ = iter;
     var cursor = firstFree;
+    var freeSpace: usize = 0;
     while (cursor) |node| {
         std.log.debug("0x{x}-0x{x} Free\n", .{ node.start, node.end - 1 });
+        freeSpace += node.end - node.start;
         cursor = node.next;
     }
+    std.log.debug(" {} KiB Free\n", .{freeSpace / 1024});
 }
 
 pub fn DebugInit() void {

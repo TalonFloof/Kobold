@@ -43,30 +43,30 @@ pub const AlarmQueue = struct {
         _ = hal.arch.intControl(old);
     }
 
-    fn schedule(self: *AlarmQueue) void {
-        const elapsedTime = self.timerNextInterval - hal.arch.getRemainingTime();
+    pub fn schedule(self: *AlarmQueue) void {
+        const elapsedTime = self.timerNextInterval - hal.arch.getRemainingTime.?();
         self.timerCounter += elapsedTime;
         var closestDeadline: u64 = 0xffff_ffff_ffff_ffff;
         var ind = self.list.first;
         while (ind) |i| {
-            if(self.timerCounter >= i.data.deadline) {
+            if (self.timerCounter >= i.data.deadline) {
                 const next = i.next;
                 i.data.func(i.data.data);
-                list.remove(i);
+                self.list.remove(i);
                 ind = next;
-            } else if(i.data.deadline < closestDeadline) {
+            } else if (i.data.deadline < closestDeadline) {
                 closestDeadline = i.data.deadline;
                 ind = i.next;
             } else {
                 ind = i.next;
             }
         }
-        if(closestDeadline == 0xffff_ffff_ffff_ffff) {
+        if (closestDeadline == 0xffff_ffff_ffff_ffff) {
             self.timerNextInterval = 0;
             return;
         } else {
-            self.timerNextInterval = closestDeadline-self.timerCounter;
-            hal.arch.setTimerDeadline(self.timerNextInterval);
+            self.timerNextInterval = closestDeadline - self.timerCounter;
+            hal.arch.setTimerDeadline.?(self.timerNextInterval);
             return;
         }
     }
