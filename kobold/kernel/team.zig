@@ -2,6 +2,7 @@ const std = @import("std");
 const thread = @import("thread.zig");
 const Spinlock = @import("root").Spinlock;
 const hal = @import("root").hal;
+const RedBlackTree = @import("perlib").RedBlackTree;
 
 pub const Team = struct {
     teamID: i64,
@@ -11,3 +12,9 @@ pub const Team = struct {
     aspaceLock: Spinlock = .unaquired,
     addressSpace: hal.memmodel.PageDirectory,
 };
+
+const TeamTreeType = RedBlackTree(*Team, struct {
+    fn compare(a: *Team, b: *Team) std.math.Order {
+        return std.math.order(a.teamID, b.teamID);
+    }
+}.compare);

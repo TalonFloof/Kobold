@@ -2,6 +2,7 @@ const std = @import("std");
 const hal = @import("root").hal;
 const Spinlock = @import("root").Spinlock;
 const team = @import("team.zig");
+const RedBlackTree = @import("perlib").RedBlackTree;
 
 pub const ThreadState = enum {
     Embryo,
@@ -27,3 +28,9 @@ pub const Thread = struct {
 };
 
 pub const ThreadList = std.DoublyLinkedList(*Thread);
+
+const ThreadTreeType = RedBlackTree(*Thread, struct {
+    fn compare(a: *Thread, b: *Thread) std.math.Order {
+        return std.math.order(a.threadID, b.threadID);
+    }
+}.compare);
