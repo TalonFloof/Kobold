@@ -81,6 +81,6 @@ pub fn setDeadline(microsecs: u64) void {
 }
 
 pub fn getRemainingUs() u64 {
-    const count = 0xffffffff - apic.read(0x390);
+    const count = apic.read(0x390);
     return @intFromFloat(@as(f64, @floatFromInt(count)) * (@as(f64, @floatFromInt(ticksPerSecond)) / 1000000.0));
 }

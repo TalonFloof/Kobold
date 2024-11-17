@@ -15,6 +15,7 @@ pub const debug = @import("debug/debug.zig");
 pub const Writer = std.io.Writer(@TypeOf(.{}), error{}, arch.write);
 pub const writer = Writer{ .context = .{} };
 const team = @import("root").team;
+const thread = @import("root").thread;
 
 pub var hiList: ?[]*HartInfo = null;
 
@@ -37,6 +38,7 @@ pub export fn HALInitialize(stackTop: usize, dtb: *allowzero anyopaque) callconv
     if (arch.memModel.layout == .Flat)
         @panic("MMUless setups are not supported!");
     team.Init();
+    thread.Init();
     root.KoboldInit();
     @panic("No Command");
 }

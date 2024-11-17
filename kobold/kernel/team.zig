@@ -43,7 +43,44 @@ pub fn NewTeam(parent: ?*Team, name: []const u8) *Team {
     return team;
 }
 
+pub fn GetTeamByID(id: i64) ?*Team {
+    const old = hal.arch.intControl(false);
+    teamLock.acquire();
+    if (teams.root != null) {
+        var x = teams.root;
+        while (x) |node| {
+            if (id < node.key.teamID) {
+                x = node.children[0];
+            } else if (id > node.key.teamID) {
+                x = node.children[1];
+            } else {
+                return node.key;
+            }
+        }
+    }
+    teamLock.release();
+    _ = hal.arch.intControl(old);
+    return null;
+}
+
+fn mttreeCommand(cmd: []const u8, iter: *std.mem.SplitIterator(u8, .sequence)) void {
+    _ = iter;
+    _ = cmd;
+    var ind = teams.inorderIterator();
+    while (ind.next()) |node| {
+        const team = node.key;
+        std.log.debug("Team {}: {s}\n", .{ team.teamID, team.name });
+        var tInd = team.threads.first;
+        while (tInd) |tNode| {
+            const thr: *thread.Thread = tNode.data;
+            std.log.debug("  |-- Thread {}: {s}\n", .{ thr.threadID, thr.name });
+            tInd = tNode.next;
+        }
+    }
+}
+
 pub fn Init() void {
     std.log.info("Creating Kernel Team", .{});
     kteam = NewTeam(null, "Kernel Team");
+    hal.debug.NewDebugCommand("mtTree", "Prints a tree of all of the threads and teams available", &mttreeCommand);
 }

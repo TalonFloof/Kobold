@@ -25,7 +25,7 @@ pub fn startSMP() void {
                     cycles += 1;
                     if (cycles >= 50000000) {
                         std.log.err("Hart #{} took too long (potential triple fault on hart!)", .{hartCount});
-                        hal.HALOops("X86_64 HAL Initialization Failure");
+                        hal.HALOops("X86-64 HAL Initialization Failure");
                     }
                     std.atomic.spinLoopHint();
                 }

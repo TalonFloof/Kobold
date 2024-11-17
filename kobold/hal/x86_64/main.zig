@@ -177,14 +177,15 @@ pub export fn HartStart(stackTop: usize) callconv(.C) noreturn {
 }
 
 fn ArchWriteString(_: @TypeOf(.{}), string: []const u8) error{}!usize {
-    var i: isize = 0;
-    while (i < string.len) : (i += 1) {
-        while ((io.inb(0x3F8 + 5) & 0x20) == 0)
-            std.atomic.spinLoopHint();
-        io.outb(0x3f8, string[@bitCast(i)]);
-    }
     if (termCtx) |ctx| {
         flanterm.flanterm_write(ctx, string.ptr, string.len);
+    } else {
+        var i: isize = 0;
+        while (i < string.len) : (i += 1) {
+            while ((io.inb(0x3F8 + 5) & 0x20) == 0)
+                std.atomic.spinLoopHint();
+            io.outb(0x3f8, string[@bitCast(i)]);
+        }
     }
     return string.len;
 }
@@ -233,6 +234,65 @@ const Context = packed struct {
     rflags: u64 = 0x202,
     rsp: u64 = 0,
     ss: u64 = 0,
+
+    pub fn SetMode(self: *Context, kern: bool) void {
+        if (kern) {
+            self.cs = 0x28;
+            self.ss = 0x30;
+        } else {
+            self.cs = 0x43;
+            self.ss = 0x3b;
+        }
+        self.rflags = 0x202;
+    }
+
+    pub fn SetReg(self: *Context, reg: u8, val: usize) void {
+        switch (reg) {
+            0 => {
+                self.rax = val;
+            },
+            1 => {
+                self.rdi = val;
+            },
+            2 => {
+                self.rsi = val;
+            },
+            3 => {
+                self.rdx = val;
+            },
+            4 => {
+                self.r10 = val;
+            },
+            5 => {
+                self.r8 = val;
+            },
+            6 => {
+                self.r9 = val;
+            },
+            128 => {
+                self.rip = val;
+            },
+            129 => {
+                self.rsp = val;
+            },
+            else => {},
+        }
+    }
+
+    pub fn GetReg(self: *Context, reg: u8) usize {
+        return switch (reg) {
+            0 => self.rax,
+            1 => self.rdi,
+            2 => self.rsi,
+            3 => self.rdx,
+            4 => self.r10,
+            5 => self.r8,
+            6 => self.r9,
+            128 => self.rip,
+            129 => self.rsp,
+            else => 0,
+        };
+    }
 
     pub fn Dump(self: *Context) void {
         std.log.debug(" rax 0x{x: <16}    rbx 0x{x: <16}    rcx 0x{x: <16}\n", .{ self.rax, self.rbx, self.rcx });
