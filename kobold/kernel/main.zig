@@ -7,6 +7,7 @@ pub const elf = @import("elf.zig");
 pub const pfn = @import("pfn.zig");
 pub const team = @import("team.zig");
 pub const thread = @import("thread.zig");
+pub const scheduler = @import("scheduler.zig");
 
 pub const kmain_log = std.log.scoped(.KernelMain);
 
@@ -55,4 +56,12 @@ pub fn panic(msg: []const u8, stacktrace: ?*std.builtin.StackTrace, retAddr: ?us
 
 pub export fn KoboldInit() void {
     _ = hal.AlignDown(u32, 0, 4096); // Prevents release builds from failing
+    std.log.info("Schedling Started", .{});
+    while (true) {
+        hal.arch.waitForInt();
+    }
+}
+
+pub fn StartMultitasking() noreturn {
+    scheduler.Schedule(null);
 }

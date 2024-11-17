@@ -12,7 +12,7 @@ const physmem = @import("root").physmem;
 pub const AlarmQueueNode = struct {
     deadline: u64,
     data: ?*anyopaque = null,
-    func: *fn (?*anyopaque) callconv(.C) void,
+    func: *const fn (?*anyopaque) callconv(.C) void,
 };
 
 const AlarmQueueList = std.DoublyLinkedList(AlarmQueueNode);
@@ -22,22 +22,25 @@ pub const AlarmQueue = struct {
     timerCounter: u64 = 0,
     timerNextInterval: u64 = 0,
 
-    pub fn addAlarm(self: *AlarmQueue, timeout: u64, func: *fn (?*anyopaque) callconv(.C) void, data: ?*anyopaque) *AlarmQueueList.Node {
+    pub fn addAlarm(self: *AlarmQueue, timeout: u64, func: *const fn (?*anyopaque) callconv(.C) void, data: ?*anyopaque) *AlarmQueueList.Node {
         const old = hal.arch.intControl(false);
         self.lock.acquire();
-        const node: AlarmQueueList.Node = @ptrCast(@alignCast(physmem.Allocate(@sizeOf(AlarmQueueList.Node), @alignOf(AlarmQueueList.node)).?));
+        const node: *AlarmQueueList.Node = @ptrCast(@alignCast(physmem.Allocate(@sizeOf(AlarmQueueList.Node), @alignOf(AlarmQueueList.Node)).?));
         node.data.deadline = self.timerCounter + timeout;
         node.data.data = data;
         node.data.func = func;
+        self.list.append(node);
         self.schedule();
         self.lock.release();
         _ = hal.arch.intControl(old);
+        return node;
     }
 
     pub fn removeAlarm(self: *AlarmQueue, aqn: *AlarmQueueList.Node) void {
         const old = hal.arch.intControl(false);
         self.lock.acquire();
         self.list.remove(aqn);
+        physmem.Free(@intFromPtr(aqn), @sizeOf(AlarmQueueList.Node));
         self.schedule();
         self.lock.release();
         _ = hal.arch.intControl(old);
@@ -54,6 +57,8 @@ pub const AlarmQueue = struct {
                 i.data.func(i.data.data);
                 self.list.remove(i);
                 ind = next;
+                physmem.Free(@intFromPtr(i), @sizeOf(AlarmQueueList.Node));
+                continue;
             } else if (i.data.deadline < closestDeadline) {
                 closestDeadline = i.data.deadline;
                 ind = i.next;

@@ -1,6 +1,7 @@
 const std = @import("std");
 const hal = @import("../hal.zig");
 const apic = @import("apic.zig");
+const scheduler = @import("root").scheduler;
 
 pub fn stub() void {}
 
@@ -19,6 +20,10 @@ pub export fn IRQHandler(entry: u8, con: *hal.arch.Context) callconv(.C) *hal.ar
         queue.lock.acquire();
         queue.schedule();
         queue.lock.release();
+        if (hal.arch.getHart().schedulePending) {
+            hal.arch.getHart().schedulePending = false;
+            scheduler.Schedule(con);
+        }
     }
     return con;
 }

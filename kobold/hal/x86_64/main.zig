@@ -16,6 +16,8 @@ const flanterm = @cImport({
     @cInclude("backends/fb.h");
 });
 
+extern fn ContextEnter(context: *allowzero void) callconv(.C) noreturn;
+
 pub export fn _start() callconv(.Naked) noreturn {
     asm volatile (
         \\mov %rsp, %rdi
@@ -303,9 +305,28 @@ const Context = packed struct {
         std.log.debug(" rip 0x{x: <16}    rsp 0x{x: <16} rflags 0x{x: <16}\n", .{ self.rip, self.rsp, self.rflags });
         std.log.debug(" error code: 0x{x}\n", .{self.errcode});
     }
+
+    pub inline fn Enter(self: *Context) noreturn {
+        ContextEnter(@as(*allowzero void, @ptrFromInt(@intFromPtr(self))));
+    }
 };
 
-const FloatContext = packed struct {};
+const FloatContext = struct {
+    data: [512]u8 align(16) = [_]u8{0} ** 512,
+
+    pub fn Save(self: *FloatContext) void {
+        asm volatile ("fxsave64 (%rax)"
+            :
+            : [state] "{rax}" (&self.data),
+        );
+    }
+    pub fn Load(self: *FloatContext) void {
+        asm volatile ("fxrstor64 (%rax)"
+            :
+            : [state] "{rax}" (&self.data),
+        );
+    }
+};
 
 fn fthConvert(pte: usize, high: bool) hal.memmodel.HALPageFrame { // high set if not at 4 KiB granularity
     const frame: hal.memmodel.HALPageFrame = .{};

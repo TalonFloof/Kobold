@@ -4,6 +4,7 @@ const Spinlock = @import("root").Spinlock;
 const team = @import("team.zig");
 const RedBlackTree = @import("perlib").RedBlackTree;
 const physmem = @import("physmem.zig");
+const scheduler = @import("scheduler.zig");
 
 pub const ThreadState = enum {
     Runnable,
@@ -41,7 +42,7 @@ pub var nextThreadID: i64 = 1;
 
 pub fn NewThread(
     t: *team.Team,
-    name: []u8,
+    name: []const u8,
     ip: usize,
     sp: ?usize,
     prior: usize,
@@ -70,6 +71,9 @@ pub fn NewThread(
     }
     thread.gpContext.SetReg(128, ip);
     t.threads.append(&thread.teamListNode);
+    scheduler.readyQueues[thread.priority].lock.acquire();
+    scheduler.readyQueues[thread.priority].queue.prepend(&thread.queueNode);
+    scheduler.readyQueues[thread.priority].lock.release();
     threadLock.release();
     _ = hal.arch.intControl(old);
     return thread;

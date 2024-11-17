@@ -73,6 +73,7 @@ pub fn init() void {
     }
     apic.write(0x3e0, 0xb);
     apic.write(0x320, 0x20);
+    apic.write(0x380, 0);
 }
 
 pub fn setDeadline(microsecs: u64) void {

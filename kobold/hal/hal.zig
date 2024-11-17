@@ -39,8 +39,8 @@ pub export fn HALInitialize(stackTop: usize, dtb: *allowzero anyopaque) callconv
         @panic("MMUless setups are not supported!");
     team.Init();
     thread.Init();
-    root.KoboldInit();
-    @panic("No Command");
+    _ = thread.NewThread(team.kteam.?, "Kobold Initialization Thread", @intFromPtr(&root.KoboldInit), null, 16);
+    root.StartMultitasking();
 }
 
 pub fn HALOops(s: []const u8) void {

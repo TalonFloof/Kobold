@@ -29,6 +29,8 @@ pub const HartInfo = struct {
     trapStack: usize = 0,
     alarmQueue: alarmqueue.AlarmQueue = .{},
     archData: ArchData = ArchData{},
+    activeThread: ?*anyopaque = null,
+    schedulePending: bool = false,
     hartID: usize = 0,
 
     comptime {
