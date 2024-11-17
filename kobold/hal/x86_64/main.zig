@@ -8,7 +8,9 @@ const mem = @import("mem.zig");
 const limine = @import("limine");
 const elf = @import("root").elf;
 const acpi = @import("acpi.zig");
+const apic = @import("apic.zig");
 const timer = @import("timer.zig");
+const hart = @import("hart.zig");
 const flanterm = @cImport({
     @cInclude("flanterm.h");
     @cInclude("backends/fb.h");
@@ -28,6 +30,23 @@ pub export fn _start() callconv(.Naked) noreturn {
         \\fninit
         \\pop %rax
         \\jmp HALInitialize
+    );
+}
+
+pub export fn _hartstart() callconv(.Naked) noreturn {
+    asm volatile (
+        \\mov %rsp, %rdi
+        \\push %rax
+        \\mov %cr0, %rax
+        \\and $0xfb, %al
+        \\or $0x22, %al
+        \\mov %rax, %cr0
+        \\mov %cr4, %rax
+        \\or $0x600, %eax
+        \\mov %rax, %cr4
+        \\fninit
+        \\pop %rax
+        \\jmp HartStart
     );
 }
 
@@ -119,6 +138,7 @@ fn ArchInit(stackTop: usize, limine_header: *allowzero anyopaque) void {
     }
     acpi.init();
     timer.init();
+    hart.startSMP();
 
     if (moduleRequest.response) |response| {
         var len = response.modules().len;
@@ -138,6 +158,21 @@ fn ArchInit(stackTop: usize, limine_header: *allowzero anyopaque) void {
             //elf.RelocateELF(@ptrCast(module.address)) catch @panic("failed!");
             i += 1;
         }
+    }
+}
+
+pub export fn HartStart(stackTop: usize) callconv(.C) noreturn {
+    wrmsr(0xC0000102, hart.hartData);
+    wrmsr(0x277, 0x0107040600070406); // Enable write combining when PAT, PCD, and PWT is set
+    ArchGetHart().archData.tss.rsp[0] = stackTop;
+    ArchGetHart().trapStack = stackTop;
+    gdt.initialize();
+    idt.fastInit();
+    apic.setup();
+    timer.init();
+    hart.hartData = 0;
+    while (true) {
+        std.atomic.spinLoopHint();
     }
 }
 

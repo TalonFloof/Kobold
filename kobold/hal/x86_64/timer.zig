@@ -71,6 +71,7 @@ pub fn init() void {
             std.log.info("{} APIC Ticks/s", .{count * 100});
         }
     }
+    apic.write(0x3e0, 0xb);
     apic.write(0x320, 0x20);
 }
 

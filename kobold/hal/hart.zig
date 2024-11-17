@@ -16,6 +16,7 @@ pub const HartInfo = struct {
             };
 
             tss: TSS = TSS{},
+            apicID: u32 = 0,
         },
         .riscv32, .riscv64 => struct {},
         else => |v| @compileError("Unsupported Architecture " ++ v),

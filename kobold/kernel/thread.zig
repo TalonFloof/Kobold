@@ -24,7 +24,7 @@ pub const Thread = struct {
     priority: usize = 16,
     kstack: []u8,
     gpContext: hal.arch.Context = .{},
-    fContext: hal.Arch.FloatContext = .{},
+    fContext: hal.arch.FloatContext = .{},
 };
 
 pub const ThreadList = std.DoublyLinkedList(*Thread);

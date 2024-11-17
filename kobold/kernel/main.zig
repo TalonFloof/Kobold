@@ -5,6 +5,7 @@ pub const physmem = @import("physmem.zig");
 pub const Spinlock = @import("perlib").Spinlock;
 pub const elf = @import("elf.zig");
 pub const pfn = @import("pfn.zig");
+pub const team = @import("team.zig");
 
 pub const kmain_log = std.log.scoped(.KernelMain);
 

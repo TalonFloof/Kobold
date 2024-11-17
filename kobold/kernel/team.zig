@@ -3,6 +3,7 @@ const thread = @import("thread.zig");
 const Spinlock = @import("root").Spinlock;
 const hal = @import("root").hal;
 const RedBlackTree = @import("perlib").RedBlackTree;
+const physmem = @import("root").physmem;
 
 pub const Team = struct {
     teamID: i64,
@@ -18,3 +19,31 @@ const TeamTreeType = RedBlackTree(*Team, struct {
         return std.math.order(a.teamID, b.teamID);
     }
 }.compare);
+
+pub var teams: TeamTreeType = .{};
+pub var kteam: ?*Team = null;
+pub var teamLock: Spinlock = .unaquired;
+pub var nextTeamID: i64 = 1;
+
+pub fn NewTeam(parent: ?*Team, name: []const u8) *Team {
+    const old = hal.arch.intControl(false);
+    teamLock.acquire();
+    var team = @as(*Team, @ptrCast(@alignCast(physmem.AllocateC(@sizeOf(Team)))));
+
+    //team.addressSpace = Memory.Paging.NewPageDirectory();
+    @memcpy(@as([*]u8, @ptrFromInt(@intFromPtr(&team.name))), name);
+    team.parent = parent;
+    team.teamID = nextTeamID;
+    nextTeamID += 1;
+    const node = @as(*TeamTreeType.Node, @ptrCast(@alignCast(physmem.AllocateC(@sizeOf(TeamTreeType.Node)))));
+    var entry = teams.getEntryFor(team);
+    entry.set(node);
+    teamLock.release();
+    _ = hal.arch.intControl(old);
+    return team;
+}
+
+pub fn Init() void {
+    std.log.info("Creating Kernel Team", .{});
+    kteam = NewTeam(null, "Kernel Team");
+}
