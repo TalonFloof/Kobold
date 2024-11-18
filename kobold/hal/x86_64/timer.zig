@@ -47,7 +47,6 @@ pub fn init() void {
             apic.write(0x320, 0x10000);
             const count = 0xffffffff - apic.read(0x390);
             ticksPerSecond = count;
-            std.log.info("{} APIC Ticks/s", .{count});
         } else {
             std.log.info("PIT @ 100 Hz for APIC Timer Calibration", .{});
             var speakerControlByte = io.inb(0x61);
@@ -68,8 +67,8 @@ pub fn init() void {
             apic.write(0x320, 0x10000);
             const count = 0xffffffff - apic.read(0x390);
             ticksPerSecond = count * 100;
-            std.log.info("{} APIC Ticks/s", .{count * 100});
         }
+        std.log.info("{} APIC Ticks/s", .{ticksPerSecond});
     }
     apic.write(0x3e0, 0xb);
     apic.write(0x320, 0x20);
@@ -78,7 +77,11 @@ pub fn init() void {
 
 pub fn setDeadline(microsecs: u64) void {
     const t: u64 = @intFromFloat(@as(f64, @floatFromInt(ticksPerSecond)) * (@as(f64, @floatFromInt(microsecs)) / 1000000.0));
-    apic.write(0x380, t);
+    if(t > 0xffffffff) {
+        apic.write(0x380,0xffffffff);
+    } else {
+        apic.write(0x380, t);
+    }
 }
 
 pub fn getRemainingUs() u64 {

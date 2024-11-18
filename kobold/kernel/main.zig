@@ -56,7 +56,7 @@ pub fn panic(msg: []const u8, stacktrace: ?*std.builtin.StackTrace, retAddr: ?us
 
 pub export fn KoboldInit() void {
     _ = hal.AlignDown(u32, 0, 4096); // Prevents release builds from failing
-    std.log.info("Schedling Started", .{});
+    std.log.info("Scheduling Started", .{});
     while (true) {
         hal.arch.waitForInt();
     }

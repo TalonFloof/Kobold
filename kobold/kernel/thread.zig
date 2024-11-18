@@ -20,7 +20,7 @@ pub const Thread = struct {
     semaphoreNode: ThreadList.Node,
     team: *team.Team,
     name: [32]u8 = [_]u8{0} ** 32,
-    state: ThreadState = .Embryo,
+    state: ThreadState = .Runnable,
     shouldKill: bool = false,
     priority: usize = 16,
     kstack: []u8,
