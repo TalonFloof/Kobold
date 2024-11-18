@@ -28,6 +28,7 @@ pub const HartInfo = struct {
     activeSyscallStack: usize = 0,
     trapStack: usize = 0,
     alarmQueue: alarmqueue.AlarmQueue = .{},
+    scheduleNode: alarmqueue.AlarmQueueList.Node = .{ .data = .{} },
     archData: ArchData = ArchData{},
     activeThread: ?*anyopaque = null,
     schedulePending: bool = false,

@@ -10,37 +10,32 @@ const Spinlock = @import("perlib").Spinlock;
 const physmem = @import("root").physmem;
 
 pub const AlarmQueueNode = struct {
-    deadline: u64,
+    deadline: u64 = 0,
     data: ?*anyopaque = null,
-    func: *const fn (?*anyopaque) callconv(.C) void,
+    func: *const fn (?*anyopaque) callconv(.C) void = undefined,
 };
 
-const AlarmQueueList = std.DoublyLinkedList(AlarmQueueNode);
+pub const AlarmQueueList = std.DoublyLinkedList(AlarmQueueNode);
 pub const AlarmQueue = struct {
     lock: Spinlock = .unaquired,
     list: AlarmQueueList = .{},
     timerCounter: u64 = 0,
     timerNextInterval: u64 = 0,
 
-    pub fn addAlarm(self: *AlarmQueue, timeout: u64, func: *const fn (?*anyopaque) callconv(.C) void, data: ?*anyopaque) *AlarmQueueList.Node {
+    pub fn addAlarm(self: *AlarmQueue, timeout: u64, aqn: *AlarmQueueList.Node) void {
         const old = hal.arch.intControl(false);
         self.lock.acquire();
-        const node: *AlarmQueueList.Node = @ptrCast(@alignCast(physmem.Allocate(@sizeOf(AlarmQueueList.Node), @alignOf(AlarmQueueList.Node)).?));
-        node.data.deadline = self.timerCounter + timeout;
-        node.data.data = data;
-        node.data.func = func;
-        self.list.append(node);
+        aqn.data.deadline = self.timerCounter + timeout;
+        self.list.append(aqn);
         self.schedule();
         self.lock.release();
         _ = hal.arch.intControl(old);
-        return node;
     }
 
     pub fn removeAlarm(self: *AlarmQueue, aqn: *AlarmQueueList.Node) void {
         const old = hal.arch.intControl(false);
         self.lock.acquire();
         self.list.remove(aqn);
-        physmem.Free(@intFromPtr(aqn), @sizeOf(AlarmQueueList.Node));
         self.schedule();
         self.lock.release();
         _ = hal.arch.intControl(old);
@@ -57,7 +52,6 @@ pub const AlarmQueue = struct {
                 i.data.func(i.data.data);
                 self.list.remove(i);
                 ind = next;
-                physmem.Free(@intFromPtr(i), @sizeOf(AlarmQueueList.Node));
                 continue;
             } else if (i.data.deadline < closestDeadline) {
                 closestDeadline = i.data.deadline;

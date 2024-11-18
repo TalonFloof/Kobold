@@ -31,7 +31,7 @@ fn GetNextThread() *thread.Thread {
     }
 }
 
-fn rescheduleAlarm(data: ?*anyopaque) callconv(.C) void {
+pub fn rescheduleAlarm(data: ?*anyopaque) callconv(.C) void {
     _ = data;
     hal.arch.getHart().schedulePending = true;
 }
@@ -65,7 +65,7 @@ pub fn Schedule(con: ?*hal.arch.Context) noreturn {
     }
     hart.activeThread = @alignCast(@ptrCast(thr));
     hart.activeSyscallStack = @intFromPtr(thr.kstack.ptr) + (thr.kstack.len - 8);
-    _ = hart.alarmQueue.addAlarm(10000, &rescheduleAlarm, null);
+    hart.alarmQueue.addAlarm(10000, &hart.scheduleNode);
     thr.fContext.Load();
     thr.gpContext.Enter();
 }

@@ -63,5 +63,8 @@ pub export fn KoboldInit() void {
 }
 
 pub fn StartMultitasking() noreturn {
+    const hart = hal.arch.getHart();
+    hart.scheduleNode.data.func = &scheduler.rescheduleAlarm;
+    hart.scheduleNode.data.data = null;
     scheduler.Schedule(null);
 }
