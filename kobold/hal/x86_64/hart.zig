@@ -5,13 +5,14 @@ const physmem = @import("root").physmem;
 
 export var smp_request: limine.SmpRequest = .{ .flags = 0 };
 pub var hartData: usize = 0;
+pub const hart_log = std.log.scoped(.X64MultiHart);
 
 pub fn startSMP() void {
     if (smp_request.response) |response| {
         hal.hiList = @as([*]*hal.HartInfo, @ptrCast(@alignCast(physmem.AllocateC(response.cpu_count * @sizeOf(usize)))))[0..response.cpu_count];
         hal.hiList.?[0] = hal.arch.getHart();
         var hartCount: i32 = 1;
-        std.log.info("{} Hart System (MultiHart Kernel)", .{hal.hiList.?.len});
+        hart_log.info("{} Hart System (MultiHart Kernel)", .{hal.hiList.?.len});
         for (response.cpus()) |hart| {
             if (hart.lapic_id != response.bsp_lapic_id) {
                 var hi: *hal.HartInfo = @ptrCast(@alignCast(physmem.AllocateC(@sizeOf(hal.HartInfo))));
@@ -24,7 +25,7 @@ pub fn startSMP() void {
                 while (hartData != 0) {
                     cycles += 1;
                     if (cycles >= 50000000) {
-                        std.log.err("Hart #{} took too long (potential triple fault on hart!)", .{hartCount});
+                        hart_log.err("Hart #{} took too long (potential triple fault on hart!)", .{hartCount});
                         hal.HALOops("X86-64 HAL Initialization Failure");
                     }
                     std.atomic.spinLoopHint();
@@ -33,6 +34,6 @@ pub fn startSMP() void {
             }
         }
     } else {
-        std.log.info("1 Hart System (MultiHart Kernel)", .{});
+        hart_log.info("1 Hart System (MultiHart Kernel)", .{});
     }
 }

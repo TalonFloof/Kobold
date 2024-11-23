@@ -129,26 +129,28 @@ pub fn build(b: *std.Build) void {
         halMod.addObjectFile(b.path("../lowlevel.o"));
     }
 
-    const ipcMod = b.addObject(.{
-        .name = "ipc",
-        .root_source_file = b.path("personalities/IPC/main.zig"),
-        .target = resolvedModTarget,
-        .optimize = optimize,
-        .code_model = .large,
-        .strip = true,
-    });
-    const vfsMod = b.addObject(.{
-        .name = "vfs",
-        .root_source_file = b.path("personalities/VFS/main.zig"),
-        .target = resolvedModTarget,
-        .optimize = optimize,
-        .code_model = .large,
-        .strip = true,
-    });
-    if (getArch(board) == .riscv64) {
-        ipcMod.root_module.code_model = .medium;
-        vfsMod.root_module.code_model = .medium;
+    const personalityDir = std.fs.cwd().openDir("personalities", .{ .iterate = true }) catch @panic("Couldn't retrieve personalities!");
+    var iter = personalityDir.iterate();
+    while (iter.next() catch @panic("Personality Iteration Failure")) |entry| {
+        if (entry.kind == .directory) {
+            const mainZig = b.fmt("personalities/{s}/main.zig", .{entry.name});
+            _ = std.fs.cwd().access(mainZig, .{}) catch continue;
+            const personality = b.addObject(.{
+                .name = entry.name,
+                .root_source_file = b.path(mainZig),
+                .target = resolvedModTarget,
+                .optimize = optimize,
+                .code_model = .large,
+                .strip = true,
+            });
+            if (getArch(board) == .riscv64) {
+                personality.root_module.code_model = .medium;
+            }
+            personality.root_module.addImport("perlib", perlibMod);
+            b.getInstallStep().dependOn(addInstallObjectFile(b, personality, entry.name));
+        }
     }
+
     kernel.want_lto = false;
     kernel.root_module.omit_frame_pointer = false;
     kernel.entry = std.Build.Step.Compile.Entry.disabled;
@@ -157,6 +159,4 @@ pub fn build(b: *std.Build) void {
     kernel.root_module.addImport("perlib", perlibMod);
     kernel.setLinkerScript(b.path(b.fmt("hal/link/{s}.ld", .{@tagName(board)})));
     b.getInstallStep().dependOn(&b.addInstallArtifact(kernel, .{}).step);
-    b.getInstallStep().dependOn(addInstallObjectFile(b, ipcMod, "ipc"));
-    b.getInstallStep().dependOn(addInstallObjectFile(b, vfsMod, "vfs"));
 }

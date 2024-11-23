@@ -23,7 +23,7 @@ pub fn setup() void {
     if (x2apicSupport()) {
         if (hal.arch.getHart().hartID == 0) {
             lapic_ptr = 0xffffffff;
-            std.log.info("X2APIC is enabled or required by system, switching to X2APIC operations", .{});
+            std.log.scoped(.X64APIC).info("X2APIC is enabled or required by system, switching to X2APIC operations", .{});
         }
         hal.archData.wrmsr(0x1b, (hal.archData.rdmsr(0x1b) | 0x800 | 0x400)); // Enable the X2APIC
     } else {

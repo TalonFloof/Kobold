@@ -4,7 +4,7 @@ pub const RedBlackTree = @import("rbtree.zig").RedBlackTree;
 
 pub const KernelCall = enum {
     Log,
-    Panic,
+    TriggerOops,
     SpawnKThread,
     MemAlloc,
     MemFree,
@@ -14,15 +14,10 @@ pub const KernelCall = enum {
     FindPersonality,
     GetDeviceTree, // ACPI-based systems will return the RSDP when you use this, otherwise return a parsed device tree
     IsACPIBased,
-    RegisterSyscall,
+    Sleep,
+    Stall,
 
-    RegisterHook,
-    FreeHook,
-};
-
-pub const HookTypes = enum {
-    ThreadSpawnHook,
-    ThreadDeathHook,
+    RegisterFilesystem,
 };
 
 pub const PersonalityHeader = struct {
@@ -35,3 +30,6 @@ pub const PersonalityHeader = struct {
     customInterface: ?*void = null,
     dependencies: [][]const u8,
 };
+
+// PersonalityLoad is defined here to allow us to setup some stuff for the convience of the developer implementing the driver in question
+export fn PersonalityLoad() void {}
