@@ -17,7 +17,8 @@ pub const KernelCall = enum {
     Sleep,
     Stall,
 
-    RegisterFilesystem,
+    RegisterScheme,
+    AccessScheme,
 };
 
 pub const PersonalityHeader = struct {

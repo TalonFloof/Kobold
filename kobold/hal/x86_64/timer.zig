@@ -60,7 +60,7 @@ pub fn init() void {
                 ticksPerSecond = count;
             } else {
                 const freq: f64 = 105000000.0 / 88.0 / 65536.0;
-                timer_log.info("PIT @ ~18.2065 Hz for APIC Timer Calibration", .{});
+                timer_log.info("PIT @ ~{} Hz for APIC Timer Calibration", .{freq});
                 var speakerControlByte = io.inb(0x61);
                 speakerControlByte &= ~@as(u8, 2);
                 io.outb(0x61, speakerControlByte);
