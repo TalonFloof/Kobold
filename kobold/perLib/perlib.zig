@@ -1,6 +1,7 @@
 const std = @import("std");
 pub const Spinlock = @import("spinlock.zig").Spinlock;
 pub const RedBlackTree = @import("rbtree.zig").RedBlackTree;
+pub const fs = @import("fs.zig");
 
 pub const KernelCall = enum {
     Log,
@@ -13,6 +14,7 @@ pub const KernelCall = enum {
     IRQFree,
     FindPersonality,
     GetDeviceTree, // ACPI-based systems will return the RSDP when you use this, otherwise return a parsed device tree
+    GetFramebuffer, // Optional, not all HALs will provide a result to this
     IsACPIBased,
     Sleep,
     Stall,

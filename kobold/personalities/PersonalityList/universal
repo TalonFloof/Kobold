@@ -1,10 +1,13 @@
 PCI
 ext2FS
-DevFS
 KoboldFS
 USBStack
-HIDStack
-UserIPC
+DiskScheme
+HIDScheme
+UserIPCScheme
 NVMe
 USBHID
 USBMass
+UNIXFileScheme
+SoundScheme
+FramebufferScheme

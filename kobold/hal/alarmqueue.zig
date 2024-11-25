@@ -70,3 +70,24 @@ pub const AlarmQueue = struct {
         }
     }
 };
+
+fn aqCommand(cmd: []const u8, iter: *std.mem.SplitIterator(u8, .sequence)) void {
+    _ = cmd;
+    var hartID = hal.arch.getHart().hartID;
+    if (iter.next()) |idStr| {
+        hartID = std.fmt.parseInt(usize, idStr, 0) catch hartID;
+    }
+    const hart = hal.hiList.?[hartID];
+    std.log.debug("Hart #{} AlarmQueue:\n  Elapsed {} us\n  NextInterval {} us\n", .{ hartID, hart.alarmQueue.timerCounter, hart.alarmQueue.timerNextInterval });
+    var n = hart.alarmQueue.list.first;
+    while (n) |node| {
+        std.log.debug("    0x{x}: Deadline {} us   Data 0x{x}\n                        Func 0x{x} ", .{ @intFromPtr(node), node.data.deadline, @intFromPtr(node.data.data), @intFromPtr(node.data.func) });
+        hal.debug.file.PrintSymbolName(@intFromPtr(node.data.func));
+        std.log.debug("\n", .{});
+        n = node.next;
+    }
+}
+
+pub fn initDebug() void {
+    hal.debug.NewDebugCommand("alarmQueue", "Dumps the pending events on a Hart's AlarmQueue", &aqCommand);
+}

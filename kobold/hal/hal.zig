@@ -11,6 +11,7 @@ pub const arch: ArchInterface = archData.Interface;
 pub const HartInfo = @import("hart.zig").HartInfo;
 pub const memmodel = @import("memmodel.zig");
 pub const debug = @import("debug/debug.zig");
+const alarmqueue = @import("alarmqueue.zig");
 
 pub const Writer = std.io.Writer(@TypeOf(.{}), error{}, arch.write);
 pub const writer = Writer{ .context = .{} };
@@ -37,6 +38,7 @@ pub export fn HALInitialize(stackTop: usize, dtb: *allowzero anyopaque) callconv
     arch.init(stackTop, dtb);
     if (arch.memModel.layout == .Flat)
         @panic("MMUless setups are not supported!");
+    alarmqueue.initDebug();
     team.Init();
     thread.Init();
     _ = thread.NewThread(team.kteam.?, "Kobold Initialization Thread", @intFromPtr(&root.KoboldInit), null, 16);

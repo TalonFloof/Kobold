@@ -9,6 +9,8 @@ for line in stdin:
     symbol = line.rstrip("\n").split(" ")
     if len(symbol) == 1:
         curFile = symbol[0].rstrip(":").split("/")[-1]
+        if curFile[-2:] == ".o":
+            curFile = curFile[:-2]
         if len(curFile) > 0 and files.get(symbol[0]) == None:
             files[curFile] = []
     elif len(symbol) >= 4:
