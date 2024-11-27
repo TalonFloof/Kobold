@@ -1,8 +1,8 @@
 const std = @import("std");
 const thread = @import("thread.zig");
-const Spinlock = @import("root").Spinlock;
+const Spinlock = @import("spinlock.zig").Spinlock;
 const hal = @import("root").hal;
-const RedBlackTree = @import("perlib").RedBlackTree;
+const RedBlackTree = @import("rbtree.zig").RedBlackTree;
 const physmem = @import("root").physmem;
 
 pub const Team = struct {

@@ -156,7 +156,6 @@ fn ArchInit(stackTop: usize, limine_header: *allowzero anyopaque) void {
             if (std.mem.eql(u8, @ptrCast(module.cmdline[0..std.mem.len(module.cmdline)]), "KernelDebug")) {
                 continue;
             }
-            std.log.info("Load Module ({}/{}) {s}", .{ i + 1, len, module.cmdline });
             //elf.RelocateELF(@ptrCast(module.address)) catch @panic("failed!");
             i += 1;
         }
@@ -374,6 +373,13 @@ fn htfConvert(pte: hal.memmodel.HALPageFrame) usize {
     return frame;
 }
 
+fn ptSwitch(ptr: usize) void {
+    asm volatile ("mov %rax, %%cr3"
+        :
+        : [pt] "{rax}" (ptr),
+    );
+}
+
 // This CPUID struct and function orginates from the Rise operating system
 // https://github.com/davidgm94/rise/blob/main/src/lib/arch/x86/common.zig
 // Rise is licensed under the 3-clause BSD License
@@ -472,6 +478,7 @@ pub const Interface: hal.ArchInterface = .{
         .layout = .Paging4Layer,
         .nativeToHal = fthConvert,
         .halToNative = htfConvert,
+        .changeTable = ptSwitch,
     },
     .Context = Context,
     .FloatContext = FloatContext,

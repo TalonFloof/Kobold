@@ -1,6 +1,6 @@
 const std = @import("std");
 const thread = @import("thread.zig");
-const Spinlock = @import("perlib").Spinlock;
+const Spinlock = @import("spinlock.zig").Spinlock;
 const hal = @import("hal");
 
 pub const Queue = struct {
@@ -53,7 +53,7 @@ pub fn Schedule(con: ?*hal.arch.Context) noreturn {
     }
     var thr: *thread.Thread = GetNextThread();
     while (true) {
-        if (thr.state == .Runnable) {
+        if (thr.terminatePending and thr.interruptable == 0) {} else if (thr.state == .Runnable) {
             thr.state = .Running;
             break;
         } else {

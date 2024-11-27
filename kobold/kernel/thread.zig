@@ -1,16 +1,17 @@
 const std = @import("std");
 const hal = @import("root").hal;
-const Spinlock = @import("root").Spinlock;
+const Spinlock = @import("spinlock.zig").Spinlock;
 const team = @import("team.zig");
-const RedBlackTree = @import("perlib").RedBlackTree;
+const RedBlackTree = @import("rbtree.zig").RedBlackTree;
 const physmem = @import("physmem.zig");
 const scheduler = @import("scheduler.zig");
 
 pub const ThreadState = enum {
+    Suspended,
     Runnable,
     Running,
     Waiting,
-    Debugging,
+    Dying,
 };
 
 pub const Thread = struct {
@@ -20,8 +21,9 @@ pub const Thread = struct {
     semaphoreNode: ThreadList.Node,
     team: *team.Team,
     name: [32]u8 = [_]u8{0} ** 32,
-    state: ThreadState = .Runnable,
-    shouldKill: bool = false,
+    state: ThreadState = .Suspended,
+    interruptable: usize = 0, // 0 = Interruptable, 1+ = Uninterruptable
+    terminatePending: bool = false,
     priority: usize = 16,
     kstack: []u8,
     gpContext: hal.arch.Context = .{},
@@ -39,6 +41,7 @@ const ThreadTreeType = RedBlackTree(*Thread, struct {
 pub var threads: ThreadTreeType = ThreadTreeType{};
 var threadLock: Spinlock = .unaquired;
 pub var nextThreadID: i64 = 1;
+pub var reapQueue: scheduler.Queue = .{};
 
 pub fn NewThread(
     t: *team.Team,
@@ -89,6 +92,7 @@ pub fn Init() void {
         };
         _ = NewThread(kteam, name, @intFromPtr(&IdleThread), null, 0);
     }
+    _ = NewThread(kteam, "Reaper", @intFromPtr(&IdleThread), null, 1);
 }
 
 fn IdleThread() callconv(.C) void {

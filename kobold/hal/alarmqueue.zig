@@ -6,7 +6,7 @@
 // though this error tends to be within nanosecond ranges, which is not enough for most software to notice.
 const std = @import("std");
 const hal = @import("hal.zig");
-const Spinlock = @import("perlib").Spinlock;
+const Spinlock = @import("root").Spinlock;
 const physmem = @import("root").physmem;
 
 pub const AlarmQueueNode = struct {

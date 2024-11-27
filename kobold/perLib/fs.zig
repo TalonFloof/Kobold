@@ -25,7 +25,7 @@ pub const DirEntry = struct {
 };
 
 pub const Scheme = struct {
-    protocolName: [32]u8 = [_]u8{0} ** 32,
+    name: [32]u8 = [_]u8{0} ** 32,
     open: ?*fn ([]const u8, u16, *usize) c_long = null,
     close: ?*fn (usize) c_long = null,
     read: ?*fn (usize, []u8, usize) c_long = null,
