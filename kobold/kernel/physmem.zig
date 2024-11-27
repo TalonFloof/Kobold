@@ -111,8 +111,14 @@ var freeCache: FreeCache = .{};
 
 var firstFree: ?*FreeHeader = null;
 
+pub var freeMem: usize = 0;
+pub var usedMem: usize = 0;
+pub var reservedMem: usize = 0;
+
 fn allocate(size: usize, align_: usize) ?*anyopaque {
     const newSize = size + align_;
+    freeMem -= size;
+    usedMem += size;
 
     var cursor = firstFree;
     while (cursor) |node| {
@@ -153,18 +159,23 @@ fn allocate(size: usize, align_: usize) ?*anyopaque {
         }
         cursor = next;
     }
+    freeMem += size;
+    usedMem -= size;
     return null;
 }
 
 pub fn Allocate(size: usize, align_: usize) ?*anyopaque {
     lock.acquire();
-    const a = allocate(size, align_);
+    const s = hal.AlignUp(usize, size, 16);
+    const a = allocate(s, align_);
     lock.release();
     return a;
 }
 
-pub fn Free(address: usize, size: usize) void {
+pub fn Free(address: usize, s: usize) void {
     lock.acquire();
+    const size = hal.AlignUp(usize, s, 16);
+    freeMem += size;
     const end = address + size;
     var cursor = firstFree;
     var prev: ?*FreeHeader = null;
@@ -234,13 +245,11 @@ pub fn PrintMap(cmd: []const u8, iter: *std.mem.SplitIterator(u8, .sequence)) vo
     _ = cmd;
     _ = iter;
     var cursor = firstFree;
-    var freeSpace: usize = 0;
     while (cursor) |node| {
         std.log.debug("0x{x}-0x{x} Free\n", .{ node.start, node.end - 1 });
-        freeSpace += node.end - node.start;
         cursor = node.next;
     }
-    std.log.debug(" {} KiB Free\n", .{freeSpace / 1024});
+    std.log.debug(" {} KiB Used\n {} KiB System Reserved\n {} KiB Free\n {} KiB Total\n", .{ usedMem / 1024, reservedMem / 1024, freeMem / 1024, (usedMem + reservedMem + freeMem) / 1024 });
 }
 
 pub fn DebugInit() void {

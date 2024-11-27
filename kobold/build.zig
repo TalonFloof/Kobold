@@ -147,7 +147,7 @@ pub fn build(b: *std.Build) void {
                 personality.root_module.code_model = .medium;
             }
             personality.root_module.addImport("perlib", perlibMod);
-            b.getInstallStep().dependOn(addInstallObjectFile(b, personality, entry.name));
+            //b.getInstallStep().dependOn(addInstallObjectFile(b, personality, entry.name));
         }
     }
 

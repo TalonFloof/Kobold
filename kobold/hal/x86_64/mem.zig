@@ -20,6 +20,8 @@ pub fn init() void {
                 highestAddress = end;
             }
             physmem.Free(entry.base + 0xffff8000_00000000, entry.length);
+        } else if (entry.kind == .bootloader_reclaimable or entry.kind == .kernel_and_modules or entry.kind == .acpi_reclaimable) {
+            physmem.reservedMem += entry.length;
         }
     }
     std.log.info("PFN Information Coverage Range 0x{x:0>16}-0x{x:0>16} ({} entries)", .{ lowestAddress, highestAddress, (highestAddress - lowestAddress) / 4096 });

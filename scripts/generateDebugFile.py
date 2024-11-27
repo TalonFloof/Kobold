@@ -1,8 +1,8 @@
 from sys import stdin
 import sys
 
-files = {}
-curFile = ""
+files = {"kernel": []}
+curFile = "kernel"
 symbolCount = 0
 
 for line in stdin:

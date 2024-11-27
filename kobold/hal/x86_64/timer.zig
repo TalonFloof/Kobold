@@ -46,7 +46,7 @@ pub fn init() void {
                 hpetAddr[2] = 1;
 
                 const hz = 1000000000000000.0 / @as(f64, @floatFromInt(clock));
-                const interval = @as(usize, @intFromFloat(apic.hpetTicksPer100NS * 10000.0 * 1000.0));
+                const interval = @as(usize, @intFromFloat(apic.hpetTicksPer100NS * 10000.0 * 100.0));
                 timer_log.info("HPET @ {d} MHz for APIC Timer Calibration", .{hz / 1000 / 1000});
                 apic.write(0x320, 0x10000);
                 apic.write(0x3e0, 0xb);
@@ -80,7 +80,9 @@ pub fn init() void {
                 const count = 0xffffffff - apic.read(0x390);
                 ticksPerSecond = @intFromFloat(@as(f64, @floatFromInt(count)) * freq);
             }
-            timer_log.info("{} APIC Ticks/s", .{ticksPerSecond});
+            const rawTicks = ticksPerSecond;
+            ticksPerSecond = (ticksPerSecond / 100000) * 100000;
+            timer_log.info("~{} APIC Ticks/s ({} Raw Ticks)", .{ ticksPerSecond, rawTicks });
         }
     }
     apic.write(0x3e0, 0xb);

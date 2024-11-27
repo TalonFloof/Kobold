@@ -48,7 +48,7 @@ pub export fn HALInitialize(stackTop: usize, dtb: *allowzero anyopaque) callconv
 pub fn HALOops(s: []const u8) void {
     const oldInt = arch.intControl(false);
     std.log.err("oops (hart 0x{x}) {s}", .{ arch.getHart().hartID, s });
-    debug.PrintBacktrace(0);
+    debug.PrintBacktrace(@returnAddress());
     debug.EnterDebugger();
     _ = arch.intControl(oldInt);
 }
