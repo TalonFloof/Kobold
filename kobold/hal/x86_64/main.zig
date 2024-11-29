@@ -97,6 +97,14 @@ fn ArchInit(stackTop: usize, limine_header: *allowzero anyopaque) void {
     idt.initialize();
     mem.init();
 
+    if (moduleRequest.response) |response| {
+        for (response.modules()) |module| {
+            if (std.mem.eql(u8, @ptrCast(module.cmdline[0..std.mem.len(module.cmdline)]), "KernelDebug")) {
+                hal.debug.file.LoadDebugFile(@ptrCast(module.address));
+                break;
+            }
+        }
+    }
     if (fbRequest.response) |response| {
         const fb = response.framebuffers()[0]; // 0x292D3E
         const ansi = [_]u32{ 0x292D3E, 0xF07178, 0x62DE84, 0xFFCB6B, 0x75A1FF, 0xF580FF, 0x60BAEC, 0xABB2BF };
@@ -132,7 +140,10 @@ fn ArchInit(stackTop: usize, limine_header: *allowzero anyopaque) void {
             0,
         );
     }
-
+    //if ((rdmsr(0x1A0) & (1 << 22)) != 0) {
+    //    std.log.warn("[Firmware Bug] MISC_ENABLE.LCMV = 1", .{});
+    //    wrmsr(0x1a0, rdmsr(0x1A0) & (~@as(u64, 1 << 22)));
+    //}
     if (cpuid(0x80000001).edx & (@as(u32, @intCast(1)) << 20) == 0) {
         std.log.warn("WARNING!!!! Your CPU does not support the NX (No Execute) bit extension!", .{});
         std.log.warn("            This allows for programs to exploit buffer overflows to run malicious code.", .{});
@@ -141,25 +152,6 @@ fn ArchInit(stackTop: usize, limine_header: *allowzero anyopaque) void {
     acpi.init();
     timer.init();
     hart.startSMP();
-
-    if (moduleRequest.response) |response| {
-        var len = response.modules().len;
-        var i: usize = 0;
-        for (response.modules()) |module| {
-            if (std.mem.eql(u8, @ptrCast(module.cmdline[0..std.mem.len(module.cmdline)]), "KernelDebug")) {
-                len -= 1;
-                hal.debug.file.LoadDebugFile(@ptrCast(module.address));
-                break;
-            }
-        }
-        for (response.modules()) |module| {
-            if (std.mem.eql(u8, @ptrCast(module.cmdline[0..std.mem.len(module.cmdline)]), "KernelDebug")) {
-                continue;
-            }
-            //elf.RelocateELF(@ptrCast(module.address)) catch @panic("failed!");
-            i += 1;
-        }
-    }
 }
 
 pub export fn HartStart(stackTop: usize) callconv(.C) noreturn {
