@@ -1,8 +1,10 @@
 const std = @import("std");
 const hal = @import("hal.zig");
 const builtin = @import("builtin");
+const physmem = @import("root").physmem;
+const pfn = @import("root").pfn;
 
-pub const PageDirectory = *anyopaque;
+pub const PageDirectory = [*]usize;
 
 pub const LayoutType = enum {
     Flat,
@@ -74,3 +76,48 @@ pub const MemoryModel = struct {
     changeTable: ?fn (usize) void = null,
     invalPage: ?fn (usize) void = null,
 };
+
+pub fn MapPage(root: PageDirectory, vaddr: usize, frame: HALPageFrame) usize {
+    var i: usize = 0;
+    var entries: [*]usize = root;
+    while (i < hal.arch.memModel.layout.layerCount()) : (i += 1) {
+        const index: u64 = (vaddr >> (39 - @as(u6, @intCast(i * 9)))) & 0x1ff;
+        var entry = hal.arch.memModel.nativeToHal.?(entries[index], i + 1 < hal.arch.memModel.layout.layerCount());
+        if (i + 1 < hal.arch.memModel.layout.layerCount()) {
+            entries[index] = hal.arch.memModel.halToNative.?(frame);
+            if (hal.arch.memModel.invalPage) |inval| {
+                inval(vaddr);
+            }
+            if (frame.valid == 0 and entry.valid == 1) {
+                if (pfn.DereferencePage(@intFromPtr(entries))) {
+                    physmem.Free(@intFromPtr(entries), 4096);
+                }
+            } else if (frame.valid == 1 and entry.valid == 0) {
+                pfn.ReferencePage(@intFromPtr(entries), 1, .noChange);
+            }
+            return @intFromPtr(&entries[index]);
+        } else {
+            if (entry.valid != 1) {
+                // Allocate a new Page Table
+                const page = physmem.Allocate(0x1000, 0x1000).?;
+                pfn.ReferencePage(@intFromPtr(page), 0, .pageTable);
+                pfn.SetPagePTE(@intFromPtr(page), @intFromPtr(&entries[index]) & 0x7fff_ffff_ffff);
+                entry.valid = 1;
+                entry.read = 0; // no rwx = branch page
+                entry.write = 0;
+                entry.execute = 0;
+                entry.user = frame.user;
+                entry.noCache = 0;
+                entry.writeComb = 0;
+                entry.writeThru = 0;
+                entry.reserved = 0;
+                entry.phys = @truncate((page & 0x7fff_ffff_f000) >> 12);
+                entries[index] = hal.arch.memModel.halToNative.?(entry);
+                pfn.ReferencePage(@intFromPtr(entries), 1, .noChange);
+                entries = @as([*]usize, @ptrFromInt(@intFromPtr(page)));
+            } else {
+                entries = @as([*]usize, @ptrFromInt((@as(usize, @intCast(entry.phys)) << 12) + 0xffff800000000000));
+            }
+        }
+    }
+}

@@ -96,6 +96,43 @@ pub fn backtraceCommand(cmd: []const u8, iter: *std.mem.SplitIterator(u8, .seque
     PrintBacktrace(@returnAddress());
 }
 
+pub fn dbCommand(cmd: []const u8, iter: *std.mem.SplitIterator(u8, .sequence)) void {
+    _ = cmd;
+    const addrO = iter.next();
+    const sizeO = iter.next();
+    if (addrO != null and sizeO != null) {
+        const range: std.bit_set.Range = .{ .start = std.fmt.parseInt(usize, addrO.?, 0) catch 0, .end = std.fmt.parseInt(usize, sizeO.?, 0) catch 0 };
+        const slice = @as([*]const u8, @ptrFromInt(range.start))[0..range.end];
+        var chunks = std.mem.window(u8, slice, 16, 16);
+        while (chunks.next()) |window| {
+            const address = (@intFromPtr(slice.ptr) + 0x10 * (chunks.index orelse 0) / 16) - 0x10;
+            std.log.debug("{x:0>[1]}  ", .{ address, @sizeOf(usize) * 2 });
+            for (window, 0..) |byte, index| {
+                std.log.debug("{X:0>2} ", .{byte});
+                if (index == 7) std.log.debug(" ", .{});
+            }
+            std.log.debug(" ", .{});
+            if (window.len < 16) {
+                var missing_columns = (16 - window.len) * 3;
+                if (window.len < 8) missing_columns += 1;
+                for (0..missing_columns) |_| {
+                    std.log.debug(" ", .{});
+                }
+            }
+            for (window) |byte| {
+                if (std.ascii.isPrint(byte)) {
+                    std.log.debug("{c}", .{byte});
+                } else {
+                    std.log.debug(".", .{});
+                }
+            }
+            std.log.debug("\n", .{});
+        }
+    } else {
+        std.log.debug("Usage: db <addr> <size>\n", .{});
+    }
+}
+
 pub fn sbCommand(cmd: []const u8, iter: *std.mem.SplitIterator(u8, .sequence)) void {
     _ = cmd;
     if (iter.peek() != null) {
@@ -229,6 +266,7 @@ pub fn symsCommand(cmd: []const u8, iter: *std.mem.SplitIterator(u8, .sequence))
 pub fn DebugInit() void {
     NewDebugCommand("help", "Prints this message", &helpCommand);
     NewDebugCommand("bt", "Prints a Stack Backtrace", &backtraceCommand);
+    NewDebugCommand("db", "Dump hex data (in byte sizes) within a given range", &dbCommand);
     NewDebugCommand("sb", "Dump hex data (in byte sizes) within a given symbol", &sbCommand);
     NewDebugCommand("sn", "Dump number within a given symbol", &snCommand);
     NewDebugCommand("si", "Disassembles the given symbol", &siCommand);

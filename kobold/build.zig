@@ -75,7 +75,7 @@ pub fn build(b: *std.Build) void {
     targetQuery.os_tag = .freestanding;
     targetQuery.abi = .none;
     const resolvedTarget = b.resolveTargetQuery(targetQuery);
-    const resolvedModTarget = b.resolveTargetQuery(modTargetQuery);
+    //const resolvedModTarget = b.resolveTargetQuery(modTargetQuery);
     const optimize = b.standardOptimizeOption(.{});
 
     const perlibMod = b.addModule("perlib", .{
@@ -129,27 +129,27 @@ pub fn build(b: *std.Build) void {
         halMod.addObjectFile(b.path("../lowlevel.o"));
     }
 
-    const personalityDir = std.fs.cwd().openDir("personalities", .{ .iterate = true }) catch @panic("Couldn't retrieve personalities!");
-    var iter = personalityDir.iterate();
-    while (iter.next() catch @panic("Personality Iteration Failure")) |entry| {
-        if (entry.kind == .directory) {
-            const mainZig = b.fmt("personalities/{s}/main.zig", .{entry.name});
-            _ = std.fs.cwd().access(mainZig, .{}) catch continue;
-            const personality = b.addObject(.{
-                .name = entry.name,
-                .root_source_file = b.path(mainZig),
-                .target = resolvedModTarget,
-                .optimize = optimize,
-                .code_model = .large,
-                .strip = true,
-            });
-            if (getArch(board) == .riscv64) {
-                personality.root_module.code_model = .medium;
-            }
-            personality.root_module.addImport("perlib", perlibMod);
-            //b.getInstallStep().dependOn(addInstallObjectFile(b, personality, entry.name));
-        }
-    }
+    //const personalityDir = std.fs.cwd().openDir("personalities", .{ .iterate = true }) catch @panic("Couldn't retrieve personalities!");
+    //var iter = personalityDir.iterate();
+    //while (iter.next() catch @panic("Personality Iteration Failure")) |entry| {
+    //    if (entry.kind == .directory) {
+    //        const mainZig = b.fmt("personalities/{s}/main.zig", .{entry.name});
+    //        _ = std.fs.cwd().access(mainZig, .{}) catch continue;
+    //        const personality = b.addObject(.{
+    //            .name = entry.name,
+    //            .root_source_file = b.path(mainZig),
+    //            .target = resolvedModTarget,
+    //            .optimize = optimize,
+    //            .code_model = .large,
+    //            .strip = true,
+    //        });
+    //        if (getArch(board) == .riscv64) {
+    //            personality.root_module.code_model = .medium;
+    //        }
+    //        personality.root_module.addImport("perlib", perlibMod);
+    //        //b.getInstallStep().dependOn(addInstallObjectFile(b, personality, entry.name));
+    //    }
+    //}
 
     kernel.want_lto = false;
     kernel.root_module.omit_frame_pointer = false;

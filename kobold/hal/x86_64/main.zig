@@ -326,6 +326,7 @@ fn fthConvert(pte: usize, high: bool) hal.memmodel.HALPageFrame { // high set if
     frame.read = if (branch) 0 else (pte & 1);
     frame.write = if (branch) 0 else ((pte >> 1) & 1);
     frame.execute = if (branch) 0 else (((~pte) >> 63) & 1);
+    frame.user = (pte >> 2) & 1;
     frame.noCache = (pte >> 4) & 1;
     frame.writeThru = (pte >> 3) & 1;
     if (high) {
