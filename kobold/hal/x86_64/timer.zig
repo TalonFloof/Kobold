@@ -50,6 +50,7 @@ pub fn init() void {
                 apic.hpetTicksPer100NS = 100000000.0 / apic.hpetPeriod;
                 hpetAddr[2] = 0;
                 hpetAddr[30] = 0;
+                hpetAddr[2] = 1;
 
                 const hz = 1000000000000000.0 / @as(f64, @floatFromInt(clock));
                 const interval = @as(usize, @intFromFloat(apic.hpetTicksPer100NS * 10000.0 * 100.0));
@@ -58,7 +59,7 @@ pub fn init() void {
                 apic.write(0x380, 0);
                 apic.write(0x3e0, 0xb);
                 const duration = hpetAddr[30] + interval;
-                hpetAddr[2] = 1;
+
                 apic.write(0x380, 0xffffffff);
                 while (hpetAddr[30] < duration) {
                     std.atomic.spinLoopHint();
@@ -73,7 +74,7 @@ pub fn init() void {
                 //timer_log.info("Corrected to {} APIC Ticks/ms", .{@as(u64, @intFromFloat(correctedBase)) * 1000});
                 //apic.write(0x320, 0x10000);
                 //const count = 0xffffffff - apic.read(0x390);
-                ticksPerSecond = @as(u64, @intFromFloat(correctedBase)) * 1000;
+                ticksPerSecond = @as(u64, @intFromFloat(correctedBase * 1000));
             } else {
                 const freq: f64 = 105000000.0 / 88.0 / 65536.0;
                 timer_log.info("PIT @ ~{} Hz for APIC Timer Calibration", .{freq});
@@ -116,8 +117,8 @@ pub fn init() void {
     apic.write(0x380, 0);
 }
 
-pub fn setDeadline(microsecs: u64) void {
-    const t: u64 = @as(u64, @intFromFloat(@as(f64, @floatFromInt(ticksPerSecond)) * (@as(f64, @floatFromInt(microsecs)) / 1000000.0 / 4.0)));
+pub fn setDeadline(nanosecs: u64) void {
+    const t: u64 = @as(u64, @intFromFloat(@as(f64, @floatFromInt(ticksPerSecond)) * (@as(f64, @floatFromInt(nanosecs)) / 1000000000.0 / 4.0)));
     if (t > 0xffffffff) {
         apic.write(0x380, 0xffffffff);
     } else {
@@ -125,7 +126,7 @@ pub fn setDeadline(microsecs: u64) void {
     }
 }
 
-pub fn getRemainingUs() u64 {
+pub fn getRemainingNs() u64 {
     const count = apic.read(0x390);
-    return @intFromFloat(@as(f64, @floatFromInt(count)) * (@as(f64, @floatFromInt(ticksPerSecond)) / 1000000.0));
+    return @intFromFloat(@as(f64, @floatFromInt(count)) * (@as(f64, @floatFromInt(ticksPerSecond)) / 1000000000.0));
 }

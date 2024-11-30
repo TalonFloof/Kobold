@@ -65,7 +65,7 @@ pub fn Schedule(con: ?*hal.arch.Context) noreturn {
     }
     hart.activeThread = @alignCast(@ptrCast(thr));
     hart.activeSyscallStack = @intFromPtr(thr.kstack.ptr) + (thr.kstack.len - 8);
-    hart.alarmQueue.addAlarm(10000, &hart.scheduleNode);
+    hart.alarmQueue.addAlarm(10 * 1_000_000, &hart.scheduleNode);
     thr.fContext.Load();
     thr.gpContext.Enter();
 }
