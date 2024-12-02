@@ -91,6 +91,13 @@ pub const FADTTable = extern struct {
 
     resetValue: u8 align(1),
     reserved3: [3]u8 align(1),
+
+    comptime {
+        if (@offsetOf(@This(), "resetAddress") != 116)
+            @compileError("@offsetOf(resetAddress) != 116");
+        if (@offsetOf(@This(), "resetValue") != 128)
+            @compileError("@offsetOf(resetValue) != 128");
+    }
 };
 
 pub const ACPIgas = extern struct {
@@ -221,19 +228,18 @@ pub fn rebootCommand(cmd: []const u8, iter: *std.mem.SplitIterator(u8, .sequence
     _ = iter;
     // Attempt to reboot using ACPI
     if (FADTAddr) |fadt| {
-        if (fadt.resetAddress.regBitOffset == 0 and fadt.resetAddress.regBitWidth == 8) {
-            if (fadt.resetAddress.addrSpaceID == 0) {
-                (@as(*volatile u8, @ptrFromInt(fadt.resetAddress.address))).* = fadt.resetValue;
-            } else if (fadt.resetAddress.addrSpaceID == 1) {
-                io.outb(@truncate(fadt.resetAddress.address), fadt.resetValue);
-            }
+        std.log.debug("{} - {x}\n", .{ fadt.resetAddress, fadt.resetValue });
+        if (fadt.resetAddress.addrSpaceID == 0) {
+            (@as(*volatile u8, @ptrFromInt(fadt.resetAddress.address))).* = fadt.resetValue;
+        } else if (fadt.resetAddress.addrSpaceID == 1) {
+            io.outb(@truncate(fadt.resetAddress.address), fadt.resetValue);
         }
     }
-    var good: u8 = 0x02; // Attempt reboot using the 8042 gate
-    while (good & 0x02 != 0) {
-        good = io.inb(0x64);
-    }
-    io.outb(0x64, 0xFE);
+    //var good: u8 = 0x02; // Attempt reboot using the 8042 gate
+    //while (good & 0x02 != 0) {
+    //    good = io.inb(0x64);
+    //}
+    //io.outb(0x64, 0xFE);
     // That didn't work, try triple faulting
     std.log.debug("If you're seeing this, it's because rebooting failed, please hold the power button until your device turns off.\n", .{});
     hal.arch.memModel.changeTable.?(0);
