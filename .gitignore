@@ -39,3 +39,8 @@ zig-out
 kobold.iso
 limine-zig/
 kobold.bcfg
+
+target/
+Cargo.lock
+out/
+efi-image

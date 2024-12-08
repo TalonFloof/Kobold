@@ -1,0 +1,25 @@
+[package]
+name = "kobold-kernel"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+log = "*"
+lock_free_buddy_allocator = "0.1.0"
+
+[profile.dev]
+opt-level = "s"
+debug = true
+debug-assertions = false
+overflow-checks = false
+lto = false
+panic = "abort"
+
+[dependencies.spin]
+version = "0.9.8"
+default-features = false
+features = ["once","mutex","spin_mutex","fair_mutex","rwlock"]
+
+[target.'cfg(target_arch = "x86_64")'.dependencies]
+x86_64 = {version="*",features=["nightly"]}
+limine = "*"
