@@ -8,11 +8,11 @@ extern "C" fn start_hal() {
     loop {}
 }
 
-pub trait HALArch {
-    fn wait_for_int() {
+pub trait HALArch: Sync + 'static {
+    fn wait_for_int(&self) {
         todo!("wait_for_int not implemented on this HAL Target!");
     }
-    fn int_control(new_int: bool) -> bool {
+    fn int_control(&self, new_int: bool) -> bool {
         todo!("int_control not implemented on this HAL Target!");
     }
 }

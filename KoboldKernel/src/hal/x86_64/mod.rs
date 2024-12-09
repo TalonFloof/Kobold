@@ -34,5 +34,5 @@ impl HALArch for HALArchImpl {
 
 }
 
-const PRIVATE_INTERFACE: HALArchImpl = HALArchImpl {};
+static PRIVATE_INTERFACE: HALArchImpl = HALArchImpl {};
 pub const INTERFACE: &dyn HALArch = &PRIVATE_INTERFACE;
