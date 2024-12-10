@@ -1,6 +1,6 @@
 pub struct Framebuffer {
-    pub ptr: *mut u32,
-    pub width: usize,
+    pub mut ptr: *mut u32,
+    pub mut width: usize,
     pub height: usize,
     pub stride: usize,
     pub bpp: usize,
@@ -22,5 +22,8 @@ impl Framebuffer {
     }
     pub fn Clear(&mut self, color: u32) {
         self.FillBlit(0,0,self.width,self.height,color);
+    }
+    pub fn DrawImage(&self, img: *mut c_void, x: usize, y: usize) {
+
     }
 }

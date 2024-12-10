@@ -1,6 +1,9 @@
 use core::arch::naked_asm;
 
+use limine::request::FramebufferRequest;
 use crate::hal::HALArch;
+
+static FRAMEBUFFER: FramebufferRequest = FramebufferRequest::new();
 
 #[naked]
 #[unsafe(no_mangle)]
@@ -31,7 +34,12 @@ extern "C" fn _entry() {
 struct HALArchImpl {}
 
 impl HALArch for HALArchImpl {
+	fn early_init(&self) {
 
+	}
+	fn init(&self) {
+
+	}
 }
 
 static PRIVATE_INTERFACE: HALArchImpl = HALArchImpl {};
