@@ -5,6 +5,7 @@
 extern crate alloc;
 
 pub mod hal;
+pub mod allocator;
 pub mod scheme;
 pub mod framebuffer;
 
@@ -16,5 +17,6 @@ fn main() {
 
 #[panic_handler]
 fn panic(info: &PanicInfo) -> ! {
+    framebuffer::GetFramebuffer().Clear(0x0000ff);
     loop {}
 }

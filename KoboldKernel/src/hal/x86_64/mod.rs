@@ -35,7 +35,15 @@ struct HALArchImpl {}
 
 impl HALArch for HALArchImpl {
 	fn early_init(&self) {
-
+		if let Some(fb) = FRAMEBUFFER.get_response() {
+			let f = fb.framebuffers().next().unwrap();
+			let fbf = crate::framebuffer::GetFramebuffer();
+			fbf.ptr = f.addr() as *mut u32;
+			fbf.width = f.width() as usize;
+			fbf.height = f.height() as usize;
+			fbf.stride = f.pitch() as usize;
+			fbf.bpp = f.bpp() as usize;
+		}
 	}
 	fn init(&self) {
 
