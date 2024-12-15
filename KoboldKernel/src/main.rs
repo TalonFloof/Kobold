@@ -8,6 +8,7 @@ pub mod hal;
 pub mod allocator;
 pub mod scheme;
 pub mod framebuffer;
+pub mod hart;
 
 use core::panic::PanicInfo;
 

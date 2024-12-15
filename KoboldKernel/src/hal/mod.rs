@@ -22,6 +22,8 @@ pub trait HALArch: Sync + 'static {
     }
 }
 
+
+
 #[unsafe(no_mangle)]
 extern "C" fn start_hal() {
     INTERFACE.early_init();
@@ -30,7 +32,8 @@ extern "C" fn start_hal() {
         let fb = crate::framebuffer::GetFramebuffer();
         fb.Clear(0);
         let (iw, ih) = crate::framebuffer::Framebuffer::GetImageSize(logo.as_ptr() as *const c_void);
-        fb.DrawImage(logo.as_ptr() as *const c_void, (fb.width/2)-(iw/2), fb.height/8,0xffffff);
+        let scale = 1.5;
+        fb.DrawScaledImage(logo.as_ptr() as *const c_void, (fb.width/2)-(((iw as f64*scale) as usize)/2), (fb.height/2)-(((ih as f64*scale) as usize)/2),(iw as f64*scale) as usize,(ih as f64*scale) as usize,0xffffff);
     }
     INTERFACE.init();
     loop {}

@@ -3,6 +3,8 @@ use core::arch::naked_asm;
 use limine::request::FramebufferRequest;
 use crate::hal::HALArch;
 
+mod gdt;
+
 static FRAMEBUFFER: FramebufferRequest = FramebufferRequest::new();
 
 #[naked]
@@ -44,6 +46,7 @@ impl HALArch for HALArchImpl {
 			fbf.stride = f.pitch() as usize;
 			fbf.bpp = f.bpp() as usize;
 		}
+		unsafe {gdt::init();}
 	}
 	fn init(&self) {
 
@@ -52,3 +55,7 @@ impl HALArch for HALArchImpl {
 
 static PRIVATE_INTERFACE: HALArchImpl = HALArchImpl {};
 pub const INTERFACE: &dyn HALArch = &PRIVATE_INTERFACE;
+
+pub struct ArchHartData {
+	tss: x86_64::structures::tss::TaskStateSegment,
+}
