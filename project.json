@@ -1,0 +1,7 @@
+{
+  "$schema": "https://schemas.cute.engineering/stable/cutekit.manifest.project.v1",
+  "id": "kobold-project/kobold",
+  "version": "v0.1.0",
+  "type": "project",
+  "description": "The Kobold Operating System"
+}

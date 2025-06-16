@@ -44,3 +44,5 @@ target/
 Cargo.lock
 out/
 efi-image
+
+.cutekit
