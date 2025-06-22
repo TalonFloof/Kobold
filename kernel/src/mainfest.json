@@ -1,0 +1,10 @@
+{
+  "$schema": "https://schemas.cute.engineering/stable/cutekit.manifest.component.v1",
+  "id": "kernel",
+  "type": "exe",
+  "description": "The Kobold (Exo?)kernel",
+  "requires": [
+    "HAL",
+    "Executive"
+  ]
+}

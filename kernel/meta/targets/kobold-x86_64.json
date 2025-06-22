@@ -29,6 +29,32 @@
         "-fno-exceptions",
         "-fno-rtti"
       ]
+    },
+    "ar": {
+      "cmd": "{shell.latest('llvm-ar')}",
+      "args": [
+        "rcs"
+      ]
+    },
+    "ld": {
+      "cmd": "{shell.latest('ld.lld')}",
+      "args": [
+        "-m",
+        "elf_x86_64",
+        "-T{utils.relpath('kobold-x86_64.ld')}",
+        "-z",
+        "max-page-size=0x1000"
+      ],
+      "files": [
+        "{utils.relpath('kobold-x86_64.ld')}"
+      ]
+    },
+    "as": {
+      "cmd": "nasm",
+      "args": [
+        "-f",
+        "elf64"
+      ]
     }
   }
 }
