@@ -1,7 +1,9 @@
 #![no_std] // don't link the Rust standard library
 #![no_main] // disable all Rust-level entry points
 
-pub mod HAL;
+// extern crate alloc;
+
+pub mod hal;
 
 use core::panic::PanicInfo;
 
