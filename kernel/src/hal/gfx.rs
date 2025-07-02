@@ -53,4 +53,10 @@ impl Framebuffer {
             fillfn: if bpp == 15 { fill15 as FillFn } else { fill32 as FillFn }
         }
     }
+    pub fn fill(&mut self, x: usize, y: usize, w: usize, h: usize, color: u32) {
+        (self.fillfn)(self,x,y,w,h,color);
+    }
+    pub fn clear(&mut self, color: u32) {
+        self.fill(0,0,self.width,self.height,color);
+    }
 }

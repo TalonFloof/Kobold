@@ -15,3 +15,8 @@ extern "C" fn _entry() {
         )
     }
 }
+
+#[no_mangle]
+extern "C" fn arch_hal_init() {
+    
+}
